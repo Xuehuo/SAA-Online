@@ -1,0 +1,98 @@
+﻿#mail {
+    background-color: #FFF;
+}
+
+    #mail #menu {
+        background-color: #007480;
+    }
+
+        #mail #menu ul li {
+            background-color: #008A87;
+        }
+
+            #mail #menu ul li:nth-child(3) {
+                background-color: #008080;
+            }
+
+            #mail #menu ul li a:hover {
+                background-color: #3CB371;
+            }
+
+    #mail #topbar {
+        background-color: #008080;
+    }
+
+    #mail #workspace #content {
+        padding: 0;
+        margin-top: -20px;
+        background-color: #FFF;
+    }
+
+    #mail .table-hover small {
+        color: #C6C6C6;
+        font-size: 85%;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        max-width: 220px;
+        cursor: grab;
+    }
+
+    #mail #maildetail {
+        margin-left: 10px;
+    }
+
+        #mail #maildetail dl {
+            margin: 5px 0;
+        }
+
+        #mail #maildetail dt {
+            width: 60px;
+        }
+
+        #mail #maildetail dd {
+            margin-left: 75px;
+        }
+
+@media (max-width: 768px) {
+    #mail .dl-horizontal{
+        font-size: 1.1rem;
+    }
+
+    #mail .dl-horizontal dd {
+        margin-top: -20px;
+    }
+
+    #mail .dl-horizontal small {
+        margin-left: 5px;
+    }
+
+    #mail #maillist table{
+        font-size: 1.1rem;
+    }
+
+    #mail #maillist small {
+        display: none;
+    }
+}
+
+#mail #maildetail hr {
+    margin: 0;
+}
+
+#mail .breadcrumb {
+    margin-bottom: 0;
+}
+
+#mail #mailframe {
+    width: 100%;
+}
+
+#mail #maillist {
+    overflow-y: scroll;
+}
+
+#mail #mailpreview {
+    overflow: hidden;
+    display: none;
+}

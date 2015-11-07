@@ -1,0 +1,260 @@
+﻿#file {
+    background-color: #FFF;
+}
+
+    #file #menu {
+        background-color: #25489F;
+    }
+
+        #file #menu ul li {
+            background-color: #25659F;
+        }
+
+            #file #menu ul li:nth-child(4) {
+                background-color: #25569F;
+            }
+
+            #file #menu ul li a:hover {
+                background-color: #4169E1;
+            }
+
+    #file #topbar {
+        background-color: #F5F5F5;
+    }
+
+    #file #workspace #topbar ul li:not(.open) a {
+        color: #777;
+    }
+
+    #file #workspace .navbar-brand {
+        cursor: default;
+        color: #25489F;
+    }
+
+    #file #topbar .navbar-right > li :first-child {
+        color: #25489F;
+    }
+
+    #file #container {
+        display: none;
+    }
+
+        #file #container h2 {
+            display: none;
+            color: #777;
+        }
+
+        #file #container > table {
+            display: inline-table;
+            height: 158px;
+            width: 255px;
+            margin: 0px 7px 22px 15px;
+            background-color: #25569F;
+            table-layout: fixed;
+            cursor: pointer;
+        }
+
+        #file #container table tbody {
+            height: 100%;
+            width: 100%;
+        }
+
+        #file #container table tr, #file #container table tr:not(.filevertype) td {
+            width: 100%;
+        }
+
+        #file #container table td {
+            text-align: center;
+            font-size: 16px;
+        }
+
+        #file #container table .filetitle {
+            height: 34%;
+            color: #FFF;
+        }
+
+            #file #container table .filetitle td {
+                padding-left: 3px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+
+        #file #container table .filevertype {
+            height: 33%;
+        }
+
+            #file #container table .filevertype td * {
+                height: 100%;
+            }
+
+                #file #container table .filevertype td *:not(td) {
+                    width: 100%;
+                }
+
+            #file #container table .filevertype .downloadcount {
+                width: 61.8%;
+                color: #D9D9D9;
+            }
+
+
+            #file #container table .filevertype .filetype {
+                color: #FFF;
+                font-size: 20px;
+            }
+
+                #file #container table .filevertype .filetype.doctype {
+                    background-color: #008080;
+                }
+
+                #file #container table .filevertype .filetype.imagetype {
+                    background-color: #E74C3C;
+                }
+
+                #file #container table .filevertype .filetype.videotype {
+                    background-color: #F08F00;
+                }
+
+                #file #container table .filevertype .filetype.ziptype {
+                    background-color: #98A000;
+                }
+
+                #file #container table .filevertype .filetype.othertype {
+                    background-color: #969696;
+                }
+
+        #file #container table .fileowntime {
+            height: 33%;
+            color: #FFF;
+        }
+
+
+    #file #uploadbtndiv button {
+        margin-right: 10px;
+    }
+
+    #file #uploadqueue {
+        margin-top: 20px;
+    }
+
+        #file #uploadqueue .file-row {
+            margin-top: 5px;
+            width: 100%;
+        }
+
+            #file #uploadqueue .file-row > div {
+                display: table-cell;
+                padding: 10px;
+                vertical-align: middle;
+                background-color: #87CEFA;
+            }
+
+                #file #uploadqueue .file-row > div > p, #file #uploadqueue .file-row > div > span {
+                    width: 100%;
+                    font-size: 13px;
+                    margin: 0;
+                    color: #fff;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    overflow: hidden;
+                }
+
+                #file #uploadqueue .file-row > div:first-child {
+                    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2DY9w8AAn4BvapEI/cAAAAASUVORK5CYII=");
+                    background-position: left;
+                    background-repeat: repeat-y;
+                    background-size: 0%;
+                    width: 100%;
+                }
+                
+                #file #uploadqueue .file-row > div:nth-child(3) {
+                    background-color: #00BFFF;
+                    cursor: pointer;
+                }
+
+            #file #uploadqueue .file-row span.glyphicon-ok {
+                display: none;
+            }
+
+    #file #btnstartupload, #file #btnclearqueue {
+        display: none;
+    }
+
+    #file #uploadmodal .modal-body {
+        padding: 30px;
+    }
+
+    #file .uploadstatep {
+        display: none;
+    }
+
+    #file #filemodal #viewfiletable {
+        margin-top: 10px;
+        width: 95%;
+    }
+
+    #file #filemodal #filename {
+        border: medium none;
+        background-color: #FFF;
+        box-shadow: none;
+        padding: 0;
+        height: 20px;
+    }
+
+
+@media (min-width: 768px) {
+    #file #filemodal .modal-dialog {
+        width: 400px;
+    }
+}
+
+
+#file #filemodal dt {
+    width: 60px;
+}
+
+#file #filemodal dd {
+    margin-left: 75px;
+}
+
+#file #filemodal #filetagbox {
+    border: none;
+    background-color: #FFF;
+}
+
+#file #filemodal textarea {
+    border: none;
+    height: 70px;
+    width: 100%;
+    padding: 0;
+    resize: none;
+}
+
+@media (max-width:479px) {
+
+    #file #filemodal .modal-body tr td:first-child {
+        min-width: 40px;
+    }
+
+    #file #uploadbtndiv button {
+        width: 100%;
+        margin-top: 5px;
+    }
+}
+
+
+@media (max-width: 767px) {
+
+    #file .dl-horizontal dd {
+        margin-top: -20px;
+    }
+
+
+    #file #uploadqueue .file-row > div {
+        display: block;
+    }
+
+        #file #uploadqueue .file-row > div > p, #file #uploadqueue .file-row > div > span {
+            text-align: center;
+        }
+}

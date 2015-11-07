@@ -1,0 +1,337 @@
+@import url(//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css);
+@import url(calendar.css);
+@import url(contact.css);
+@import url(dashboard.css);
+@import url(file.css);
+@import url(mail.css);
+@import url(notification.css);
+
+/*================basic-begin=================*/
+a {
+    cursor: pointer;
+    outline: none;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+.alert-info {
+    background-color: #375476 !important;
+    border-color: #375476 !important;
+    color: #f7f3cd !important;
+}
+
+.alert-success {
+    background-color: #426662 !important;
+    border-color: #426662 !important;
+    color: #f7f3cd !important;
+}
+
+.alert-danger {
+    background-color: #C85C5F !important;
+    border-color: #C85C5F !important;
+    color: #fffbee !important;
+}
+
+/*.modal-content {
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    background-color: #eee;
+}*/
+
+    /*.modal-content .btn {
+        border: none;
+    }
+
+        .modal-content .btn.btn-default:hover {
+            background-color: #ccc;
+        }*/
+
+.modal-header {
+    border-bottom: none;
+}
+
+.modal-footer {
+    border-top: none;
+    margin-top: -20px;
+}
+
+#passwordmodal .modal-body {
+    padding-left: 10%;
+}
+
+#passwordmodal input[type='password'] {
+    ime-mode: disabled;
+}
+
+#topbar .navbar-right > li :first-child {
+    color: #fff;
+}
+
+#topbar .navbar-right > li.open :first-child {
+    color: #555;
+}
+
+.dropdown-menu {
+    border: none;
+    border-radius: 0;
+    /*background-color: #eee !important;*/
+    padding: 0;
+    margin: 0;
+    /*box-shadow: none;*/
+    background-clip: border-box;
+}
+
+    .dropdown-menu li:not(.divider) {
+        padding: 0px;
+        background-color: #FFF;
+    }
+
+    .dropdown-menu li a {
+        padding: 10px 16px;
+    }
+
+    .dropdown-menu .divider {
+        margin: 0;
+    }
+
+
+    #workspace ul.navbar-left {
+        margin-left: 0;
+        height: 50px;
+    }
+
+        #workspace ul.navbar-left .glyphicon {
+            margin-right: 5px;
+        }
+
+    #workspace #topbar ul li:not(.open) a {
+        color: #FFF;
+    }
+
+    #workspace #topbar ul.dropdown-menu li a {
+        color: #555;
+    }
+
+.open.btn-group .dropdown-toggle {
+    box-shadow: none;
+    background-color: #bbb;
+}
+
+/*================basic-end=================*/
+
+/*================menu-begin=================*/
+#menu {
+    position: fixed;
+    float: left;
+    width: 15%;
+}
+
+    #menu ul {
+        padding-left: 0;
+    }
+
+        #menu ul li {
+            list-style: none;
+            margin: 0;
+            display: block;
+        }
+
+            #menu ul li a {
+                height: 50px;
+                display: block;
+                text-decoration: none;
+                color: #FFF;
+                padding-top: 16px;
+                padding-left: 16px;
+            }
+
+                #menu ul li a span.glyphicon {
+                    float: right;
+                    margin-right: 20px;
+                }
+
+#logo {
+    height: 100px;
+    text-align: center;
+}
+
+    #logo img {
+        width: 100px;
+        height: 100px;
+    }
+
+
+@media (max-width: 767px) {
+    #menu {
+        width: 50px;
+    }
+
+        #menu ul li a span {
+            display: none;
+        }
+
+            #menu ul li a span.glyphicon {
+                display: inline;
+                float: none;
+            }
+
+        #menu ul li.active a span.glyphicon {
+            display: inline;
+            color: #333;
+        }
+
+        #menu #logo {
+            height: 50px;
+        }
+
+            #menu #logo img {
+                width: 50px;
+                height: 50px;
+            }
+}
+/*================menu-end=================*/
+
+/*================workspace-begin=================*/
+#workspace {
+    float: right;
+    width: 85%;
+}
+
+    #workspace .navbar {
+        border: none;
+        border-radius: 0px;
+    }
+
+    #workspace .navbar-nav {
+        margin: 0px -15px;
+    }
+
+    #workspace #content {
+        margin-top: -20px;
+    }
+
+body #workspace #content {
+    padding: 10px;
+}
+
+#workspace .navbar-brand {
+    cursor: default;
+    color: #FFF;
+}
+
+@media (max-width:767px) {
+    .navbar-nav .open .dropdown-menu > li > a, .navbar-nav .open .dropdown-menu .dropdown-header {
+        padding: 5px 15px 5px 15px;
+    }
+
+    #workspace {
+        width: calc(100% - 50px);
+    }
+
+    
+    #workspace .navbar-left {
+        margin: -50px 60px 0 0 !important;
+    }
+
+        #workspace .navbar-left > li {
+            float: left;
+            height: 50px;
+        }
+
+            #workspace .navbar-left > li > a {
+                height: 50px;
+                padding: 15px 10px 10px 10px;
+            }
+
+        #workspace .navbar-left .dropdown-menu {
+            position: absolute !important;
+        }
+
+
+        #workspace .navbar-right {
+            margin: -50px -15px 0 0 !important;
+        }
+
+        #workspace .dropdown-menu {
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.176);
+        }
+
+            #workspace .navbar-right > li {
+                float: right;
+                height: 50px;
+            }
+
+                #workspace .navbar-right > li > a {
+                    height: 50px;
+                    padding-top: 15px;
+                }
+
+            #workspace .navbar-right .dropdown-menu {
+                position: absolute !important;
+            }
+}
+/*================workspace-end=================*/
+
+/*================tagging-start=================*/
+
+.tagging {
+	border: 1px solid #CCCCCC;
+	cursor: text;
+	font-size: 1em;
+	height: auto;
+	padding: 10px 10px 15px;
+}
+
+.tag {
+	background-color: #25489F;
+	border-radius: 2px;
+	color: #FFF;
+	cursor: default;
+	display: inline-block;
+	position: relative;
+	white-space: nowrap;
+	padding: 4px 20px 4px 0;
+	margin: 5px 10px 0 0;
+}
+
+.tag span {
+	background-color: #25569F;
+	border-radius: 2px 0 0 2px;
+	margin-right: 5px;
+	padding: 5px 10px 5px;
+}
+
+.tag .tag-i {
+	color: #FFF;
+	cursor: pointer;
+	font-size: 1.3em;
+	height: 0;
+	line-height: 0.1em;
+	position: absolute;
+	right: 5px;
+	top: 0.7em;
+	text-align: center;
+	width: 10px;
+}
+
+.tag .tag-i:hover {
+	color: #EEE;
+	text-decoration: none;
+}
+
+.type-zone {
+	border: 0 none;
+	height: auto;
+	width: auto;
+	min-width: 20px;
+	display: inline-block;
+}
+
+.type-zone:focus {
+	outline: none;
+}
+
+/*================tagging-end=================*/

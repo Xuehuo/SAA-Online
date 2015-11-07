@@ -1,0 +1,54 @@
+﻿#calendar {
+    background-color: #FFF;
+}
+
+    #calendar #menu {
+        background-color: #D94839;
+    }
+
+        #calendar #menu ul li {
+            background-color: #E95C4D;
+        }
+
+            #calendar #menu ul li:nth-child(5) {
+                background-color: #E74C3C;
+            }
+
+            #calendar #menu ul li a:hover {
+                background-color: #F08080;
+            }
+
+    #calendar #topbar {
+        background-color: #E74C3C;
+    }
+
+    /*按钮扁平化*/
+    #calendar .fc-state-default {
+        background-image: none !important;
+        border: none !important;
+    }
+    /*今天颜色*/
+    #calendar .fc-unthemed .fc-today {
+        background-color: #F08080;
+    }
+    /*换行显示*/
+    #calendar .fc-day-grid-event > .fc-content {
+        white-space: normal;
+        font-size: 16px;
+    }
+
+
+@media(max-width:479px) {
+    /*年月字体大小*/
+    #calendar #container .fc-left h2 {
+        font-size: 18px;
+        line-height: 30px;
+    }
+}
+
+@media(max-width:767px) {
+    /*事件字体大小*/
+    #calendar .fc-day-grid-event > .fc-content {
+        font-size: 11px;
+    }
+}

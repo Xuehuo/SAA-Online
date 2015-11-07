@@ -1,0 +1,45 @@
+﻿#dashboard {
+    background-color: #FFF;
+}
+
+    #dashboard #menu {
+        background-color: #2C3E50;
+    }
+
+        #dashboard #menu ul li {
+            background-color: #34495E;
+        }
+
+            #dashboard #menu ul li:nth-child(1) {
+                background-color: #324558;
+            }
+
+            #dashboard #menu ul li a:hover {
+                background-color: #253B51;
+            }
+
+        #dashboard #topbar {
+           background-color: #324558;
+        }
+
+    #dashboard #content .panel {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: #F5F5F5;
+    }
+
+        #dashboard #content .panel .panel-heading {
+            background-color:#324558;
+            color:#FFF;
+            border-bottom: none;
+            border-radius: 0;
+        }
+
+        #dashboard #content .panel th {
+            border-bottom: none;
+        }
+
+        #dashboard #content .panel td {
+            border-top: none;
+        }

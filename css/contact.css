@@ -1,0 +1,86 @@
+﻿#contact {
+    background-color: #FFF;
+}
+
+    #contact #menu {
+        background-color: #085E08;
+    }
+
+        #contact #menu ul li {
+            background-color: #006E00;
+        }
+
+            #contact #menu ul li:nth-child(6) {
+                background-color: #006600;
+            }
+
+            #contact #menu ul li a:hover {
+                background-color: #008000;
+            }
+
+    #contact #topbar {
+        background-color: #F5F5F5;
+    }
+    
+    #contact #workspace #topbar ul li:not(.open) a {
+        color: #777;
+    }
+
+    /*个人信息模拟框条目*/
+    #contact #contactmodal dt {
+        width: 60px;
+    }
+
+    #contact #contactmodal dd {
+        margin-left: 75px;
+    }
+
+
+@media (max-width:767px) {
+
+    /*个人信息模拟框条目*/
+    #contact .dl-horizontal dd {
+        margin-top: -20px;
+    }
+}
+
+#contact #container {
+    padding: 12px;
+}
+
+    /*联系人卡片*/
+    #contact #container div {
+        font-size: 16px;
+        padding: 16px;
+        margin: 8px;
+        color: #FFF;
+        background-color: #228B22;
+        cursor: pointer;
+    }
+
+        #contact #container div:hover {
+            background-color: #008B8B;
+        }
+    /*MIXITUP*/
+    #contact #container .mix {
+        display: none;
+    }
+    /*默认隐藏无联系人提示*/
+    #contact #container h2 {
+        display: none;
+        color: #777;
+    }
+
+/*顶栏字体颜色*/
+#contact #workspace .navbar-brand {
+    cursor: default;
+    color: #060;
+}
+
+#contact #topbar .navbar-right > li :first-child {
+    color: #060;
+}
+/*模拟框左侧调整*/
+#contact #filtermodal .modal-body {
+    padding-left: 10%;
+}

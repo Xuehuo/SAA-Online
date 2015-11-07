@@ -1,0 +1,36 @@
+﻿@import url(//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css);
+body {
+	background-color: rgb(50,69,88);
+}
+
+#login {
+	position: fixed;
+	width: 220px;
+	height: 380px;
+	top: 50%;
+	left: 50%;
+	margin: -190px -110px;
+}
+    #login #logo {
+        height: 100px;
+        text-align: center;
+    }
+
+	#login #logo > img {
+		width: 120px;
+		height: 120px;
+		margin: -30px auto;
+		background: rgba(255,255,255,0.1);
+		border-radius: 50%;
+	}
+	
+	#login button {
+		padding: 10px;
+		border: 0;
+		background-color: rgba(255,255,255,0.3);
+	}
+	
+		#login button:hover {
+			background-color: rgba(255,255,255,0.7);
+			color: #333;
+		}
