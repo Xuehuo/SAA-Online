@@ -11,7 +11,7 @@ public class calendarHandler : IHttpHandler, IRequiresSessionState
         {
             switch (context.Request["action"].ToString())
             {
-                case "list":
+                case "list": // list events
                     try
                     {
                         context.Response.Write("{\"flag\":0,\"data\":" + SAAO.Event.ListJSON() + "}");

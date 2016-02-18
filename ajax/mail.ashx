@@ -12,7 +12,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
         if (context.Request["action"] != null && SAAO.User.IsLogin)
             switch (context.Request["action"].ToString())
             {
-                case "list":
+                case "list": // list mail of a folder
                     string[] folder = new string[] { "INBOX", "Sent", "Drafts", "Trash" };
                     if (context.Request["folder"] != null && Array.IndexOf(folder, context.Request["folder"].ToString()) != -1)
                     {
@@ -27,7 +27,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "info":
+                case "info": // obtain information of a mail
                     {
                         int mailID = -1;
                         if (context.Request["id"] != null && int.TryParse(context.Request["id"].ToString(), out mailID))
@@ -48,7 +48,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "attachment":
+                case "attachment": // download mail attachment
                     {
                         int mailID = -1;
                         int index = -1;
@@ -76,7 +76,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "display":
+                case "display": // display a mail body
                     {
                         int mailID = -1;
                         if (context.Request["id"] != null && int.TryParse(context.Request["id"].ToString(), out mailID))
@@ -88,7 +88,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                                 if (message.username == SAAO.User.Current.username)
                                 {
                                     context.Response.Write(message.Body());
-                                    message.SetFlag((int)SAAO.Mail.flag.Seen);
+                                    message.SetFlag(SAAO.Mail.mailFlag.Seen);
                                 }
                                 else
                                     context.Response.Write("邮件无法加载，访问被拒绝。");
@@ -101,7 +101,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "delete":
+                case "delete": // delete a mail
                     {
                         int mailID = -1;
                         if (context.Request["id"] != null && int.TryParse(context.Request["id"].ToString(), out mailID))
@@ -128,7 +128,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "send":
+                case "send": // send a mail
                     if (context.Request.Form["to"] != null)
                     {
                         try
@@ -160,7 +160,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "login":
+                case "login": // obtain mail login credential
                     context.Response.Write("{\"flag\":0,\"data\":{\"mail\":\"" + SAAO.User.Current.mail + "\",\"password\":\"" + SAAO.User.Current.passwordRaw + "\"}}");
                     break;
             }

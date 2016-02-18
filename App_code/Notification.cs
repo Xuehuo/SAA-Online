@@ -2,13 +2,17 @@
 using System.Data;
 using System.Net.Mail;
 using System.Text;
-/// <summary>
-/// Notification 通知
-/// </summary>
+
 namespace SAAO
 {
+    /// <summary>
+    /// Notification 通知
+    /// </summary>
     public class Notification
     {
+        /// <summary>
+        /// File storage path of supervising notification
+        /// </summary>
         public static string storagePath = System.Configuration.ConfigurationManager.AppSettings["fileStoragePath"] + @"report\";
 
         public int ID;
@@ -27,6 +31,10 @@ namespace SAAO
             SELF_GROUP_ONLY = 1,
             SUPERVISE = 2
         }
+        /// <summary>
+        /// Notification constructor (obtain a current one)
+        /// </summary>
+        /// <param name="ID">Notification ID in database</param>
         public Notification(int ID)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
@@ -41,6 +49,12 @@ namespace SAAO
             notifyTime = Convert.ToDateTime(dr["notifyTime"].ToString());
         }
 
+        /// <summary>
+        /// Notification constructor (creat a new one)
+        /// </summary>
+        /// <param name="title">Notification title</param>
+        /// <param name="content">Notification content</param>
+        /// <param name="type">Notification type</param>
         public Notification(string title, string content, permissionType type)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
@@ -57,6 +71,9 @@ namespace SAAO
             notifyTime = DateTime.Now;
         }
 
+        /// <summary>
+        /// Broardcase the notification by sending email
+        /// </summary>
         public void Broardcast()
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
@@ -66,30 +83,48 @@ namespace SAAO
                 SendMail(dt.Rows[i]["mail"].ToString());
         }
 
+        /// <summary>
+        /// Set an important flag
+        /// </summary>
         public void SetImportant()
         {
             int important = Convert.ToInt32(new SqlIntegrate(Utility.connStr).Query("SELECT MAX(important) FROM Notification"));
             new SqlIntegrate(Utility.connStr).Execute("UPDATE Notification SET important =" + (important + 1) + " WHERE ID=" + ID);
         }
 
+        /// <summary>
+        /// Attach supervising report
+        /// </summary>
+        /// <param name="guid">Supervising report storage GUID</param>
         public void AttachReport(string guid)
         {
             new SqlIntegrate(Utility.connStr).Execute("UPDATE Notification SET reportFile ='" + guid + "' WHERE ID=" + ID);
         }
 
+        /// <summary>
+        /// Send a notification email
+        /// </summary>
+        /// <param name="to">Receiver email</param>
         private void SendMail(string to)
         {
-            MailMessage mail = new MailMessage("notify@xuehuo.org", to);
+            MailMessage mail = new MailMessage("", to);
             mail.SubjectEncoding = Encoding.UTF8;
             mail.Subject = title;
             mail.IsBodyHtml = false;
             mail.BodyEncoding = Encoding.UTF8;
             mail.Body = content;
             SmtpClient smtp = new SmtpClient(Mail.serverAddress);
-            smtp.Credentials = new System.Net.NetworkCredential("notify@xuehuo.org", "7972A87BEC12");//IN DUE TIME MOVE IT TO SETTING!
+            smtp.Credentials = new System.Net.NetworkCredential("", "");
+            // TODO: Move this credential to setting
             smtp.Send(mail);
         }
 
+        /// <summary>
+        /// Check whether a user can see a notification (static function)
+        /// </summary>
+        /// <param name="group">Group of a notification</param>
+        /// <param name="type">Notification permission type</param>
+        /// <returns>Whether a user can see a notification</returns>
         private static bool Visible(int group, permissionType type)
         {
             if (type == permissionType.SUPERVISE)
@@ -102,11 +137,19 @@ namespace SAAO
                 return false;
             return true;
         }
+        /// <summary>
+        /// Check whether a user can see the notification
+        /// </summary>
+        /// <returns>whether a user can see the notification</returns>
         public bool Visible()
         {
             return Visible(group, type);
         }
 
+        /// <summary>
+        /// List current notifications in the database in JSON
+        /// </summary>
+        /// <returns>JSON of current notifications [{ID,title,user,content,notifyTime,type,imprtant,(reportFile)},...]</returns>
         public static string ListJSON()
         {
             string back = "[";

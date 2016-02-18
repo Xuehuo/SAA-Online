@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 namespace SAAO
 {
     /// <summary>
-    /// SqlIntegrate is a basic SQL Database operating module.
+    /// SqlIntegrate 数据库交互
     /// </summary>
     public class SqlIntegrate
     {
@@ -16,6 +16,9 @@ namespace SAAO
         private DataSet ds;
         private int paraindex = 0;
         private SqlParameter[] paralist;
+        /// <summary>
+        /// SQL data type
+        /// </summary>
         public enum DataType
         {
             Date = SqlDbType.Date,
@@ -24,15 +27,30 @@ namespace SAAO
             Text = SqlDbType.Text,
             Int = SqlDbType.Int,
         };
+        /// <summary>
+        /// SqlIntegrate constructor
+        /// </summary>
+        /// <param name="connstr">Connection string</param>
         public SqlIntegrate(string connstr)
         {
             sqlConnStr = connstr;
         }
+        /// <summary>
+        /// Initialize parameter array
+        /// </summary>
+        /// <param name="paracount">Number of parameter(s)</param>
         public void InitParameter(int paracount)
         {
             paraindex = 0;
             paralist = new SqlParameter[paracount];
         }
+        /// <summary>
+        /// Add a parameter
+        /// </summary>
+        /// <param name="key">Parameter name (with at '@')</param>
+        /// <param name="datatype">SQL data type</param>
+        /// <param name="value">Parameter value</param>
+        /// <param name="length">Max length (if necessary)</param>
         public void AddParameter(string key, DataType datatype, object value, int length = 0)
         {
             SqlParameter para = ((int)datatype != (int)SqlDbType.Text || length == 0) ? new SqlParameter(key, (SqlDbType)datatype, length) : new SqlParameter(key, (SqlDbType)datatype);
@@ -40,6 +58,10 @@ namespace SAAO
             paralist[paraindex] = para;
             paraindex++;
         }
+        /// <summary>
+        /// Execute a SQL query with no return
+        /// </summary>
+        /// <param name="command">SQL query command</param>
         public void Execute(string command)
         {
             conn = new SqlConnection(sqlConnStr);
@@ -51,6 +73,11 @@ namespace SAAO
             cmd.ExecuteNonQuery();
             conn.Close();
         }
+        /// <summary>
+        /// Execute a SQL query and return a single value
+        /// </summary>
+        /// <param name="command">SQL query command</param>
+        /// <returns>Query result (a single value)</returns>
         public object Query(string command)
         {
             object back = null;
@@ -67,6 +94,11 @@ namespace SAAO
             else
                 return "";
         }
+        /// <summary>
+        /// Execute a SQL query and return a row of data
+        /// </summary>
+        /// <param name="command">SQL query command</param>
+        /// <returns>A row of data</returns>
         public DataRow Reader(string command)
         {
             conn = new SqlConnection(sqlConnStr);
@@ -83,6 +115,11 @@ namespace SAAO
             conn.Close();
             return datarow;
         }
+        /// <summary>
+        /// Convert DataReader to DataRow
+        /// </summary>
+        /// <param name="reader">A DataReader</param>
+        /// <returns>A DataRow</returns>
         private static DataRow GetDataRow(SqlDataReader reader)
         {
             DataTable schemaTable = reader.GetSchemaTable();
@@ -103,6 +140,12 @@ namespace SAAO
             }
             return data.Rows[0];
         }
+        // TODO: this method is low-efficient
+        /// <summary>
+        /// Execute a SQL query and return a table of data
+        /// </summary>
+        /// <param name="command">SQL query command</param>
+        /// <returns>A table of data</returns>
         public DataTable Adapter(string command)
         {
             da = new SqlDataAdapter(command, sqlConnStr);
@@ -114,6 +157,11 @@ namespace SAAO
             DataTable dt = ds.Tables[0];
             return dt;
         }
+        /// <summary>
+        /// Execute a SQL query and return a row of data in JSON
+        /// </summary>
+        /// <param name="command">SQL query command</param>
+        /// <returns>A row of data in JSON</returns>
         public string QueryJSON(string command)
         {
             string back = "{";
@@ -139,6 +187,11 @@ namespace SAAO
             conn.Close();
             return back.Replace(",}", "}");
         }
+        /// <summary>
+        /// Execute a SQL query and return a table of data in JSON
+        /// </summary>
+        /// <param name="command">SQL query command</param>
+        /// <returns>A table of data in JSON</returns>
         public string AdapterJSON(string command)
         {
             string back = "[";
@@ -165,5 +218,6 @@ namespace SAAO
             back += "]";
             return back.Replace(",}", "}").Replace(",]", "]");
         }
+        
     }
 }

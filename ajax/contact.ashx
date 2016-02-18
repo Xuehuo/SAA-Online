@@ -11,7 +11,7 @@ public class contactHandler : IHttpHandler, IRequiresSessionState
         {
             switch (context.Request["action"].ToString())
             {
-                case "list":
+                case "list": // list contacts
                     try
                     {
                         context.Response.Write("{\"flag\":0,\"data\":" + SAAO.User.ListJSON() + "}");

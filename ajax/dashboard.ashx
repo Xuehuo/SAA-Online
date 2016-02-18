@@ -11,7 +11,7 @@ public class dashboardHandler : IHttpHandler, IRequiresSessionState
         {
             switch (context.Request["action"].ToString())
             {
-                case "list":
+                case "list": // list current events
                     try
                     {
                         SAAO.SqlIntegrate si = new SAAO.SqlIntegrate(SAAO.Utility.connStr);

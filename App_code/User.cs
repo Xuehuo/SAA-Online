@@ -4,26 +4,52 @@ using System.Web;
 namespace SAAO
 {
     /// <summary>
-    /// SAAO User
+    /// User 用户
     /// </summary>
     public class User
     {
+        /// <summary>
+        /// Index in database
+        /// </summary>
         private int ID;
         public string UUID;
         public string username;
         private string password;
+        /// <summary>
+        /// Student number
+        /// </summary>
         private string SN;
         public string realname;
+        /// <summary>
+        /// Class
+        /// </summary>
         private int @class;
+        // TODO: Remove or rename this useless key
+
         public string mail;
         public string phone;
+        /// <summary>
+        /// Initial letter of surname (0 represents 'A')
+        /// </summary>
         public int initial;
+        // TODO: another way to obtain (username[2] - 'A')
+
         public int group;
         public string groupName;
         public int job;
         public string jobName;
+        /// <summary>
+        /// Raw password string (only filled when it is current user)
+        /// </summary>
         public string passwordRaw;
+        /// <summary>
+        /// Senior (1 or 2)
+        /// </summary>
         public int senior;
+        /// <summary>
+        /// User constructor
+        /// </summary>
+        /// <param name="UUID">User UUID</param>
         public User(Guid UUID)
         {
             this.UUID = UUID.ToString().ToUpper();
@@ -46,6 +72,10 @@ namespace SAAO
             else if (SN.Substring(0, 4) == Organization.Current.state.seniorTwo)
                 senior = 2;
         }
+        /// <summary>
+        /// User constructor
+        /// </summary>
+        /// <param name="username">Username</param>
         public User(string username)
         {
             this.username = username;
@@ -71,6 +101,9 @@ namespace SAAO
             else if (SN.Substring(0, 4) == Organization.Current.state.seniorTwo)
                 senior = 2;
         }
+        /// <summary>
+        /// Logined user of current session (values null if not logined)
+        /// </summary>
         public static User Current
         {
             get
@@ -85,6 +118,9 @@ namespace SAAO
                 HttpContext.Current.Session["User"] = value;
             }
         }
+        /// <summary>
+        /// Whether the user of current session has logined
+        /// </summary>
         public static bool IsLogin
         {
             get
@@ -93,35 +129,68 @@ namespace SAAO
             }
         }
 
-        public bool IsExecutive//SENIOR TWO!
+        /// <summary>
+        /// Whether the user is executive (only Senior Two)
+        /// </summary>
+        public bool IsExecutive
         {
             get
             {
-                return Array.IndexOf(Organization.IMPT_MEMBER, job) != -1;
+                // Executive member and important member are identical
+                return senior == 2 && Array.IndexOf(Organization.IMPT_MEMBER, job) != -1;
             }
         }
 
-        public bool IsGroupHeadman//SENIOR ONE!
+        /// <summary>
+        /// Whether the user is headman of a group (only Senior One)
+        /// </summary>
+        public bool IsGroupHeadman
         {
             get
             {
+                // TODO: Remove this magic number
                 return senior == 1 && job == 5;
             }
         }
 
+        /// <summary>
+        /// Whether the user is in the supervising group (both Senior)
+        /// </summary>
         public bool IsSupervisor
         {
             get
             {
+                // TODO: Remove this magic string
                 return groupName == "审计组";
             }
         }
+        /// <summary>
+        /// Verify whether a string is the password of the user
+        /// </summary>
+        /// <param name="password">Raw password</param>
+        /// <returns>Whether a string is the password of the user</returns>
         private bool Verify(string password)
         {
+            /* The raw password is encrypted in this way:
+             *  (SALT is generated randomly and its length is 6)
+             *        ┌──────┬───────────────┐
+             *  [A] = │ SALT  │ Raw password     │ (join SALT and raw password)
+             *        └──────┴───────────────┘
+             *  [B] = SHA256([A])
+             *        ┌──────┬───────────────┐
+             *  [C] = │ SALT  │      [B]         │ (join SALT and [B])
+             *        └──────┴───────────────┘
+             *  At last, store [C] in the database
+             */
             string SALT = this.password.Substring(0, 6);
             string passwordVerify = SALT + Utility.Encrypt(SALT + password);
             return (this.password == passwordVerify);
         }
+        /// <summary>
+        /// Verify a password and login if it's correct
+        /// </summary>
+        /// <param name="password">Password</param>
+        /// <returns>Whether the password is correct</returns>
         public bool Login(string password)
         {
             if (Verify(password))
@@ -133,25 +202,43 @@ namespace SAAO
             else
                 return false;
         }
+        /// <summary>
+        /// Logout the user of current session
+        /// </summary>
         public void Logout()
         {
             Current = null;
         }
+        /// <summary>
+        /// Change password of the user
+        /// </summary>
+        /// <param name="password">Orginal password</param>
+        /// <param name="passwordNew">New password</param>
+        /// <returns>Whether the original password is correct</returns>
         public bool SetPassword(string password, string passwordNew)
         {
             if (Verify(password))
             {
                 SqlIntegrate si = new SqlIntegrate(Utility.connStr);
                 string SALT = this.password.Substring(0, 6);
-                si.Execute("update [User] set password = '" + SALT + Utility.Encrypt(SALT + passwordNew) + "' where UUID = '" + UUID + "'");//更新密码
+                string passwordEncrypted = SALT + Utility.Encrypt(SALT + passwordNew);
+                // Update the user's password of SAA Online
+                si.Execute("UPDATE [User] SET password = '" + passwordEncrypted + "' WHERE UUID = '" + UUID + "'");
                 si = new SqlIntegrate(Mail.connStr);
-                si.Execute("update [hm_accounts] set accountpassword = '" + SALT + Utility.Encrypt(SALT + passwordNew) + "' where accountaddress = '" + username + "@xuehuo.org'");//更新邮件系统密码
+                // Update the user's password of SAA Mail (Hmailserver)
+                si.InitParameter(1);
+                si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, username + "@" + Mail.mailDomain, 50);
+                si.Execute("UPDATE [hm_accounts] SET accountpassword = '" + passwordEncrypted + "' WHERE accountaddress = @accountaddress");
                 passwordRaw = passwordNew;
                 return true;
             }
             else
                 return false;
         }
+        /// <summary>
+        /// List activated users in the database in JSON
+        /// </summary>
+        /// <returns>JSON of activated users. [{realname,senior,group,initial,jobName,groupName,phone,mail},...]</returns>
         public static string ListJSON()
         {
             string data = "[";

@@ -4,29 +4,54 @@ using System.Data;
 namespace SAAO
 {
     /// <summary>
-    /// SAAO File
+    /// File 文件
     /// </summary>
     public class File
     {
+        /// <summary>
+        /// File storage path (with a backslash '\' in the end)
+        /// </summary>
         public static string storagePath = System.Configuration.ConfigurationManager.AppSettings["fileStoragePath"] + @"storage\";
         private string guid;
         private string name;
+        /// <summary>
+        /// File description
+        /// </summary>
         private string info;
+        /// <summary>
+        /// File extension (doc, pdf, etc.)
+        /// </summary>
         public string extension;
+        /// <summary>
+        /// File size in byte
+        /// </summary>
         public int size;
         private User uploader;
         private DateTime uploadTime;
         private int downloadCount;
         public string savePath;
-        private List<string> tag;
+        public List<string> tag;
         private permissionLevel permisstion;
         public enum permissionLevel
         {
             ALL = 0,
+            /// <summary>
+            /// Only visible to group of oneself
+            /// </summary>
             SELF_GROUP_ONLY = 1,
+            /// <summary>
+            /// Only visible to Senior Two
+            /// </summary>
             SENIOR_TWO_ONLY = 2,
+            /// <summary>
+            /// Only visible to important members (administrative member). IMPT_MEMB is defined in Organization.cs
+            /// </summary>
             IMPT_MEMB_ONLY = 3
         }
+        /// <summary>
+        /// File constructor
+        /// </summary>
+        /// <param name="str">GUID string</param>
         public File(string str)
         {
             Guid guid;
@@ -49,6 +74,11 @@ namespace SAAO
             for (int i = 0; i < taglist.Rows.Count; i++)
                 tag.Add(taglist.Rows[i]["name"].ToString());
         }
+        /// <summary>
+        /// Check whether the file has a tag
+        /// </summary>
+        /// <param name="str">Tag string</param>
+        /// <returns>whether the file has this tag</returns>
         public bool HasTag(string str)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
@@ -60,6 +90,10 @@ namespace SAAO
             else
                 return false;
         }
+        /// <summary>
+        /// Remove a tag of the file (if existed)
+        /// </summary>
+        /// <param name="str">Tag string</param>
         public void RemoveTag(string str)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
@@ -67,6 +101,10 @@ namespace SAAO
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.Execute("DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = '" + guid + "')");
         }
+        /// <summary>
+        /// Add a tag to the file
+        /// </summary>
+        /// <param name="str">Tag string</param>
         public void AddTag(string str)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
@@ -74,6 +112,9 @@ namespace SAAO
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.Execute("INSERT INTO Filetag ([name], [FUID]) VALUES (@name, '" + guid + "')");
         }
+        /// <summary>
+        /// Filename
+        /// </summary>
         public string Name
         {
             set
@@ -88,6 +129,9 @@ namespace SAAO
                 return name;
             }
         }
+        /// <summary>
+        /// File description
+        /// </summary>
         public string Info
         {
             set
@@ -102,13 +146,19 @@ namespace SAAO
                 return info;
             }
         }
+        /// <summary>
+        /// Delete the file
+        /// </summary>
         public void Delete()
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
             si.Execute("DELETE FROM [File] WHERE [GUID] = '" + guid + "'");
             si.Execute("DELETE FROM [Filetag] WHERE [FUID] = '" + guid + "'");
-            System.IO.File.Delete(savePath);            
+            System.IO.File.Delete(savePath);
         }
+        /// <summary>
+        /// File visibility-level
+        /// </summary>
         public permissionLevel Permission
         {
             get
@@ -122,10 +172,22 @@ namespace SAAO
                 si.Execute("UPDATE [File] SET [permission] = "+ (int)value + " WHERE [GUID] = '" + guid + "'");
             }
         }
+        /// <summary>
+        /// Check whether a user has the permission to the file
+        /// </summary>
+        /// <param name="user">User</param>
+        /// <returns>whether a user has the permission to the file</returns>
         public bool Visible(User user)
         {
             return Visible(permisstion, uploader, user);
         }
+        /// <summary>
+        /// Check whether a user has the permission to a file (static function)
+        /// </summary>
+        /// <param name="permisstion">Permission setting</param>
+        /// <param name="uploader">Uploader of the file</param>
+        /// <param name="user">User (current one most possibly)</param>
+        /// <returns>whether a user has the permission to a file</returns>
         public static bool Visible(permissionLevel permisstion, User uploader, User user)
         {
             bool rt = false;
@@ -150,13 +212,10 @@ namespace SAAO
             }
             return rt;
         }
-        public string ListTag()
-        {
-            string rt = "";
-            foreach (string str in tag)
-                rt += str + ",";
-            return rt == "" ? "" : rt.Substring(0, rt.Length - 1);
-        }
+        /// <summary>
+        /// Convert the file information to JSON
+        /// </summary>
+        /// <returns>File information in JSON. {guid,permission,name,extension,uploadTime,size,uploader,group,downloadCount,tag(string),info(string)}</returns>
         public string ToJSON()
         {
             string data = "{";
@@ -169,11 +228,15 @@ namespace SAAO
             data += "\"uploader\":\"" + Utility.string2JSON(uploader.realname) + "\",";
             data += "\"group\":\"" + Utility.string2JSON(uploader.groupName) + "\",";
             data += "\"downloadCount\":" + downloadCount + ",";
-            data += "\"tag\":\"" + Utility.string2JSON(ListTag()) + "\",";
+            data += "\"tag\":\"" + Utility.string2JSON(string.Join(",", tag)) + "\",";
             data += "\"info\":\"" + (info == null ? "" : Utility.string2JSON(info)) + "\"";
             data += "}";
             return data;
         }
+        /// <summary>
+        /// List current files in the database in JSON
+        /// </summary>
+        /// <returns>JSON of current files [{guid,name,extension,uploaderName,datetime,info(bool)},...]</returns>
         public static string ListJSON()
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);

@@ -12,7 +12,7 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
         {
             switch(context.Request["action"].ToString())
             {
-                case "upload":
+                case "upload": // upload file(s)
                     if (context.Request.Files.Count != 0)
                     {
                         try
@@ -37,7 +37,7 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "list":
+                case "list": // list current files
                     try
                     {
                         context.Response.Write("{\"flag\":0,\"data\":" + SAAO.File.ListJSON() + "}");
@@ -48,7 +48,7 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
                         SAAO.Utility.Log(ex);
                     }
                     break;
-                case "info":
+                case "info": // obtain file information
                     {
                         Guid guid = new Guid();
                         if (Guid.TryParse(context.Request["id"].ToString(), out guid))
@@ -73,7 +73,7 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
                             context.Response.Write("{\"flag\":2}");
                     }
                     break;
-                case "update":
+                case "update": // update information of a file
                     {
                         try
                         {
@@ -85,9 +85,12 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
                                 {
                                     file.Name = context.Request.Form["name"];
                                     file.Info = context.Request.Form["info"];
-                                    file.Permission = (SAAO.File.permissionLevel)int.Parse(context.Request.Form["permission"]);
+                                    if (context.Request.Form["permission"] != "")
+                                        file.Permission = (SAAO.File.permissionLevel)int.Parse(context.Request.Form["permission"]);
+                                    else
+                                        file.Permission = SAAO.File.permissionLevel.ALL;
                                     string[] tags = context.Request.Form["tag"].Split(',');
-                                    string[] tagsOriginal = file.ListTag().Split(',');
+                                    string[] tagsOriginal = file.tag.ToArray();
                                     foreach (string tag in tagsOriginal)
                                     {
                                         bool exist = false;
@@ -118,7 +121,7 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "download":
+                case "download": // download a file
                     {
                         Guid guid = new Guid();
                         if (Guid.TryParse(context.Request["id"].ToString(), out guid))
@@ -164,7 +167,7 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
                         }
                     }
                     break;
-                case "delete":
+                case "delete": //delete a file
                     {
                         try
                         {

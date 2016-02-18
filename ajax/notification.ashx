@@ -12,7 +12,7 @@ public class notificationHandler : IHttpHandler, IRequiresSessionState
         {
             switch (context.Request["action"].ToString())
             {
-                case "list":
+                case "list": // list current notifications
                     try
                     {
                         context.Response.Write("{\"flag\":0,\"data\":" + SAAO.Notification.ListJSON() + "}");
@@ -23,7 +23,7 @@ public class notificationHandler : IHttpHandler, IRequiresSessionState
                         SAAO.Utility.Log(ex);
                     }
                     break;
-                case "report":
+                case "report": // download a supervising report
                     {
                         Guid guid = new Guid();
                         if (Guid.TryParse(context.Request["id"].ToString(), out guid))
@@ -61,7 +61,7 @@ public class notificationHandler : IHttpHandler, IRequiresSessionState
                         }
                         break;
                     }
-                case "create":
+                case "create": // creat a notification
                     {
                         try
                         {
@@ -84,7 +84,7 @@ public class notificationHandler : IHttpHandler, IRequiresSessionState
                                     n.AttachReport(guid);
                                 } 
                                 else
-                                    n.Broardcast(); 
+                                    n.Broardcast(); // broadcast automatically if not supervising report
                                 if (context.Request.Form["important"] == "1")
                                     n.SetImportant();
                                 context.Response.Write("{\"flag\":0}");  

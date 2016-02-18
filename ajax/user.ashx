@@ -10,7 +10,7 @@ public class userHandler : IHttpHandler, IRequiresSessionState
         if (context.Request["action"] != null && SAAO.User.IsLogin)
             switch (context.Request["action"].ToString())
             {
-                case "password":
+                case "password": // change password
                     string password = context.Request.Form["password"].ToString();
                     string passwordNew = context.Request.Form["newpassword"].ToString();
                     try
@@ -26,11 +26,12 @@ public class userHandler : IHttpHandler, IRequiresSessionState
                         context.Response.Write("{\"flag\": 3}");
                     }
                     break;
-                case "logout":
+                case "logout": // user logout
                     SAAO.User.Current.Logout();
                     context.Response.Write("{\"flag\": 0}");
                     break;
             }
+            // user login
         else if (context.Request["action"] != null && context.Request["action"] == "login" && context.Request.Form["username"] != null && context.Request.Form["password"] != null && !SAAO.User.IsLogin)
         {
             string username = context.Request.Form["username"].ToString().ToLower();
