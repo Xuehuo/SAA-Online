@@ -14,6 +14,8 @@ namespace SAAO
         /// File storage path of supervising notification
         /// </summary>
         public static string storagePath = System.Configuration.ConfigurationManager.AppSettings["fileStoragePath"] + @"report\";
+        public static string notifyMail = System.Configuration.ConfigurationManager.AppSettings["notifyMailAddress"];
+        public static string notifyMailCredential = System.Configuration.ConfigurationManager.AppSettings["notifyMailCredential"];
 
         public int ID;
         public permissionType type;
@@ -107,14 +109,14 @@ namespace SAAO
         /// <param name="to">Receiver email</param>
         private void SendMail(string to)
         {
-            MailMessage mail = new MailMessage("", to);
+            MailMessage mail = new MailMessage(notifyMail, to);
             mail.SubjectEncoding = Encoding.UTF8;
             mail.Subject = title;
             mail.IsBodyHtml = false;
             mail.BodyEncoding = Encoding.UTF8;
             mail.Body = content;
             SmtpClient smtp = new SmtpClient(Mail.serverAddress);
-            smtp.Credentials = new System.Net.NetworkCredential("", "");
+            smtp.Credentials = new System.Net.NetworkCredential(notifyMail, notifyMailCredential);
             // TODO: Move this credential to setting
             smtp.Send(mail);
         }
@@ -155,11 +157,11 @@ namespace SAAO
             string back = "[";
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
             DataTable dt = si.Adapter("SELECT Notification.reportFile, Notification.ID, Notification.important, Notification.type, Notification.title, Notification.[content], Notification.notifyTime, [User].realname, [User].[group] FROM Notification INNER JOIN [User] ON Notification.UUID = [User].UUID ORDER BY Notification.important DESC, ID DESC");
-            for (int i = 0; i < dt.Rows.Count; i ++)
+            for (int i = 0; i < dt.Rows.Count; i++)
                 if (Visible(Convert.ToInt32(dt.Rows[i]["group"]), permissionType.SELF_GROUP_ONLY))
                 {
                     back += "{";
-                    back += "\"ID\":"+ dt.Rows[i]["ID"] + ",";
+                    back += "\"ID\":" + dt.Rows[i]["ID"] + ",";
                     back += "\"title\":\"" + Utility.string2JSON(dt.Rows[i]["title"].ToString()) + "\",";
                     back += "\"user\":\"" + Utility.string2JSON(dt.Rows[i]["realname"].ToString()) + "\",";
                     back += "\"content\":\"" + Utility.string2JSON(dt.Rows[i]["content"].ToString()) + "\",";
@@ -171,7 +173,7 @@ namespace SAAO
                     back += "},";
                 }
             back += "]";
-            return back.Replace(",]","]").Replace(",}","}");
+            return back.Replace(",]", "]").Replace(",}", "}");
         }
     }
 }

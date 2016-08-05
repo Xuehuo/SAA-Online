@@ -136,6 +136,8 @@
                             <dd></dd>
                             <dt>邮箱</dt>
                             <dd></dd>
+                            <dt>班级</dt>
+                            <dd></dd>
                         </dl>
                     </div>
                 </div>
