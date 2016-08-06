@@ -84,7 +84,7 @@ public class notificationHandler : IHttpHandler, IRequiresSessionState
                                     n.AttachReport(guid);
                                 } 
                                 else
-                                    n.Broardcast(); // broadcast automatically if not supervising report
+                                    n.Broadcast(); // broadcast automatically if not supervising report
                                 if (context.Request.Form["important"] == "1")
                                     n.SetImportant();
                                 context.Response.Write("{\"flag\":0}");  

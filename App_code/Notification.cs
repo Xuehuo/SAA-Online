@@ -74,9 +74,9 @@ namespace SAAO
         }
 
         /// <summary>
-        /// Broardcase the notification by sending email
+        /// Broadcast the notification by sending email
         /// </summary>
-        public void Broardcast()
+        public void Broadcast()
         {
             SqlIntegrate si = new SqlIntegrate(Utility.connStr);
             DataTable dt = si.Adapter("SELECT mail, SN FROM [User] WHERE activated = 1" + (group != -1 ? " AND [group] =" + group : ""));
