@@ -12,7 +12,7 @@ namespace SAAO
         /// </summary>
         public static int[] IMPT_MEMBER = new int[] { 0, 1, 2, 3 };
         // TODO: Rename or write it in database
-        
+
         public State state;
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace SAAO
         public Organization(DateTime dt)
         {
             state = new State(dt);
-            structure = new SqlIntegrate(Utility.connStr).Adapter("SELECT * FROM [Org] WHERE [year]='" + state.structureCurrent + state.eventCurrent.ToString() + "'");
+            structure = new SqlIntegrate(Utility.connStr).Adapter("SELECT * FROM [Org] WHERE [year]='" + state.structureCurrent + ((int)state.eventCurrent).ToString() + "'");
         }
         /// <summary>
         /// Current organization structure
@@ -80,7 +80,7 @@ namespace SAAO
         /// Current structure (the same as seniorTwo)
         /// </summary>
         public string structureCurrent;
-        public enum Event 
+        public enum Event
         {
             /// <summary>
             /// 游园会 (from Apr 1 to Feb 15)
