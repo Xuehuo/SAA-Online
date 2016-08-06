@@ -31,7 +31,7 @@ namespace SAAO
         private int downloadCount;
         public string savePath;
         public List<string> tag;
-        private permissionLevel permisstion;
+        private permissionLevel permission;
         public enum permissionLevel
         {
             ALL = 0,
@@ -68,7 +68,7 @@ namespace SAAO
             downloadCount = Convert.ToInt32(fileInfo["downloadCount"]);
             uploadTime = Convert.ToDateTime(fileInfo["uploadTime"]);
             savePath = storagePath + str.ToUpper();
-            permisstion = (permissionLevel)Convert.ToInt32(fileInfo["permission"]);
+            permission = (permissionLevel)Convert.ToInt32(fileInfo["permission"]);
             tag = new List<string>();
             DataTable taglist = si.Adapter("SELECT [name] FROM [Filetag] WHERE FUID = '" + str.ToUpper() +"'");
             for (int i = 0; i < taglist.Rows.Count; i++)
@@ -163,11 +163,11 @@ namespace SAAO
         {
             get
             {
-                return permisstion;
+                return permission;
             }
             set
             {
-                permisstion = value;
+                permission = value;
                 SqlIntegrate si = new SqlIntegrate(Utility.connStr);
                 si.Execute("UPDATE [File] SET [permission] = "+ (int)value + " WHERE [GUID] = '" + guid + "'");
             }
@@ -179,7 +179,7 @@ namespace SAAO
         /// <returns>whether a user has the permission to the file</returns>
         public bool Visible(User user)
         {
-            return Visible(permisstion, uploader, user);
+            return Visible(permission, uploader, user);
         }
         /// <summary>
         /// Check whether a user has the permission to a file (static function)
@@ -220,7 +220,7 @@ namespace SAAO
         {
             string data = "{";
             data += "\"guid\":\"" + guid + "\",";
-            data += "\"permission\":" + (int)permisstion + ",";
+            data += "\"permission\":" + (int)permission + ",";
             data += "\"name\":\"" + Utility.string2JSON(name) + "\",";
             data += "\"extension\":\"" + extension + "\",";
             data += "\"uploadTime\":\"" + uploadTime.ToString("yyyy-MM-dd HH:mm") + "\",";

@@ -61,7 +61,7 @@ public class notificationHandler : IHttpHandler, IRequiresSessionState
                         }
                         break;
                     }
-                case "create": // creat a notification
+                case "create": // create a notification
                     {
                         try
                         {

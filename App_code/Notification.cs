@@ -52,7 +52,7 @@ namespace SAAO
         }
 
         /// <summary>
-        /// Notification constructor (creat a new one)
+        /// Notification constructor (create a new one)
         /// </summary>
         /// <param name="title">Notification title</param>
         /// <param name="content">Notification content</param>
