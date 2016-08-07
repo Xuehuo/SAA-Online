@@ -12,20 +12,20 @@ namespace SAAO
         /// <summary>
         /// Major database connection string
         /// </summary>
-        public static string connStr = System.Configuration.ConfigurationManager.ConnectionStrings["SAAOConnectionString"].ToString();
+        public static string ConnStr = System.Configuration.ConfigurationManager.ConnectionStrings["SAAOConnectionString"].ToString();
         /// <summary>
         /// Write message (error one most possibly) to database
         /// </summary>
         /// <param name="message">Message (string)</param>
         public static void Log(string message)
         {
-            SqlIntegrate si = new SqlIntegrate(connStr);
+            SqlIntegrate si = new SqlIntegrate(ConnStr);
             si.InitParameter(5);
             si.AddParameter("@context", SqlIntegrate.DataType.Text, message);
             si.AddParameter("@IP", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.UserHostAddress, 50);
             si.AddParameter("@browser", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserAgent);
             si.AddParameter("@OS", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.Browser.Platform, 50);
-            si.AddParameter("@session", SqlIntegrate.DataType.VarChar, User.IsLogin ? User.Current.username : "未登录用户", 50);
+            si.AddParameter("@session", SqlIntegrate.DataType.VarChar, User.IsLogin ? User.Current.Username : "未登录用户", 50);
             si.Execute("INSERT INTO Log ([context], [IP], [browser], [OS], [session]) VALUES (@context, @IP, @browser, @OS, @session)");
         }
         /// <summary>
@@ -34,13 +34,13 @@ namespace SAAO
         /// <param name="message">Exception</param>
         public static void Log(Exception message)
         {
-            SqlIntegrate si = new SqlIntegrate(connStr);
+            SqlIntegrate si = new SqlIntegrate(ConnStr);
             si.InitParameter(5);
             si.AddParameter("@context", SqlIntegrate.DataType.Text, message.Message + message.StackTrace);
             si.AddParameter("@IP", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.UserHostAddress, 50);
             si.AddParameter("@browser", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserAgent);
             si.AddParameter("@OS", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.Browser.Platform, 50);
-            si.AddParameter("@session", SqlIntegrate.DataType.VarChar, User.IsLogin ? User.Current.username : "未登录用户", 50);
+            si.AddParameter("@session", SqlIntegrate.DataType.VarChar, User.IsLogin ? User.Current.Username : "未登录用户", 50);
             si.Execute("INSERT INTO Log ([context], [IP], [browser], [OS], [session]) VALUES (@context, @IP, @browser, @OS, @session)");
         }
         /// <summary>
@@ -80,7 +80,7 @@ namespace SAAO
         /// </summary>
         /// <param name="str">String</param>
         /// <returns>String without escape character</returns>
-        public static string string2JSON(string str)
+        public static string String2Json(string str)
         {
             str = str.Replace(">", "&gt;");
             str = str.Replace("<", "&lt;");

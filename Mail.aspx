@@ -54,7 +54,7 @@
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=SAAO.User.Current.realname %> <b class="caret"></b></a>
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=SAAO.User.Current.Realname %> <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="#" data-toggle="modal" data-target="#passwordmodal">修改密码</a></li>
                             <li class="divider"></li>
@@ -67,7 +67,7 @@
         <div id="content">
             <div id="maillist">
                 <ol class="breadcrumb">
-                    <li><%=SAAO.User.Current.mail %></li>
+                    <li><%=SAAO.User.Current.Mail %></li>
                     <li>收件箱</li>
                 </ol>
                 <table class="table table-hover">

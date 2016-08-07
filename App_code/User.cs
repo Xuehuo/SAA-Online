@@ -11,66 +11,64 @@ namespace SAAO
         /// <summary>
         /// Index in database
         /// </summary>
-        private int ID;
+        private readonly int _id;
         public string UUID;
-        public string username;
-        private string password;
+        public string Username;
+        private readonly string _password;
         /// <summary>
         /// Student number
         /// </summary>
-        private string SN;
-        public string realname;
+        private readonly string _sn;
+        public string Realname;
         /// <summary>
         /// Class
         /// </summary>
-        private int @class;
-        // TODO: Remove or rename this useless key
+        private int _class;
 
-        public string mail;
-        public string phone;
+        public string Mail;
+        public string Phone;
         /// <summary>
         /// Initial letter of surname (0 represents 'A')
         /// </summary>
-        public int initial;
-        // TODO: another way to obtain (username[2] - 'A')
+        public int Initial;
 
-        public int group;
-        public string groupName;
-        public int job;
-        public string jobName;
+        public int Group;
+        public string GroupName;
+        public int Job;
+        public string JobName;
         /// <summary>
         /// Raw password string (only filled when it is current user)
         /// </summary>
-        public string passwordRaw;
+        public string PasswordRaw;
         /// <summary>
         /// Senior (1 or 2)
         /// </summary>
-        public int senior;
+        public int Senior;
         /// <summary>
         /// User constructor
         /// </summary>
-        /// <param name="UUID">User UUID</param>
-        public User(Guid UUID)
+        /// <param name="uuid">User UUID</param>
+        public User(Guid uuid)
         {
-            this.UUID = UUID.ToString().ToUpper();
-            SqlIntegrate si = new SqlIntegrate(Utility.connStr);
-            DataRow dr = si.Reader("SELECT * FROM [User] WHERE [UUID] = '" + this.UUID + "'");
-            ID = Convert.ToInt32(dr["ID"]);
-            password = dr["password"].ToString();
-            realname = dr["realname"].ToString();
-            SN = dr["SN"].ToString();
-            @class = Convert.ToInt32(dr["class"]);
-            mail = dr["mail"].ToString();
-            phone = dr["phone"].ToString();
-            initial = Convert.ToInt32(dr["initial"]);
-            group = Convert.ToInt32(dr["group"].ToString());
-            job = Convert.ToInt32(dr["job"].ToString());
-            groupName = Organization.Current.GetGroupName(group);
-            jobName = Organization.Current.GetJobName(job);
-            if (SN.Substring(0, 4) == Organization.Current.state.seniorOne)
-                senior = 1;
-            else if (SN.Substring(0, 4) == Organization.Current.state.seniorTwo)
-                senior = 2;
+            UUID = uuid.ToString().ToUpper();
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            DataRow dr = si.Reader($"SELECT * FROM [User] WHERE [UUID] = '{UUID}'");
+            _id = Convert.ToInt32(dr["ID"]);
+            _password = dr["password"].ToString();
+            Realname = dr["realname"].ToString();
+            _sn = dr["SN"].ToString();
+            _class = Convert.ToInt32(dr["class"]);
+            Mail = dr["mail"].ToString();
+            Phone = dr["phone"].ToString();
+            Initial = Convert.ToInt32(dr["initial"]);
+            Group = Convert.ToInt32(dr["group"].ToString());
+            Job = Convert.ToInt32(dr["job"].ToString());
+            GroupName = Organization.Current.GetGroupName(Group);
+            JobName = Organization.Current.GetJobName(Job);
+            if (_sn.Substring(0, 4) == Organization.Current.State.SeniorOne)
+                Senior = 1;
+            else if (_sn.Substring(0, 4) == Organization.Current.State.SeniorTwo)
+                Senior = 2;
         }
         /// <summary>
         /// User constructor
@@ -78,31 +76,31 @@ namespace SAAO
         /// <param name="username">Username</param>
         public User(string username)
         {
-            this.username = username;
-            SqlIntegrate si = new SqlIntegrate(Utility.connStr);
+            Username = username;
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.InitParameter(1);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
             DataRow dr = si.Reader("SELECT * FROM [User] WHERE [username] = @username");
-            ID = Convert.ToInt32(dr["ID"]);
+            _id = Convert.ToInt32(dr["ID"]);
             UUID = dr["UUID"].ToString();
-            password = dr["password"].ToString();
-            realname = dr["realname"].ToString();
-            SN = dr["SN"].ToString();
-            @class = Convert.ToInt32(dr["class"]);
-            mail = dr["mail"].ToString();
-            phone = dr["phone"].ToString();
-            initial = Convert.ToInt32(dr["initial"]);
-            group = Convert.ToInt32(dr["group"].ToString());
-            job = Convert.ToInt32(dr["job"].ToString());
-            groupName = Organization.Current.GetGroupName(group);
-            jobName = Organization.Current.GetJobName(job);
-            if (SN.Substring(0, 4) == Organization.Current.state.seniorOne)
-                senior = 1;
-            else if (SN.Substring(0, 4) == Organization.Current.state.seniorTwo)
-                senior = 2;
+            _password = dr["password"].ToString();
+            Realname = dr["realname"].ToString();
+            _sn = dr["SN"].ToString();
+            _class = Convert.ToInt32(dr["class"]);
+            Mail = dr["mail"].ToString();
+            Phone = dr["phone"].ToString();
+            Initial = Convert.ToInt32(dr["initial"]);
+            Group = Convert.ToInt32(dr["group"].ToString());
+            Job = Convert.ToInt32(dr["job"].ToString());
+            GroupName = Organization.Current.GetGroupName(Group);
+            JobName = Organization.Current.GetJobName(Job);
+            if (_sn.Substring(0, 4) == Organization.Current.State.SeniorOne)
+                Senior = 1;
+            else if (_sn.Substring(0, 4) == Organization.Current.State.SeniorTwo)
+                Senior = 2;
         }
         /// <summary>
-        /// Logined user of current session (values null if not logined)
+        /// Logged user of current session (values null if not logged)
         /// </summary>
         public static User Current
         {
@@ -110,8 +108,7 @@ namespace SAAO
             {
                 if (HttpContext.Current.Session["User"] != null)
                     return (User)HttpContext.Current.Session["User"];
-                else
-                    return null;
+                return null;
             }
             set
             {
@@ -121,49 +118,26 @@ namespace SAAO
         /// <summary>
         /// Whether the user of current session has logined
         /// </summary>
-        public static bool IsLogin
-        {
-            get
-            {
-                return !(Current == null);
-            }
-        }
+        public static bool IsLogin => Current != null;
 
         /// <summary>
         /// Whether the user is executive (only Senior Two)
         /// </summary>
-        public bool IsExecutive
-        {
-            get
-            {
-                // Executive member and important member are identical
-                return senior == 2 && Array.IndexOf(Organization.IMPT_MEMBER, job) != -1;
-            }
-        }
+        public bool IsExecutive => Senior == 2 && Array.IndexOf(Organization.ImptMember, Job) != -1;
+         // Executive member and important member are identical
 
         /// <summary>
         /// Whether the user is headman of a group (only Senior One)
         /// </summary>
-        public bool IsGroupHeadman
-        {
-            get
-            {
-                // TODO: Remove this magic number
-                return senior == 1 && job == 5;
-            }
-        }
+        public bool IsGroupHeadman => Senior == 1 && Job == 5;
+        // TODO: Remove this magic number
 
         /// <summary>
         /// Whether the user is in the supervising group (both Senior)
         /// </summary>
-        public bool IsSupervisor
-        {
-            get
-            {
-                // TODO: Remove this magic string
-                return groupName == "审计组";
-            }
-        }
+        public bool IsSupervisor => GroupName == "审计组";
+        // TODO: Remove this magic string
+
         /// <summary>
         /// Verify whether a string is the password of the user
         /// </summary>
@@ -182,9 +156,9 @@ namespace SAAO
              *        └──────┴───────────────┘
              *  At last, store [C] in the database
              */
-            string SALT = this.password.Substring(0, 6);
-            string passwordVerify = SALT + Utility.Encrypt(SALT + password);
-            return (this.password == passwordVerify);
+            string salt = _password.Substring(0, 6);
+            string passwordVerify = salt + Utility.Encrypt(salt + password);
+            return (_password == passwordVerify);
         }
         /// <summary>
         /// Verify a password and login if it's correct
@@ -193,15 +167,12 @@ namespace SAAO
         /// <returns>Whether the password is correct</returns>
         public bool Login(string password)
         {
-            if (Verify(password))
-            {
-                passwordRaw = password;
-                Current = this;
-                return true;
-            }
-            else
-                return false;
+            if (!Verify(password)) return false;
+            PasswordRaw = password;
+            Current = this;
+            return true;
         }
+
         /// <summary>
         /// Logout the user of current session
         /// </summary>
@@ -219,42 +190,42 @@ namespace SAAO
         {
             if (Verify(password))
             {
-                SqlIntegrate si = new SqlIntegrate(Utility.connStr);
-                string SALT = this.password.Substring(0, 6);
-                string passwordEncrypted = SALT + Utility.Encrypt(SALT + passwordNew);
+                SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+                string salt = _password.Substring(0, 6);
+                string passwordEncrypted = salt + Utility.Encrypt(salt + passwordNew);
                 // Update the user's password of SAA Online
-                si.Execute("UPDATE [User] SET password = '" + passwordEncrypted + "' WHERE UUID = '" + UUID + "'");
-                si = new SqlIntegrate(Mail.connStr);
+                si.Execute($"UPDATE [User] SET password = '{passwordEncrypted}' WHERE UUID = '{UUID}'");
+                si = new SqlIntegrate(SAAO.Mail.ConnStr);
                 // Update the user's password of SAA Mail (Hmailserver)
                 si.InitParameter(1);
-                si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, username + "@" + Mail.mailDomain, 50);
-                si.Execute("UPDATE [hm_accounts] SET accountpassword = '" + passwordEncrypted + "' WHERE accountaddress = @accountaddress");
-                passwordRaw = passwordNew;
+                si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, Username + "@" + SAAO.Mail.MailDomain, 50);
+                si.Execute($"UPDATE [hm_accounts] SET accountpassword = '{passwordEncrypted}' WHERE accountaddress = @accountaddress");
+                PasswordRaw = passwordNew;
                 return true;
             }
-            else
-                return false;
+            return false;
         }
+
         /// <summary>
         /// List activated users in the database in JSON
         /// </summary>
         /// <returns>JSON of activated users. [{realname,senior,group,initial,jobName,groupName,phone,mail},...]</returns>
-        public static string ListJSON()
+        public static string ListJson()
         {
             string data = "[";
-            SqlIntegrate si = new SqlIntegrate(Utility.connStr);
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             DataTable dt = si.Adapter("SELECT * FROM [User] WHERE [activated]=1");
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 data += "{";
-                data += "\"realname\":\"" + Utility.string2JSON(dt.Rows[i]["realname"].ToString()) + "\",";
-                data += "\"senior\":" + ((dt.Rows[i]["SN"].ToString().Substring(0, 4) == Organization.Current.state.structureCurrent) ? "2" : "1") + ",";
-                data += "\"group\":" + dt.Rows[i]["group"].ToString() + ",";
-                data += "\"initial\":" + dt.Rows[i]["initial"].ToString() + ",";
-                data += "\"jobName\":\"" + Utility.string2JSON(Organization.Current.GetJobName(Convert.ToInt32(dt.Rows[i]["job"].ToString()))) + "\",";
-                data += "\"groupName\":\"" + Utility.string2JSON(Organization.Current.GetGroupName(Convert.ToInt32(dt.Rows[i]["group"].ToString()))) + "\",";
-                data += "\"phone\":\"" + dt.Rows[i]["phone"].ToString() + "\",";
-                data += "\"mail\":\"" + Utility.string2JSON(dt.Rows[i]["mail"].ToString()) + "\"},";
+                data += "\"realname\":\"" + Utility.String2Json(dt.Rows[i]["realname"].ToString()) + "\",";
+                data += "\"senior\":" + ((dt.Rows[i]["SN"].ToString().Substring(0, 4) == Organization.Current.State.StructureCurrent) ? "2" : "1") + ",";
+                data += "\"group\":" + dt.Rows[i]["group"] + ",";
+                data += "\"initial\":" + dt.Rows[i]["initial"] + ",";
+                data += "\"jobName\":\"" + Utility.String2Json(Organization.Current.GetJobName(Convert.ToInt32(dt.Rows[i]["job"].ToString()))) + "\",";
+                data += "\"groupName\":\"" + Utility.String2Json(Organization.Current.GetGroupName(Convert.ToInt32(dt.Rows[i]["group"].ToString()))) + "\",";
+                data += "\"phone\":\"" + dt.Rows[i]["phone"] + "\",";
+                data += "\"mail\":\"" + Utility.String2Json(dt.Rows[i]["mail"].ToString()) + "\"},";
             }
             data += "]";
             data = data.Replace(",]", "]");
