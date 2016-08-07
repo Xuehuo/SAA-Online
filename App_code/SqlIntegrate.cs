@@ -6,7 +6,7 @@ namespace SAAO
     /// <summary>
     /// SqlIntegrate 数据库交互
     /// </summary>
-    public class SqlIntegrate
+    public class SqlIntegrate : IDisposable
     {
         private readonly string _sqlConnStr;
         private SqlConnection _conn;
@@ -216,6 +216,13 @@ namespace SAAO
             back += "]";
             return back.Replace(",}", "}").Replace(",]", "]");
         }
-        
+
+        public void Dispose()
+        {
+            _conn.Dispose();
+            _cmd.Dispose();
+            _dr.Dispose();
+            _da.Dispose();
+        }
     }
 }
