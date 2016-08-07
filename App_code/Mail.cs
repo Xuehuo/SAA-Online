@@ -100,7 +100,7 @@ namespace SAAO
         {
             _mailId = mailId;
             SqlIntegrate si = new SqlIntegrate(ConnStr);
-            DataRow mailInfo = si.Reader($"SELECT * FROM hm_messages WHERE messageid = {mailId}");
+            var mailInfo = si.Reader($"SELECT * FROM hm_messages WHERE messageid = {mailId}");
             Username = si.Query($"DECLARE @uid int; SELECT @uid = messageaccountid FROM hm_messages WHERE messageid = {mailId}; SELECT accountaddress FROM hm_accounts WHERE accountid = @uid;").ToString().Replace("@" + MailDomain, "");
             /* The eml file is storage in this way:
              *

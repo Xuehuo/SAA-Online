@@ -52,7 +52,7 @@ namespace SAAO
         {
             UUID = uuid.ToString().ToUpper();
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataRow dr = si.Reader($"SELECT * FROM [User] WHERE [UUID] = '{UUID}'");
+            var dr = si.Reader($"SELECT * FROM [User] WHERE [UUID] = '{UUID}'");
             _id = Convert.ToInt32(dr["ID"]);
             _password = dr["password"].ToString();
             Realname = dr["realname"].ToString();
@@ -80,7 +80,7 @@ namespace SAAO
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.InitParameter(1);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
-            DataRow dr = si.Reader("SELECT * FROM [User] WHERE [username] = @username");
+            var dr = si.Reader("SELECT * FROM [User] WHERE [username] = @username");
             _id = Convert.ToInt32(dr["ID"]);
             UUID = dr["UUID"].ToString();
             _password = dr["password"].ToString();

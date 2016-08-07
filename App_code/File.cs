@@ -59,7 +59,7 @@ namespace SAAO
                 throw new ArgumentException();
             _guid = str.ToUpper();
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataRow fileInfo = si.Reader($"SELECT * FROM [File] WHERE [GUID] = '{str.ToUpper()}'");
+            var fileInfo = si.Reader($"SELECT * FROM [File] WHERE [GUID] = '{str.ToUpper()}'");
             _name = fileInfo["name"].ToString();
             _info = fileInfo["info"].ToString();
             Extension = fileInfo["extension"].ToString();
