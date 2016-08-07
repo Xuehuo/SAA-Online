@@ -13,42 +13,42 @@ namespace SAAO
         /// <summary>
         /// File storage path of supervising notification
         /// </summary>
-        public static string storagePath = System.Configuration.ConfigurationManager.AppSettings["fileStoragePath"] + @"report\";
-        public static string notifyMail = System.Configuration.ConfigurationManager.AppSettings["notifyMailAddress"];
-        public static string notifyMailCredential = System.Configuration.ConfigurationManager.AppSettings["notifyMailCredential"];
+        public static readonly string StoragePath = System.Configuration.ConfigurationManager.AppSettings["fileStoragePath"] + @"report\";
+        private static readonly string NotifyMail = System.Configuration.ConfigurationManager.AppSettings["notifyMailAddress"];
+        private static readonly string NotifyMailCredential = System.Configuration.ConfigurationManager.AppSettings["notifyMailCredential"];
 
-        public int ID;
-        public permissionType type;
+        public int Id;
+        public PermissionType Type;
 
-        private int group;
+        private readonly int _group;
 
-        public string title;
-        public string content;
+        public string Title;
+        public string Content;
 
-        public DateTime notifyTime;
+        public DateTime NotifyTime;
 
-        public enum permissionType
+        public enum PermissionType
         {
-            ALL = 0,
-            SELF_GROUP_ONLY = 1,
-            SUPERVISE = 2
+            All = 0,
+            SelfGroupOnly = 1,
+            Supervise = 2
         }
         /// <summary>
         /// Notification constructor (obtain a current one)
         /// </summary>
-        /// <param name="ID">Notification ID in database</param>
-        public Notification(int ID)
+        /// <param name="id">Notification ID in database</param>
+        public Notification(int id)
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.connStr);
-            DataRow dr = si.Reader("SELECT * FROM Notification WHERE ID =" + ID);
-            content = dr["content"].ToString();
-            title = dr["title"].ToString();
-            this.ID = ID;
-            type = (permissionType)int.Parse(dr["type"].ToString());
-            group = -1;
-            if (type == permissionType.SELF_GROUP_ONLY)
-                group = new User(Guid.Parse(dr["UUID"].ToString())).group;
-            notifyTime = Convert.ToDateTime(dr["notifyTime"].ToString());
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            DataRow dr = si.Reader($"SELECT * FROM Notification WHERE ID ={id}");
+            Content = dr["content"].ToString();
+            Title = dr["title"].ToString();
+            Id = id;
+            Type = (PermissionType)int.Parse(dr["type"].ToString());
+            _group = -1;
+            if (Type == PermissionType.SelfGroupOnly)
+                _group = new User(Guid.Parse(dr["UUID"].ToString())).Group;
+            NotifyTime = Convert.ToDateTime(dr["notifyTime"].ToString());
         }
 
         /// <summary>
@@ -57,20 +57,20 @@ namespace SAAO
         /// <param name="title">Notification title</param>
         /// <param name="content">Notification content</param>
         /// <param name="type">Notification type</param>
-        public Notification(string title, string content, permissionType type)
+        public Notification(string title, string content, PermissionType type)
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.connStr);
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.InitParameter(2);
             si.AddParameter("@content", SqlIntegrate.DataType.Text, content);
             si.AddParameter("@title", SqlIntegrate.DataType.NVarChar, title, 50);
-            ID = Convert.ToInt32(si.Query("INSERT INTO Notification ([title], [content], [type], [UUID]) VALUES (@title, @content, " + (int)type + ", '" + User.Current.UUID + "'); SELECT @@IDENTITY"));
-            this.type = type;
-            this.title = title;
-            this.content = content;
-            group = -1;
-            if (type == permissionType.SELF_GROUP_ONLY)
-                group = User.Current.group;
-            notifyTime = DateTime.Now;
+            Id = Convert.ToInt32(si.Query($"INSERT INTO Notification ([title], [content], [type], [UUID]) VALUES (@title, @content, {(int) type}, \'{User.Current.UUID}\'); SELECT @@IDENTITY"));
+            Type = type;
+            Title = title;
+            Content = content;
+            _group = -1;
+            if (type == PermissionType.SelfGroupOnly)
+                _group = User.Current.Group;
+            NotifyTime = DateTime.Now;
         }
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace SAAO
         /// </summary>
         public void Broadcast()
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.connStr);
-            DataTable dt = si.Adapter("SELECT mail, SN FROM [User] WHERE activated = 1" + (group != -1 ? " AND [group] =" + group : ""));
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            DataTable dt = si.Adapter($"SELECT mail, SN FROM [User] WHERE activated = 1{(_group != -1 ? " AND [group] =" + _group : "")}");
 
             for (int i = 0; i < dt.Rows.Count; i++)
                 SendMail(dt.Rows[i]["mail"].ToString());
@@ -90,8 +90,8 @@ namespace SAAO
         /// </summary>
         public void SetImportant()
         {
-            int important = Convert.ToInt32(new SqlIntegrate(Utility.connStr).Query("SELECT MAX(important) FROM Notification"));
-            new SqlIntegrate(Utility.connStr).Execute("UPDATE Notification SET important =" + (important + 1) + " WHERE ID=" + ID);
+            int important = Convert.ToInt32(new SqlIntegrate(Utility.ConnStr).Query("SELECT MAX(important) FROM Notification"));
+            new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE Notification SET important ={(important + 1)} WHERE ID={Id}");
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace SAAO
         /// <param name="guid">Supervising report storage GUID</param>
         public void AttachReport(string guid)
         {
-            new SqlIntegrate(Utility.connStr).Execute("UPDATE Notification SET reportFile ='" + guid + "' WHERE ID=" + ID);
+            new SqlIntegrate(Utility.ConnStr).Execute("UPDATE Notification SET reportFile ='" + guid + "' WHERE ID=" + Id);
         }
 
         /// <summary>
@@ -109,15 +109,16 @@ namespace SAAO
         /// <param name="to">Receiver email</param>
         private void SendMail(string to)
         {
-            MailMessage mail = new MailMessage(notifyMail, to);
-            mail.SubjectEncoding = Encoding.UTF8;
-            mail.Subject = title;
-            mail.IsBodyHtml = false;
-            mail.BodyEncoding = Encoding.UTF8;
-            mail.Body = content;
-            SmtpClient smtp = new SmtpClient(Mail.serverAddress);
-            smtp.Credentials = new System.Net.NetworkCredential(notifyMail, notifyMailCredential);
-            // TODO: Move this credential to setting
+            MailMessage mail = new MailMessage(NotifyMail, to)
+            {
+                SubjectEncoding = Encoding.UTF8,
+                Subject = Title,
+                IsBodyHtml = false,
+                BodyEncoding = Encoding.UTF8,
+                Body = Content
+            };
+            SmtpClient smtp = new SmtpClient(Mail.ServerAddress);
+            smtp.Credentials = new System.Net.NetworkCredential(NotifyMail, NotifyMailCredential);
             smtp.Send(mail);
         }
 
@@ -127,15 +128,15 @@ namespace SAAO
         /// <param name="group">Group of a notification</param>
         /// <param name="type">Notification permission type</param>
         /// <returns>Whether a user can see a notification</returns>
-        private static bool Visible(int group, permissionType type)
+        private static bool Visible(int group, PermissionType type)
         {
-            if (type == permissionType.SUPERVISE)
+            if (type == PermissionType.Supervise)
                 return true;
-            if (type == permissionType.ALL)
+            if (type == PermissionType.All)
                 return true;
             if (User.Current.IsExecutive)
                 return true;
-            if (type == permissionType.SELF_GROUP_ONLY && User.Current.group != group)
+            if (type == PermissionType.SelfGroupOnly && User.Current.Group != group)
                 return false;
             return true;
         }
@@ -145,30 +146,30 @@ namespace SAAO
         /// <returns>whether a user can see the notification</returns>
         public bool Visible()
         {
-            return Visible(group, type);
+            return Visible(_group, Type);
         }
 
         /// <summary>
         /// List current notifications in the database in JSON
         /// </summary>
         /// <returns>JSON of current notifications [{ID,title,user,content,notifyTime,type,imprtant,(reportFile)},...]</returns>
-        public static string ListJSON()
+        public static string ListJson()
         {
             string back = "[";
-            SqlIntegrate si = new SqlIntegrate(Utility.connStr);
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             DataTable dt = si.Adapter("SELECT Notification.reportFile, Notification.ID, Notification.important, Notification.type, Notification.title, Notification.[content], Notification.notifyTime, [User].realname, [User].[group] FROM Notification INNER JOIN [User] ON Notification.UUID = [User].UUID ORDER BY Notification.important DESC, ID DESC");
             for (int i = 0; i < dt.Rows.Count; i++)
-                if (Visible(Convert.ToInt32(dt.Rows[i]["group"]), permissionType.SELF_GROUP_ONLY))
+                if (Visible(Convert.ToInt32(dt.Rows[i]["group"]), PermissionType.SelfGroupOnly))
                 {
                     back += "{";
                     back += "\"ID\":" + dt.Rows[i]["ID"] + ",";
-                    back += "\"title\":\"" + Utility.string2JSON(dt.Rows[i]["title"].ToString()) + "\",";
-                    back += "\"user\":\"" + Utility.string2JSON(dt.Rows[i]["realname"].ToString()) + "\",";
-                    back += "\"content\":\"" + Utility.string2JSON(dt.Rows[i]["content"].ToString()) + "\",";
-                    back += "\"notifyTime\":\"" + Convert.ToDateTime(dt.Rows[i]["notifyTime"].ToString()).ToString() + "\",";
+                    back += "\"title\":\"" + Utility.String2Json(dt.Rows[i]["title"].ToString()) + "\",";
+                    back += "\"user\":\"" + Utility.String2Json(dt.Rows[i]["realname"].ToString()) + "\",";
+                    back += "\"content\":\"" + Utility.String2Json(dt.Rows[i]["content"].ToString()) + "\",";
+                    back += "\"notifyTime\":\"" + Convert.ToDateTime(dt.Rows[i]["notifyTime"].ToString()).ToString("yyyy-MM-dd HH:mm") + "\",";
                     back += "\"type\":" + dt.Rows[i]["type"] + ",";
                     back += "\"important\":" + (Convert.ToInt32(dt.Rows[i]["important"]) - 1) + ",";
-                    if (Convert.ToInt32(dt.Rows[i]["type"]) == (int)permissionType.SUPERVISE)
+                    if (Convert.ToInt32(dt.Rows[i]["type"]) == (int)PermissionType.Supervise)
                         back += "\"reportFile\":\"" + dt.Rows[i]["reportFile"] + "\",";
                     back += "},";
                 }

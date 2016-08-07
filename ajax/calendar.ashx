@@ -7,29 +7,19 @@ public class calendarHandler : IHttpHandler, IRequiresSessionState
     public void ProcessRequest(HttpContext context)
     {
         context.Response.ContentType = "application/json";
-        if (context.Request["action"] != null && SAAO.User.IsLogin)
+        if (context.Request["action"] == null || !SAAO.User.IsLogin) return;
+        if (context.Request["action"] == "list")
         {
-            switch (context.Request["action"].ToString())
+            try
             {
-                case "list": // list events
-                    try
-                    {
-                        context.Response.Write("{\"flag\":0,\"data\":" + SAAO.Event.ListJSON() + "}");
-                    }
-                    catch (Exception ex)
-                    {
-                        context.Response.Write("{\"flag\":3}");
-                        SAAO.Utility.Log(ex);
-                    }
-                    break;
+                context.Response.Write("{\"flag\":0,\"data\":" + SAAO.Event.ListJson() + "}");
+            }
+            catch (Exception ex)
+            {
+                context.Response.Write("{\"flag\":3}");
+                SAAO.Utility.Log(ex);
             }
         }
     }
-    public bool IsReusable
-    {
-        get
-        {
-            return false;
-        }
-    }
+    public bool IsReusable => false;
 }

@@ -36,7 +36,7 @@
             <div class="container-fluid">
                 <div class="navbar-header"><a class="navbar-brand">日历</a></div>
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=SAAO.User.Current.realname %> <b class="caret"></b></a>
+                    <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><%=SAAO.User.Current.Realname %> <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="#" data-toggle="modal" data-target="#passwordmodal">修改密码</a></li>
                             <li class="divider"></li>

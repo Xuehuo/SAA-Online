@@ -7,29 +7,19 @@ public class contactHandler : IHttpHandler, IRequiresSessionState
     public void ProcessRequest(HttpContext context)
     {
         context.Response.ContentType = "application/json";
-        if (context.Request["action"] != null && SAAO.User.IsLogin)
+        if (context.Request["action"] == null || !SAAO.User.IsLogin) return;
+        if (context.Request["action"] == "list")
         {
-            switch (context.Request["action"].ToString())
+            try
             {
-                case "list": // list contacts
-                    try
-                    {
-                        context.Response.Write("{\"flag\":0,\"data\":" + SAAO.User.ListJSON() + "}");
-                    }
-                    catch (Exception ex)
-                    {
-                        context.Response.Write("{\"flag\":3}");
-                        SAAO.Utility.Log(ex);
-                    }
-                    break;
+                context.Response.Write("{\"flag\":0,\"data\":" + SAAO.User.ListJson() + "}");
+            }
+            catch (Exception ex)
+            {
+                context.Response.Write("{\"flag\":3}");
+                SAAO.Utility.Log(ex);
             }
         }
     }
-    public bool IsReusable
-    {
-        get
-        {
-            return false;
-        }
-    }
+    public bool IsReusable => false;
 }
