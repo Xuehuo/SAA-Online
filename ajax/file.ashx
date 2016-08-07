@@ -2,7 +2,6 @@
 using System;
 using System.Web;
 using System.Web.SessionState;
-using System.IO;
 public class fileHandler : IHttpHandler, IRequiresSessionState
 {
     public void ProcessRequest(HttpContext context)
@@ -127,50 +126,17 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
         }
         else if (context.Request["action"] == "download")
         {
+            Guid guid;
+            if (Guid.TryParse(context.Request["id"], out guid))
             {
-                Guid guid;
-                if (Guid.TryParse(context.Request["id"], out guid))
+                SAAO.File file = new SAAO.File(guid.ToString().ToUpper());
+                if (file.Visible(SAAO.User.Current))
                 {
-                    SAAO.File file = new SAAO.File(guid.ToString().ToUpper());
-                    if (file.Visible(SAAO.User.Current))
-                    {
-                        new SAAO.SqlIntegrate(SAAO.Utility.ConnStr).Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{guid.ToString().ToUpper()}'");
-                        string fileName = file.Name + "." + file.Extension;
-                        FileInfo fileInfo = new FileInfo(file.SavePath);
-                        if (fileInfo.Exists)
-                        {
-                            const long chunkSize = 102400;
-                            byte[] buffer = new byte[chunkSize];
-                            context.Response.Clear();
-                            FileStream iStream = File.OpenRead(file.SavePath);
-                            long dataLengthToRead = iStream.Length;
-                            context.Response.ContentType = "application/octet-stream";
-                            if (context.Request.UserAgent.ToLower().IndexOf("trident") > -1)
-                                context.Response.AddHeader("Content-Disposition",
-                                    "attachment; filename=" + HttpUtility.UrlEncode(fileName));
-                            if (context.Request.UserAgent.ToLower().IndexOf("firefox") > -1)
-                                context.Response.AddHeader("Content-Disposition",
-                                    "attachment;filename=\"" + fileName + "\"");
-                            else
-                                context.Response.AddHeader("Content-Disposition", "attachment;filename=" + fileName);
-                            while (dataLengthToRead > 0 && context.Response.IsClientConnected)
-                            {
-                                int lengthRead = iStream.Read(buffer, 0, Convert.ToInt32(chunkSize));
-                                context.Response.OutputStream.Write(buffer, 0, lengthRead);
-                                context.Response.Flush();
-                                dataLengthToRead = dataLengthToRead - lengthRead;
-                            }
-                            iStream.Close();
-                        }
-                        else
-                        {
-                            context.Response.Write("Invalid Request!");
-                        }
-                    }
-                    else
-                    {
-                        context.Response.Write("Invalid Request!");
-                    }
+                    file.Download(context.Response);
+                }
+                else
+                {
+                    context.Response.Write("Invalid Request!");
                 }
             }
         }
