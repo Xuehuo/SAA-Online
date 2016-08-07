@@ -4,15 +4,9 @@
     cache: false,
     success: function (result) {
         if (result.flag == 0)
-            $("#container").fullCalendar({
-                editable: false,
-                height: $(window).height() - 70,
-                eventBackgroundColor: "#E64C3C",
-                eventBorderColor: "#EEE",
-                allDayDefault: true,
-                handleWindowResize: false,
-                events: result.data
-            });
+        {
+
+        }
         else if(result.flag == 1)
             msg("提示", "找不到近期的任务", "info");
         else if(result.flag == 3)

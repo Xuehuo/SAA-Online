@@ -93,10 +93,6 @@
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="//cdn.bootcss.com/pnotify/2.0.0/pnotify.all.min.js"></script>
     <link href="//cdn.bootcss.com/pnotify/2.0.0/pnotify.all.min.css" rel="stylesheet">
-    <script src="//cdn.bootcss.com/moment.js/2.10.6/moment.min.js"></script>
-    <script src="//cdn.bootcss.com/fullcalendar/2.4.0/fullcalendar.min.js"></script>
-    <script src="//cdn.bootcss.com/fullcalendar/2.4.0/lang/zh-cn.js"></script>
-    <link href="//cdn.bootcss.com/fullcalendar/2.4.0/fullcalendar.min.css" rel="stylesheet">
     <script src="js/basic.js"></script>
     <script src="js/calendar.js"></script>
 </body>
