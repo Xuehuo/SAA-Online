@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
+
 namespace SAAO
 {
     /// <summary>
     /// SqlIntegrate 数据库交互
     /// </summary>
-    public class SqlIntegrate
+    public class SqlIntegrate : IDisposable
     {
         private readonly string _sqlConnStr;
         private SqlConnection _conn;
@@ -97,7 +100,7 @@ namespace SAAO
         /// </summary>
         /// <param name="command">SQL query command</param>
         /// <returns>A row of data</returns>
-        public DataRow Reader(string command)
+        public Dictionary<string, object> Reader(string command)
         {
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
@@ -106,39 +109,16 @@ namespace SAAO
                     _cmd.Parameters.Add(para);
             _conn.Open();
             _dr = _cmd.ExecuteReader();
-            if (!_dr.HasRows)
+            if (!_dr.HasRows && _dr.Read())
                 throw new DataException();
-            DataRow datarow = GetDataRow(_dr);
+            var cols = new List<string>();
+            for (var i = 0; i < _dr.FieldCount; i++)
+                cols.Add(_dr.GetName(i));
+            var result = cols.ToDictionary(col => col, col => _dr[col]);
             _dr.Close();
             _conn.Close();
-            return datarow;
+            return result;
         }
-        /// <summary>
-        /// Convert DataReader to DataRow
-        /// </summary>
-        /// <param name="reader">A DataReader</param>
-        /// <returns>A DataRow</returns>
-        private static DataRow GetDataRow(SqlDataReader reader)
-        {
-            DataTable schemaTable = reader.GetSchemaTable();
-            DataTable data = new DataTable();
-            foreach (DataRow row in schemaTable.Rows)
-            {
-                string colName = row.Field<string>("ColumnName");
-                Type t = row.Field<Type>("DataType");
-                data.Columns.Add(colName, t);
-            }
-            while (reader.Read())
-            {
-                var newRow = data.Rows.Add();
-                foreach (DataColumn col in data.Columns)
-                {
-                    newRow[col.ColumnName] = reader[col.ColumnName];
-                }
-            }
-            return data.Rows[0];
-        }
-        // TODO: this method is low-efficient
         /// <summary>
         /// Execute a SQL query and return a table of data
         /// </summary>
@@ -216,6 +196,13 @@ namespace SAAO
             back += "]";
             return back.Replace(",}", "}").Replace(",]", "]");
         }
-        
+
+        public void Dispose()
+        {
+            _conn.Dispose();
+            _cmd.Dispose();
+            _dr.Dispose();
+            _da.Dispose();
+        }
     }
 }

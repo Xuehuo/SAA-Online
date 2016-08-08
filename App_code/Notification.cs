@@ -40,7 +40,7 @@ namespace SAAO
         public Notification(int id)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataRow dr = si.Reader($"SELECT * FROM Notification WHERE ID ={id}");
+            var dr = si.Reader($"SELECT * FROM Notification WHERE ID ={id}");
             Content = dr["content"].ToString();
             Title = dr["title"].ToString();
             Id = id;

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
+using System.Web;
+
 namespace SAAO
 {
     /// <summary>
@@ -59,7 +62,7 @@ namespace SAAO
                 throw new ArgumentException();
             _guid = str.ToUpper();
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataRow fileInfo = si.Reader($"SELECT * FROM [File] WHERE [GUID] = '{str.ToUpper()}'");
+            var fileInfo = si.Reader($"SELECT * FROM [File] WHERE [GUID] = '{str.ToUpper()}'");
             _name = fileInfo["name"].ToString();
             _info = fileInfo["info"].ToString();
             Extension = fileInfo["extension"].ToString();
@@ -111,6 +114,37 @@ namespace SAAO
             si.InitParameter(1);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.Execute($"INSERT INTO Filetag ([name], [FUID]) VALUES (@name, '{_guid}')");
+        }
+        /// <summary>
+        /// Download the file (Write stream to current http response)
+        /// </summary>
+        public void Download()
+        {
+            _downloadCount++;
+            new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{_guid}'");
+            string fileName = Name + "." + Extension;
+            const long chunkSize = 102400;
+            byte[] buffer = new byte[chunkSize];
+            HttpContext.Current.Response.Clear();
+            FileStream iStream = System.IO.File.OpenRead(SavePath);
+            long dataLengthToRead = iStream.Length;
+            HttpContext.Current.Response.ContentType = "application/octet-stream";
+            if (HttpContext.Current.Request.UserAgent.ToLower().IndexOf("trident") > -1)
+                HttpContext.Current.Response.AddHeader("Content-Disposition",
+                    "attachment; filename=" + HttpUtility.UrlEncode(fileName));
+            if (HttpContext.Current.Request.UserAgent.ToLower().IndexOf("firefox") > -1)
+                HttpContext.Current.Response.AddHeader("Content-Disposition",
+                    "attachment;filename=\"" + fileName + "\"");
+            else
+                HttpContext.Current.Response.AddHeader("Content-Disposition", "attachment;filename=" + fileName);
+            while (dataLengthToRead > 0 && HttpContext.Current.Response.IsClientConnected)
+            {
+                int lengthRead = iStream.Read(buffer, 0, Convert.ToInt32(chunkSize));
+                HttpContext.Current.Response.OutputStream.Write(buffer, 0, lengthRead);
+                HttpContext.Current.Response.Flush();
+                dataLengthToRead = dataLengthToRead - lengthRead;
+            }
+            iStream.Close();
         }
         /// <summary>
         /// Filename

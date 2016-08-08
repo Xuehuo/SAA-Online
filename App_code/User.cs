@@ -52,7 +52,7 @@ namespace SAAO
         {
             UUID = uuid.ToString().ToUpper();
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataRow dr = si.Reader($"SELECT * FROM [User] WHERE [UUID] = '{UUID}'");
+            var dr = si.Reader($"SELECT * FROM [User] WHERE [UUID] = '{UUID}'");
             _id = Convert.ToInt32(dr["ID"]);
             _password = dr["password"].ToString();
             Realname = dr["realname"].ToString();
@@ -80,7 +80,7 @@ namespace SAAO
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.InitParameter(1);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
-            DataRow dr = si.Reader("SELECT * FROM [User] WHERE [username] = @username");
+            var dr = si.Reader("SELECT * FROM [User] WHERE [username] = @username");
             _id = Convert.ToInt32(dr["ID"]);
             UUID = dr["UUID"].ToString();
             _password = dr["password"].ToString();
@@ -98,6 +98,18 @@ namespace SAAO
                 Senior = 1;
             else if (_sn.Substring(0, 4) == Organization.Current.State.SeniorTwo)
                 Senior = 2;
+        }
+        /// <summary>
+        /// Check whether the user of a username exists and is activated
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>Whether the user of a username exists and is activated</returns>
+        public static bool Exist(string username)
+        {
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            si.InitParameter(1);
+            si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
+            return Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE username = @username AND [activated] = 1")) == 1;
         }
         /// <summary>
         /// Logged user of current session (values null if not logged)
