@@ -7,8 +7,8 @@ public class userHandler : IHttpHandler, IRequiresSessionState
     public void ProcessRequest(HttpContext context)
     {
         context.Response.ContentType = "application/json";
-        if (context.Request["action"] == null || !SAAO.User.IsLogin) return;
-        if (context.Request["action"] == "password")
+        if (context.Request["action"] == null) return;
+        if (context.Request["action"] == "password" && SAAO.User.IsLogin)
         {
             string password = context.Request.Form["password"];
             string passwordNew = context.Request.Form["newpassword"];
@@ -25,13 +25,13 @@ public class userHandler : IHttpHandler, IRequiresSessionState
                 context.Response.Write("{\"flag\": 3}");
             }
         }
-        else if (context.Request["action"] == "logout")
+        else if (context.Request["action"] == "logout" && SAAO.User.IsLogin)
         {
             SAAO.User.Current.Logout();
             context.Response.Write("{\"flag\": 0}");
         }
         // user login
-        else if (context.Request["action"] != null && context.Request["action"] == "login" && context.Request.Form["username"] != null && context.Request.Form["password"] != null && !SAAO.User.IsLogin)
+        else if (context.Request["action"] == "login" && context.Request.Form["username"] != null && context.Request.Form["password"] != null && !SAAO.User.IsLogin)
         {
             string username = context.Request.Form["username"].ToLower();
             string password = context.Request.Form["password"];
@@ -57,6 +57,7 @@ public class userHandler : IHttpHandler, IRequiresSessionState
                 context.Response.Write("{\"flag\": 3}");
             }
         }
+        else return;
     }
     public bool IsReusable => false;
 }

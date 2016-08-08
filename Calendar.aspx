@@ -47,7 +47,19 @@
             </div>
         </nav>
         <div id="content">
-            <div id="container"></div>
+            <div id="container" class="dhx_cal_container">
+                <div class="dhx_cal_navline">
+                    <div class="dhx_cal_prev_button">&nbsp;</div>
+                    <div class="dhx_cal_next_button">&nbsp;</div>
+                    <div class="dhx_cal_today_button"></div>
+                    <div class="dhx_cal_date"></div>
+                    <div class="dhx_cal_tab" style="right: 204px;"></div>
+                    <div class="dhx_cal_tab" style="right: 140px;"></div>
+                    <div class="dhx_cal_tab" style="right: 76px;"></div>
+                </div>
+                <div class="dhx_cal_header"></div>
+                <div class="dhx_cal_data"></div>
+            </div>
         </div>
     </div>
     <div class="modal fade" id="passwordmodal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -93,6 +105,8 @@
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="//cdn.bootcss.com/pnotify/2.0.0/pnotify.all.min.js"></script>
     <link href="//cdn.bootcss.com/pnotify/2.0.0/pnotify.all.min.css" rel="stylesheet">
+    <script src="plugin/dhtmlxScheduler/dhtmlxscheduler.js"></script>
+    <link href="plugin/dhtmlxScheduler/dhtmlxscheduler_flat.css" rel="stylesheet" />
     <script src="js/basic.js"></script>
     <script src="js/calendar.js"></script>
 </body>
