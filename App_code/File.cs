@@ -115,31 +115,33 @@ namespace SAAO
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.Execute($"INSERT INTO Filetag ([name], [FUID]) VALUES (@name, '{_guid}')");
         }
-
-        public void Download(HttpResponse res)
+        /// <summary>
+        /// Download the file (Write stream to current http response)
+        /// </summary>
+        public void Download()
         {
             _downloadCount++;
             new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{_guid}'");
             string fileName = Name + "." + Extension;
             const long chunkSize = 102400;
             byte[] buffer = new byte[chunkSize];
-            res.Clear();
+            HttpContext.Current.Response.Clear();
             FileStream iStream = System.IO.File.OpenRead(SavePath);
             long dataLengthToRead = iStream.Length;
-            res.ContentType = "application/octet-stream";
+            HttpContext.Current.Response.ContentType = "application/octet-stream";
             if (HttpContext.Current.Request.UserAgent.ToLower().IndexOf("trident") > -1)
-                res.AddHeader("Content-Disposition",
+                HttpContext.Current.Response.AddHeader("Content-Disposition",
                     "attachment; filename=" + HttpUtility.UrlEncode(fileName));
             if (HttpContext.Current.Request.UserAgent.ToLower().IndexOf("firefox") > -1)
-                res.AddHeader("Content-Disposition",
+                HttpContext.Current.Response.AddHeader("Content-Disposition",
                     "attachment;filename=\"" + fileName + "\"");
             else
-                res.AddHeader("Content-Disposition", "attachment;filename=" + fileName);
-            while (dataLengthToRead > 0 && res.IsClientConnected)
+                HttpContext.Current.Response.AddHeader("Content-Disposition", "attachment;filename=" + fileName);
+            while (dataLengthToRead > 0 && HttpContext.Current.Response.IsClientConnected)
             {
                 int lengthRead = iStream.Read(buffer, 0, Convert.ToInt32(chunkSize));
-                res.OutputStream.Write(buffer, 0, lengthRead);
-                res.Flush();
+                HttpContext.Current.Response.OutputStream.Write(buffer, 0, lengthRead);
+                HttpContext.Current.Response.Flush();
                 dataLengthToRead = dataLengthToRead - lengthRead;
             }
             iStream.Close();

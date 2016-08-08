@@ -132,7 +132,7 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
                 SAAO.File file = new SAAO.File(guid.ToString().ToUpper());
                 if (file.Visible(SAAO.User.Current))
                 {
-                    file.Download(context.Response);
+                    file.Download();
                 }
                 else
                 {
