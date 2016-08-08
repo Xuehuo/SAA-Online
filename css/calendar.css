@@ -26,7 +26,7 @@
         height: 100%;
     }
 
-@media(max-width:479px) {
+/*@media(max-width:479px) {
     年月字体大小 #calendar #container .fc-left h2 {
         font-size: 18px;
         line-height: 30px;
@@ -37,6 +37,4 @@
     事件字体大小 #calendar .fc-day-grid-event > .fc-content {
         font-size: 11px;
     }
-}
-
-*/
+}*/
