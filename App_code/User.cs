@@ -100,6 +100,18 @@ namespace SAAO
                 Senior = 2;
         }
         /// <summary>
+        /// Check whether the user of a username exists and is activated
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns>Whether the user of a username exists and is activated</returns>
+        public static bool Exist(string username)
+        {
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            si.InitParameter(1);
+            si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
+            return Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE username = @username AND [activated] = 1")) == 1;
+        }
+        /// <summary>
         /// Logged user of current session (values null if not logged)
         /// </summary>
         public static User Current

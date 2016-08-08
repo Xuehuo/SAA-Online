@@ -14,10 +14,7 @@ public class userHandler : IHttpHandler, IRequiresSessionState
             string password = context.Request.Form["password"];
             try
             {
-                SAAO.SqlIntegrate si = new SAAO.SqlIntegrate(SAAO.Utility.ConnStr);
-                si.InitParameter(1);
-                si.AddParameter("@username", SAAO.SqlIntegrate.DataType.VarChar, username, 50);
-                if (Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE username = @username")) > 0)
+                if (SAAO.User.Exist(username))
                 {
                     SAAO.User user = new SAAO.User(username);
                     if (user.Login(password))
