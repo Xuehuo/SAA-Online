@@ -109,12 +109,16 @@ namespace SAAO
                     _cmd.Parameters.Add(para);
             _conn.Open();
             _dr = _cmd.ExecuteReader();
-            if (!_dr.HasRows && _dr.Read())
+            if (!_dr.HasRows)
                 throw new DataException();
             var cols = new List<string>();
             for (var i = 0; i < _dr.FieldCount; i++)
                 cols.Add(_dr.GetName(i));
-            var result = cols.ToDictionary(col => col, col => _dr[col]);
+            Dictionary<string, object> result;
+            if (_dr.Read())
+                result = cols.ToDictionary(col => col, col => _dr[col]);
+            else
+                throw new DataException();
             _dr.Close();
             _conn.Close();
             return result;
