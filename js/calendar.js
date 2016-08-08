@@ -1,4 +1,10 @@
-﻿//$.ajax({
+﻿$(function () {
+    $("div#content").css("height", $(window).height() - 50);
+});
+$(window).resize(function () {
+    $("div#content").css("height", $(window).height() - 50);
+});
+//$.ajax({
 //    url: "calendar.list",
 //    type: "get",
 //    cache: false,
@@ -18,5 +24,4 @@
 //        msg("初始化时出错", "网络中断或服务器错误", "error");
 //    }
 //});
-
-scheduler.init('container', new Date(), "week");
+scheduler.init("container", new Date(), "week");

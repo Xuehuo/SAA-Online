@@ -53,9 +53,9 @@
                     <div class="dhx_cal_next_button">&nbsp;</div>
                     <div class="dhx_cal_today_button"></div>
                     <div class="dhx_cal_date"></div>
-                    <div class="dhx_cal_tab" style="right: 204px;"></div>
-                    <div class="dhx_cal_tab" style="right: 140px;"></div>
-                    <div class="dhx_cal_tab" style="right: 76px;"></div>
+                    <div class="dhx_cal_tab" name="day_tab"></div>
+                    <div class="dhx_cal_tab" name="week_tab"></div>
+                    <div class="dhx_cal_tab" name="month_tab"></div>
                 </div>
                 <div class="dhx_cal_header"></div>
                 <div class="dhx_cal_data"></div>

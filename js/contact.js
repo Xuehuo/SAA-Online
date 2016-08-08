@@ -1,7 +1,4 @@
-﻿//$("button[data-filter=g1]").hide()
-//第一句疑似刘浩远所写，作用暂不明
-
-function contactApplyFilter() {
+﻿function contactApplyFilter() {
     var filterString = "";
     if (contactFilterStr[0])
         filterString += contactFilterStr[0];
