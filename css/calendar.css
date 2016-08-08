@@ -22,9 +22,74 @@
         background-color: #E74C3C;
     }
 
+    /*======Calendar style begin======*/
+
     #calendar #container {
         height: 100%;
     }
+
+        #calendar #container .dhx_cal_tab {
+            color: #E74C3C;
+        }
+
+            #calendar #container .dhx_cal_tab.active {
+                background-color: #E74C3C;
+                color: #FFFFFF;
+            }
+
+        #calendar #container .dhx_cal_navline .dhx_cal_date {
+            color: #E74C3C;
+            font-weight: normal;
+        }
+
+        #calendar #container .dhx_cal_today_button {
+            color: #E74C3C;
+        }
+
+        #calendar #container .dhx_scale_bar {
+            border-left: 0;
+            color: #E74C3C;
+        }
+
+        #calendar #container .dhx_cal_header {
+            border-right: 0;
+            border-top: 1px solid #E74C3C;
+        }
+
+        #calendar #container .dhx_multi_day_icon_small, #calendar #container .dhx_multi_day_icon {
+            background-image: none;
+            border-right: 1px solid #E74C3C;
+            border-bottom: 0;
+        }
+
+        #calendar #container .dhx_multi_day {
+            border-top: 1px solid #E74C3C;
+        }
+
+        #calendar #container .dhx_scale_hour {
+            border-bottom: 1px solid #E74C3C;
+            color: #E74C3C;
+        }
+
+        #calendar #container .dhx_cal_data {
+            border-top: 1px solid #E74C3C;
+        }
+
+            #calendar #container .dhx_cal_data .dhx_scale_holder_now, #calendar #container .dhx_cal_data .dhx_scale_holder {
+                border-right: 1px solid #E74C3C;
+            }
+
+            #calendar #container .dhx_cal_data .dhx_month_head {
+                border-right: 1px solid #E74C3C;
+                color: #E74C3C;
+            }
+
+            #calendar #container .dhx_cal_data .dhx_month_body {
+                border-right: 1px solid #E74C3C;
+                border-bottom: 1px solid #E74C3C;
+            }
+
+/*======Calendar style end======*/
 
 /*@media(max-width:479px) {
     年月字体大小 #calendar #container .fc-left h2 {
