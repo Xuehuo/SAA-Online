@@ -123,28 +123,13 @@ namespace SAAO
             _downloadCount++;
             new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{_guid}'");
             string fileName = Name + "." + Extension;
-            const long chunkSize = 102400;
-            byte[] buffer = new byte[chunkSize];
             HttpContext.Current.Response.Clear();
-            FileStream iStream = System.IO.File.OpenRead(SavePath);
-            long dataLengthToRead = iStream.Length;
-            HttpContext.Current.Response.ContentType = "application/octet-stream";
-            if (HttpContext.Current.Request.UserAgent.ToLower().IndexOf("trident") > -1)
-                HttpContext.Current.Response.AddHeader("Content-Disposition",
-                    "attachment; filename=" + HttpUtility.UrlEncode(fileName));
-            if (HttpContext.Current.Request.UserAgent.ToLower().IndexOf("firefox") > -1)
-                HttpContext.Current.Response.AddHeader("Content-Disposition",
-                    "attachment;filename=\"" + fileName + "\"");
-            else
-                HttpContext.Current.Response.AddHeader("Content-Disposition", "attachment;filename=" + fileName);
-            while (dataLengthToRead > 0 && HttpContext.Current.Response.IsClientConnected)
-            {
-                int lengthRead = iStream.Read(buffer, 0, Convert.ToInt32(chunkSize));
-                HttpContext.Current.Response.OutputStream.Write(buffer, 0, lengthRead);
-                HttpContext.Current.Response.Flush();
-                dataLengthToRead = dataLengthToRead - lengthRead;
-            }
-            iStream.Close();
+            HttpContext.Current.Response.ContentType = "text/plain";
+            HttpContext.Current.Response.AppendHeader("Content-Disposition", "attachment; filename*=UTF-8''" + Uri.EscapeDataString(fileName));
+            // TODO: different browsers behave totally different
+            HttpContext.Current.Response.TransmitFile(SavePath);
+            HttpContext.Current.Response.Flush();
+            HttpContext.Current.ApplicationInstance.CompleteRequest();
         }
         /// <summary>
         /// Filename
