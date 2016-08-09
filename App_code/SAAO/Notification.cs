@@ -108,7 +108,14 @@ namespace SAAO
         /// <param name="to">Receiver email</param>
         private void SendMail(string to)
         {
-            Mail.Send(NotifyMail, to, Title, true, Content, new System.Net.NetworkCredential(NotifyMail, NotifyMailCredential));
+            Mail.Send(
+                @from: NotifyMail, 
+                receiver: to, 
+                subject: Title, 
+                isBodyHtml: false, 
+                body: Content, 
+                credential: new System.Net.NetworkCredential(NotifyMail, NotifyMailCredential)
+            );
         }
 
         /// <summary>
