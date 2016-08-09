@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
-using System.Web;
-
 namespace SAAO
 {
     /// <summary>
@@ -78,16 +75,16 @@ namespace SAAO
                 Tag.Add(tagList.Rows[i]["name"].ToString());
         }
 
-        public static void Upload(HttpPostedFile file)
+        public static void Upload(System.Web.HttpPostedFile file)
         {
             string guid = Guid.NewGuid().ToString().ToUpper();
             file.SaveAs(StoragePath + guid);
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.InitParameter(2);
             si.AddParameter("@name", SqlIntegrate.DataType.VarChar,
-                Path.GetFileNameWithoutExtension(file.FileName), 50);
+                System.IO.Path.GetFileNameWithoutExtension(file.FileName), 50);
             si.AddParameter("@extension", SqlIntegrate.DataType.VarChar,
-                Path.GetExtension(file.FileName).TrimStart('.').ToLower(), 10);
+                System.IO.Path.GetExtension(file.FileName).TrimStart('.').ToLower(), 10);
             si.Execute($"INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES ('{guid}',@name,@extension,{file.ContentLength},'{User.Current.UUID}')");
         }
         /// <summary>

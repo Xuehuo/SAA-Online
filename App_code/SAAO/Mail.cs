@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Net.Mail;
-using System.Text;
-
 namespace SAAO
 {
     /// <summary>
@@ -287,10 +285,10 @@ namespace SAAO
                     User.Current.PasswordRaw);
             MailMessage mail = new MailMessage(from, receiver)
             {
-                SubjectEncoding = Encoding.UTF8,
+                SubjectEncoding = System.Text.Encoding.UTF8,
                 Subject = subject,
                 IsBodyHtml = true,
-                BodyEncoding = Encoding.UTF8,
+                BodyEncoding = System.Text.Encoding.UTF8,
                 Body = Utility.Base64Decode(body)
             };
             SmtpClient smtp = new SmtpClient(ServerAddress);
