@@ -243,7 +243,7 @@
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="//cdn.bootcss.com/pnotify/2.0.0/pnotify.all.min.js"></script>
     <link href="//cdn.bootcss.com/pnotify/2.0.0/pnotify.all.min.css" rel="stylesheet">
-    <script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+<%--    <script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>--%>
     <script src="js/basic.js"></script>
     <script src="js/notification.js"></script>
 </body>

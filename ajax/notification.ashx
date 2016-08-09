@@ -1,68 +1,50 @@
-﻿<%@ WebHandler Language="C#" Class="notificationHandler" %>
+﻿<%@ WebHandler Language="C#" Class="NotificationHandler" %>
 using System;
-using System.Web;
-using System.Web.SessionState;
-public class notificationHandler : IHttpHandler, IRequiresSessionState
+
+public class NotificationHandler : Ajax
 {
-    public void ProcessRequest(HttpContext context)
+    public override void Process(System.Web.HttpContext context)
     {
-        context.Response.ContentType = "application/json";
         if (context.Request["action"] == null || !SAAO.User.IsLogin) return;
         if (context.Request["action"] == "list") // list current notifications
         {
-            try
-            {
-                context.Response.Write("{\"flag\":0,\"data\":" + SAAO.Notification.ListJson() + "}");
-            }
-            catch (Exception ex)
-            {
-                context.Response.Write("{\"flag\":3}");
-                SAAO.Utility.Log(ex);
-            }
+            R.Data = SAAO.Notification.ListJson();
         }
-        if (context.Request["action"] == "report") // download a supervising report
+        else if (context.Request["action"] == "report") // download a supervising report
         {
             Guid guid;
-            if (Guid.TryParse(context.Request["id"], out guid))
-            {
-                SAAO.Utility.Download(SAAO.Notification.StoragePath + context.Request["id"], "监督报告", "application/pdf");
-            }
+            if (!Guid.TryParse(context.Request["id"], out guid)) return;
+            SAAO.Utility.Download(
+                path: SAAO.Notification.StoragePath + context.Request["id"], 
+                fileName: "监督报告", 
+                contentType: "application/pdf"
+            );
         }
-        if (context.Request["action"] == "create") // create a notification
+        else if (context.Request["action"] == "create") // create a notification
         {
-            try
+            if (context.Request.Form["title"] == null || context.Request.Form["content"] == null ||
+                context.Request.Form["type"] == null ||
+                (((context.Request.Form["type"] != "0" && context.Request.Form["type"] != "1") ||
+                  (!SAAO.User.Current.IsExecutive && !SAAO.User.Current.IsGroupHeadman)) &&
+                 (context.Request.Form["type"] != "2" || SAAO.User.Current.IsSupervisor ||
+                  context.Request.Files.Count != 1)) || context.Request.Form["important"] == null ||
+                (context.Request.Form["important"] != "0" &&
+                 (context.Request.Form["important"] != "1" || !SAAO.User.Current.IsExecutive))) return;
+            var n = new SAAO.Notification(
+                title: context.Request.Form["title"], 
+                content: context.Request.Form["content"], 
+                type: (SAAO.Notification.PermissionType)int.Parse(context.Request.Form["type"])
+            );
+            if (context.Request.Form["type"] == "2")
             {
-                if (context.Request.Form["title"] != null
-                    && context.Request.Form["content"] != null
-                    && context.Request.Form["type"] != null
-                    && ((context.Request.Form["type"] == "0" || context.Request.Form["type"] == "1") && (SAAO.User.Current.IsExecutive || SAAO.User.Current.IsGroupHeadman)
-                        || (context.Request.Form["type"] == "2" && !SAAO.User.Current.IsSupervisor && context.Request.Files.Count == 1)
-                        )
-                    && context.Request.Form["important"] != null
-                    && (context.Request.Form["important"] == "0" || (context.Request.Form["important"] == "1" && SAAO.User.Current.IsExecutive)))
-
-                {
-                    SAAO.Notification n = new SAAO.Notification(context.Request.Form["title"], context.Request.Form["content"], (SAAO.Notification.PermissionType)int.Parse(context.Request.Form["type"]));
-
-                    if (context.Request.Form["type"] == "2")
-                    {
-                        string guid = Guid.NewGuid().ToString("D").ToUpper();
-                        context.Request.Files[0].SaveAs(SAAO.Notification.StoragePath + guid);
-                        n.AttachReport(guid);
-                    }
-                    else
-                        n.Broadcast(); // broadcast automatically if not supervising report
-                    if (context.Request.Form["important"] == "1")
-                        n.SetImportant();
-                    context.Response.Write("{\"flag\":0}");
-                }
+                var guid = Guid.NewGuid().ToString("D").ToUpper();
+                context.Request.Files[0].SaveAs(SAAO.Notification.StoragePath + guid);
+                n.AttachReport(guid);
             }
-            catch (Exception ex)
-            {
-                context.Response.Write("{\"flag\":3}");
-                SAAO.Utility.Log(ex);
-            }
+            else
+                n.Broadcast(); // broadcast automatically if not supervising report
+            if (context.Request.Form["important"] == "1")
+                n.SetImportant();
         }
     }
-    public bool IsReusable => false;
 }

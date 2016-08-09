@@ -1,25 +1,12 @@
-﻿<%@ WebHandler Language="C#" Class="dashboardHandler" %>
-using System;
-using System.Web;
-using System.Web.SessionState;
-public class dashboardHandler : IHttpHandler, IRequiresSessionState
+﻿<%@ WebHandler Language="C#" Class="DashboardHandler" %>
+public class DashboardHandler : Ajax
 {
-    public void ProcessRequest(HttpContext context)
+    public override void Process(System.Web.HttpContext context)
     {
-        context.Response.ContentType = "application/json";
         if (context.Request["action"] == null || !SAAO.User.IsLogin) return;
         if (context.Request["action"] == "list")
         {
-            try
-            {
-                context.Response.Write("{\"flag\":0,\"data\":" + SAAO.Event.DashboardJson()+ "}");
-            }
-            catch (Exception ex)
-            {
-                SAAO.Utility.Log(ex);
-                context.Response.Write("{\"flag\":3}");
-            }
+            R.Data = SAAO.Event.DashboardJson();
         }
     }
-    public bool IsReusable => false;
 }

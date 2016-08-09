@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data;
+using Newtonsoft.Json.Linq;
+
 namespace SAAO
 {
     /// <summary>
@@ -140,28 +142,30 @@ namespace SAAO
         /// List current notifications in the database in JSON
         /// </summary>
         /// <returns>JSON of current notifications [{ID,title,user,content,notifyTime,type,imprtant,(reportFile)},...]</returns>
-        public static string ListJson()
+        public static JArray ListJson()
         {
-            string back = "[";
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             DataTable dt = si.Adapter("SELECT Notification.reportFile, Notification.ID, Notification.important, Notification.type, Notification.title, Notification.[content], Notification.notifyTime, [User].realname, [User].[group] FROM Notification INNER JOIN [User] ON Notification.UUID = [User].UUID ORDER BY Notification.important DESC, ID DESC");
+            JArray a = new JArray();
             for (int i = 0; i < dt.Rows.Count; i++)
                 if (Visible(Convert.ToInt32(dt.Rows[i]["group"]), PermissionType.SelfGroupOnly))
                 {
-                    back += "{";
-                    back += "\"ID\":" + dt.Rows[i]["ID"] + ",";
-                    back += "\"title\":\"" + Utility.String2Json(dt.Rows[i]["title"].ToString()) + "\",";
-                    back += "\"user\":\"" + Utility.String2Json(dt.Rows[i]["realname"].ToString()) + "\",";
-                    back += "\"content\":\"" + Utility.String2Json(dt.Rows[i]["content"].ToString()) + "\",";
-                    back += "\"notifyTime\":\"" + Convert.ToDateTime(dt.Rows[i]["notifyTime"].ToString()).ToString("yyyy-MM-dd HH:mm") + "\",";
-                    back += "\"type\":" + dt.Rows[i]["type"] + ",";
-                    back += "\"important\":" + (Convert.ToInt32(dt.Rows[i]["important"]) - 1) + ",";
+                    JObject o = new JObject
+                    {
+                        ["ID"] = dt.Rows[i]["ID"].ToString(),
+                        ["title"] = dt.Rows[i]["title"].ToString(),
+                        ["user"] = dt.Rows[i]["realname"].ToString(),
+                        ["content"] = dt.Rows[i]["content"].ToString(),
+                        ["notifyTime"] =
+                            Convert.ToDateTime(dt.Rows[i]["notifyTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
+                        ["type"] = dt.Rows[i]["type"].ToString(),
+                        ["important"] = (Convert.ToInt32(dt.Rows[i]["important"]) - 1)
+                    };
                     if (Convert.ToInt32(dt.Rows[i]["type"]) == (int)PermissionType.Supervise)
-                        back += "\"reportFile\":\"" + dt.Rows[i]["reportFile"] + "\",";
-                    back += "},";
+                        o["reportFile"] = dt.Rows[i]["reportFile"].ToString();
+                    a.Add(o);
                 }
-            back += "]";
-            return back.Replace(",]", "]").Replace(",}", "}");
+            return a;
         }
     }
 }
