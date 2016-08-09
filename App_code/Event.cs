@@ -27,5 +27,19 @@
             // Group 255 represents a default one.
             return rt.Replace(",\"group\":255","");
         }
+
+        /// <summary>
+        /// Generate Json for dashboard
+        /// </summary>
+        /// <returns>Event Json for dashboard</returns>
+        public static string DashboardJson()
+        {
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            string group = User.Current.GroupName;
+            string begin = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [start] = CONVERT(varchar(10),getdate(),110)");
+            string doing = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [start] < getdate() AND [end] > getdate()");
+            string todo = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [end] = CONVERT(varchar(10),getdate(),110)");
+            return "{\"group\":\"" + group + "\",\"begin\":" + begin + ",\"doing\":" + doing + ",\"todo\":" + todo + "}";
+        }
     }
 }

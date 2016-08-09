@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Data;
+using System.Net.Mail;
+using System.Text;
+
 namespace SAAO
 {
     /// <summary>
@@ -214,12 +217,15 @@ namespace SAAO
         /// <summary>
         /// Move the mail to another folder
         /// </summary>
-        /// <param name="newfolderid">Target folder ID</param>
-        public void MoveTo(int newfolderid)
+        /// <param name="folderName">Target folder name</param>
+        public void MoveTo(string folderName)
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
-            si.Execute($"UPDATE hm_messages SET messagefolderid = {newfolderid} WHERE messageid = {_mailId}");
-            _folderid = newfolderid;
+            int uid = Convert.ToInt32(si.Query($"SELECT accountid FROM hm_accounts WHERE accountaddress = '{User.Current.Mail}'"));
+            int folderid = Convert.ToInt32(si.Query($"SELECT folderid FROM hm_imapfolders WHERE foldername = '{folderName}' AND folderaccountid = {uid}"));
+            // TODO: Care for SQL Inject of folderName
+            si.Execute($"UPDATE hm_messages SET messagefolderid = {folderid} WHERE messageid = {_mailId}");
+            _folderid = folderid;
         }
         /// <summary>
         /// Set a new flag of the mail
@@ -274,6 +280,23 @@ namespace SAAO
             return oMsg;
         }
 
+        public static void Send(string from, string receiver, string subject, bool isBodyHtml, string body, System.Net.NetworkCredential credential = null)
+        {
+            if (credential == null)
+                credential = new System.Net.NetworkCredential(User.Current.Mail,
+                    User.Current.PasswordRaw);
+            MailMessage mail = new MailMessage(from, receiver)
+            {
+                SubjectEncoding = Encoding.UTF8,
+                Subject = subject,
+                IsBodyHtml = true,
+                BodyEncoding = Encoding.UTF8,
+                Body = Utility.Base64Decode(body)
+            };
+            SmtpClient smtp = new SmtpClient(ServerAddress);
+            smtp.Credentials = credential;
+            smtp.Send(mail);
+        }
         /// <summary>
         /// List mail(s) of a folder in the database in JSON
         /// </summary>

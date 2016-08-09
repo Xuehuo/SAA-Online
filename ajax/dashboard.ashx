@@ -12,12 +12,7 @@ public class dashboardHandler : IHttpHandler, IRequiresSessionState
         {
             try
             {
-                SAAO.SqlIntegrate si = new SAAO.SqlIntegrate(SAAO.Utility.ConnStr);
-                string group = SAAO.User.Current.GroupName;
-                string begin = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{SAAO.User.Current.Group}' AND [start] = CONVERT(varchar(10),getdate(),110)");
-                string doing = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{SAAO.User.Current.Group}' AND [start] < getdate() AND [end] > getdate()");
-                string todo = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{SAAO.User.Current.Group}' AND [end] = CONVERT(varchar(10),getdate(),110)");
-                context.Response.Write("{\"flag\":0,\"data\":{\"group\":\"" + group + "\",\"begin\":" + begin + ",\"doing\":" + doing + ",\"todo\":" + todo + "}}");
+                context.Response.Write("{\"flag\":0,\"data\":" + SAAO.Event.DashboardJson()+ "}");
             }
             catch (Exception ex)
             {

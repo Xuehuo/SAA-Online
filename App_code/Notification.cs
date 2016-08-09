@@ -109,17 +109,7 @@ namespace SAAO
         /// <param name="to">Receiver email</param>
         private void SendMail(string to)
         {
-            MailMessage mail = new MailMessage(NotifyMail, to)
-            {
-                SubjectEncoding = Encoding.UTF8,
-                Subject = Title,
-                IsBodyHtml = false,
-                BodyEncoding = Encoding.UTF8,
-                Body = Content
-            };
-            SmtpClient smtp = new SmtpClient(Mail.ServerAddress);
-            smtp.Credentials = new System.Net.NetworkCredential(NotifyMail, NotifyMailCredential);
-            smtp.Send(mail);
+            Mail.Send(NotifyMail, to, Title, true, Content, new System.Net.NetworkCredential(NotifyMail, NotifyMailCredential));
         }
 
         /// <summary>
