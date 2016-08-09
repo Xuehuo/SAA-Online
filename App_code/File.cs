@@ -24,15 +24,15 @@ namespace SAAO
         /// <summary>
         /// File extension (doc, pdf, etc.)
         /// </summary>
-        public string Extension;
+        private readonly string _extension;
         /// <summary>
         /// File size in byte
         /// </summary>
-        public int Size;
+        private readonly int _size;
         private readonly User _uploader;
         private DateTime _uploadTime;
         private int _downloadCount;
-        public string SavePath;
+        private readonly string _savePath;
         public List<string> Tag;
         private PermissionLevel _permission;
         public enum PermissionLevel
@@ -65,17 +65,30 @@ namespace SAAO
             var fileInfo = si.Reader($"SELECT * FROM [File] WHERE [GUID] = '{str.ToUpper()}'");
             _name = fileInfo["name"].ToString();
             _info = fileInfo["info"].ToString();
-            Extension = fileInfo["extension"].ToString();
-            Size = Convert.ToInt32(fileInfo["size"]);
+            _extension = fileInfo["extension"].ToString();
+            _size = Convert.ToInt32(fileInfo["size"]);
             _uploader = new User(Guid.Parse(fileInfo["uploader"].ToString()));
             _downloadCount = Convert.ToInt32(fileInfo["downloadCount"]);
             _uploadTime = Convert.ToDateTime(fileInfo["uploadTime"]);
-            SavePath = StoragePath + str.ToUpper();
+            _savePath = StoragePath + str.ToUpper();
             _permission = (PermissionLevel)Convert.ToInt32(fileInfo["permission"]);
             Tag = new List<string>();
             DataTable tagList = si.Adapter($"SELECT [name] FROM [Filetag] WHERE FUID = '{str.ToUpper()}'");
             for (int i = 0; i < tagList.Rows.Count; i++)
                 Tag.Add(tagList.Rows[i]["name"].ToString());
+        }
+
+        public static void Upload(HttpPostedFile file)
+        {
+            string guid = Guid.NewGuid().ToString().ToUpper();
+            file.SaveAs(StoragePath + guid);
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            si.InitParameter(2);
+            si.AddParameter("@name", SqlIntegrate.DataType.VarChar,
+                Path.GetFileNameWithoutExtension(file.FileName), 50);
+            si.AddParameter("@extension", SqlIntegrate.DataType.VarChar,
+                Path.GetExtension(file.FileName).TrimStart('.').ToLower(), 10);
+            si.Execute($"INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES ('{guid}',@name,@extension,{file.ContentLength},'{User.Current.UUID}')");
         }
         /// <summary>
         /// Check whether the file has a tag
@@ -99,6 +112,8 @@ namespace SAAO
         /// <param name="str">Tag string</param>
         public void RemoveTag(string str)
         {
+            if (!HasTag(str)) return;
+            Tag.Remove(str);
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.InitParameter(1);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
@@ -110,6 +125,7 @@ namespace SAAO
         /// <param name="str">Tag string</param>
         public void AddTag(string str)
         {
+            Tag.Add(str);
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.InitParameter(1);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
@@ -122,8 +138,8 @@ namespace SAAO
         {
             _downloadCount++;
             new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{_guid}'");
-            string fileName = Name + "." + Extension;
-            Utility.Download(SavePath, fileName);
+            string fileName = Name + "." + _extension;
+            Utility.Download(_savePath, fileName);
         }
         /// <summary>
         /// Filename
@@ -169,7 +185,7 @@ namespace SAAO
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.Execute($"DELETE FROM [File] WHERE [GUID] = '{_guid}'");
             si.Execute($"DELETE FROM [Filetag] WHERE [FUID] = '{_guid}'");
-            System.IO.File.Delete(SavePath);
+            System.IO.File.Delete(_savePath);
         }
         /// <summary>
         /// File visibility-level
@@ -236,9 +252,9 @@ namespace SAAO
             data += "\"guid\":\"" + _guid + "\",";
             data += "\"permission\":" + (int)_permission + ",";
             data += "\"name\":\"" + Utility.String2Json(_name) + "\",";
-            data += "\"extension\":\"" + Extension + "\",";
+            data += "\"extension\":\"" + _extension + "\",";
             data += "\"uploadTime\":\"" + _uploadTime.ToString("yyyy-MM-dd HH:mm") + "\",";
-            data += "\"size\":" + Size + ",";
+            data += "\"size\":" + _size + ",";
             data += "\"uploader\":\"" + Utility.String2Json(_uploader.Realname) + "\",";
             data += "\"group\":\"" + Utility.String2Json(_uploader.GroupName) + "\",";
             data += "\"downloadCount\":" + _downloadCount + ",";
