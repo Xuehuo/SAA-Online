@@ -20,17 +20,17 @@ public class Ajax : IHttpHandler, IRequiresSessionState
     public void ProcessRequest(HttpContext context)
     {
         context.Response.ContentType = "application/json";
-        //try
-        //{
+        try
+        {
             Process(context);
-        //}
-        //catch (Exception ex)
-        //{
-        //    R.Flag = 3;
-        //    SAAO.Utility.Log(ex);
-        //}
+        }
+        catch (Exception ex)
+        {
+            R.Flag = 3;
+            SAAO.Utility.Log(ex);
+        }
         context.Response.Write(JsonConvert.SerializeObject(
-            value: R, 
+            value: R,
             formatting: Formatting.Indented,
             settings: new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() })
         );
