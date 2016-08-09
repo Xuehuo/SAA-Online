@@ -61,16 +61,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                     SAAO.Mail message = new SAAO.Mail(mailId);
                     if (message.Username == SAAO.User.Current.Username)
                     {
-                        string filename = message.GetAttachmentName(index);
-                        context.Response.ContentType = "application/octet-stream";
-                        if (context.Request.UserAgent.ToLower().IndexOf("trident") > -1)
-                            filename = BitConverter.ToString(Encoding.Default.GetBytes(filename)).Replace("-", " ");
-                        if (context.Request.UserAgent.ToLower().IndexOf("firefox") > -1)
-                            context.Response.AddHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
-                        else
-                            context.Response.AddHeader("Content-Disposition", "attachment;filename=" + filename);
-                        context.Response.WriteFile(message.GetAttachmentPath(index));
-                        context.Response.End();
+                        message.DownloadAttachment(index);
                     }
                     else
                     {

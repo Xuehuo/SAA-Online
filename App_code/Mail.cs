@@ -161,7 +161,7 @@ namespace SAAO
         /// </summary>
         /// <param name="index">Attachment index (from 1)</param>
         /// <returns>Attachment name</returns>
-        public string GetAttachmentName(int index)
+        private string GetAttachmentName(int index)
         {
             if (index <= _message.Attachments.Count && index != 0)
                 return _message.Attachments[index].FileName;
@@ -173,13 +173,20 @@ namespace SAAO
         /// </summary>
         /// <param name="index">Attachment index (from 1)</param>
         /// <returns>Attachment storage path</returns>
-        public string GetAttachmentPath(int index)
+        private string GetAttachmentPath(int index)
         {
             if (index <= _message.Attachments.Count && index != 0)
                 return _emlPath.Replace(".eml", "") + "_" + index + ".attach";
             return null;
         }
-
+        /// <summary>
+        /// Download mail attachment (via current response)
+        /// </summary>
+        /// <param name="index">Attachment index (from 1)</param>
+        public void DownloadAttachment(int index)
+        {
+            Utility.Download(GetAttachmentPath(index), GetAttachmentName(index));
+        }
         /// <summary>
         /// Obtain attachment information in JSON
         /// </summary>
