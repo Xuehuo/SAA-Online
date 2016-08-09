@@ -14,18 +14,9 @@ public class fileHandler : IHttpHandler, IRequiresSessionState
             {
                 try
                 {
-                    for (int i = 0; i < context.Request.Files.Count; i++)
+                    foreach (HttpPostedFile file in context.Request.Files)
                     {
-                        HttpPostedFile file = context.Request.Files[i];
-                        string guid = Guid.NewGuid().ToString().ToUpper();
-                        file.SaveAs(SAAO.File.StoragePath + guid);
-                        SAAO.SqlIntegrate si = new SAAO.SqlIntegrate(SAAO.Utility.ConnStr);
-                        si.InitParameter(2);
-                        si.AddParameter("@name", SAAO.SqlIntegrate.DataType.VarChar,
-                            file.FileName.Remove(file.FileName.LastIndexOf(".")), 50);
-                        si.AddParameter("@extension", SAAO.SqlIntegrate.DataType.VarChar,
-                            file.FileName.Substring(file.FileName.LastIndexOf(".") + 1).ToLower(), 10);
-                        si.Execute($"INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES ('{guid}',@name,@extension,{file.ContentLength},'{SAAO.User.Current.UUID}')");
+                        SAAO.File.Upload(file);
                     }
                     context.Response.Write("{\"flag\":0}");
                 }

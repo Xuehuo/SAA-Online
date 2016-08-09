@@ -2,7 +2,6 @@
 using System;
 using System.Web;
 using System.Web.SessionState;
-using System.IO;
 public class notificationHandler : IHttpHandler, IRequiresSessionState
 {
     public void ProcessRequest(HttpContext context)
@@ -26,36 +25,7 @@ public class notificationHandler : IHttpHandler, IRequiresSessionState
             Guid guid;
             if (Guid.TryParse(context.Request["id"], out guid))
             {
-                FileInfo fileInfo = new FileInfo(SAAO.Notification.StoragePath + context.Request["id"]);
-                if (fileInfo.Exists)
-                {
-                    string fileName = "监督报告";
-                    const long chunkSize = 102400;
-                    byte[] buffer = new byte[chunkSize];
-                    context.Response.Clear();
-                    FileStream iStream = File.OpenRead(SAAO.Notification.StoragePath + context.Request["id"]);
-                    long dataLengthToRead = iStream.Length;
-                    context.Response.ContentType = "application/pdf";
-                    if (context.Request["download"] != null)
-                        if (context.Request.UserAgent.ToLower().IndexOf("trident") > -1)
-                            context.Response.AddHeader("Content-Disposition", "attachment;filename=" + HttpUtility.UrlEncode(fileName));
-                        else if (context.Request.UserAgent.ToLower().IndexOf("firefox") > -1)
-                            context.Response.AddHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
-                        else
-                            context.Response.AddHeader("Content-Disposition", "attachment;filename=" + fileName);
-                    while (dataLengthToRead > 0 && context.Response.IsClientConnected)
-                    {
-                        int lengthRead = iStream.Read(buffer, 0, Convert.ToInt32(chunkSize));
-                        context.Response.OutputStream.Write(buffer, 0, lengthRead);
-                        context.Response.Flush();
-                        dataLengthToRead = dataLengthToRead - lengthRead;
-                    }
-                    iStream.Close();
-                }
-                else
-                {
-                    context.Response.Write("Invalid Request!");
-                }
+                SAAO.Utility.Download(SAAO.Notification.StoragePath + context.Request["id"], "监督报告", "application/pdf");
             }
         }
         if (context.Request["action"] == "create") // create a notification

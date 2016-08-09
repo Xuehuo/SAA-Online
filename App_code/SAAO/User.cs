@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Web;
 namespace SAAO
 {
     /// <summary>
@@ -118,13 +117,13 @@ namespace SAAO
         {
             get
             {
-                if (HttpContext.Current.Session["User"] != null)
-                    return (User)HttpContext.Current.Session["User"];
+                if (System.Web.HttpContext.Current.Session["User"] != null)
+                    return (User)System.Web.HttpContext.Current.Session["User"];
                 return null;
             }
             set
             {
-                HttpContext.Current.Session["User"] = value;
+                System.Web.HttpContext.Current.Session["User"] = value;
             }
         }
         /// <summary>

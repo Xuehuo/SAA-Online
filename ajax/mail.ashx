@@ -1,8 +1,6 @@
 ﻿<%@ WebHandler Language="C#" Class="mailHandler" %>
 using System;
 using System.Web;
-using System.Net.Mail;
-using System.Text;
 using System.Web.SessionState;
 public class mailHandler : IHttpHandler, IRequiresSessionState
 {
@@ -61,16 +59,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                     SAAO.Mail message = new SAAO.Mail(mailId);
                     if (message.Username == SAAO.User.Current.Username)
                     {
-                        string filename = message.GetAttachmentName(index);
-                        context.Response.ContentType = "application/octet-stream";
-                        if (context.Request.UserAgent.ToLower().IndexOf("trident") > -1)
-                            filename = BitConverter.ToString(Encoding.Default.GetBytes(filename)).Replace("-", " ");
-                        if (context.Request.UserAgent.ToLower().IndexOf("firefox") > -1)
-                            context.Response.AddHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
-                        else
-                            context.Response.AddHeader("Content-Disposition", "attachment;filename=" + filename);
-                        context.Response.WriteFile(message.GetAttachmentPath(index));
-                        context.Response.End();
+                        message.DownloadAttachment(index);
                     }
                     else
                     {
@@ -117,10 +106,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                         SAAO.Mail message = new SAAO.Mail(mailId);
                         if (message.Username == SAAO.User.Current.Username)
                         {
-                            SAAO.SqlIntegrate si = new SAAO.SqlIntegrate(SAAO.Mail.ConnStr);
-                            int uid = Convert.ToInt32(si.Query($"SELECT accountid FROM hm_accounts WHERE accountaddress = '{SAAO.User.Current.Mail}'"));
-                            int folderid = Convert.ToInt32(si.Query($"SELECT folderid FROM hm_imapfolders WHERE foldername = \'Trash\' AND folderaccountid = {uid}"));
-                            message.MoveTo(folderid);
+                            message.MoveTo("Trash");
                             context.Response.Write("{\"flag\":0}");
                         }
                         else
@@ -145,18 +131,7 @@ public class mailHandler : IHttpHandler, IRequiresSessionState
                     {
                         foreach (string receiver in to)
                         {
-                            MailMessage mail = new MailMessage(SAAO.User.Current.Mail, receiver)
-                            {
-                                SubjectEncoding = Encoding.UTF8,
-                                Subject = context.Request.Form["subject"],
-                                IsBodyHtml = true,
-                                BodyEncoding = Encoding.UTF8,
-                                Body = SAAO.Utility.Base64Decode(context.Request.Form["content"])
-                            };
-                            SmtpClient smtp = new SmtpClient(SAAO.Mail.ServerAddress);
-                            smtp.Credentials = new System.Net.NetworkCredential(SAAO.User.Current.Mail,
-                                SAAO.User.Current.PasswordRaw);
-                            smtp.Send(mail);
+                            SAAO.Mail.Send(SAAO.User.Current.Mail, receiver, context.Request.Form["subject"], true, context.Request.Form["content"]);
                         }
                         context.Response.Write("{\"flag\":0}");
                     }
