@@ -93,5 +93,20 @@ namespace SAAO
             str = str.Replace("\r", "\\r");
             return str;
         }
+        /// <summary>
+        /// Download a file (via current response)
+        /// </summary>
+        /// <param name="path">File absolute path</param>
+        /// <param name="fileName">File name to display</param>
+        public static void Download(string path, string fileName)
+        {
+            HttpContext.Current.Response.Clear();
+            HttpContext.Current.Response.ContentType = "application/octet-stream";
+            HttpContext.Current.Response.AppendHeader("Content-Disposition", "attachment; filename*=UTF-8''" + Uri.EscapeDataString(fileName));
+            // TODO: different browsers behave totally different
+            HttpContext.Current.Response.TransmitFile(path);
+            HttpContext.Current.Response.Flush();
+            HttpContext.Current.ApplicationInstance.CompleteRequest();
+        }
     }
 }

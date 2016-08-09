@@ -123,13 +123,7 @@ namespace SAAO
             _downloadCount++;
             new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{_guid}'");
             string fileName = Name + "." + Extension;
-            HttpContext.Current.Response.Clear();
-            HttpContext.Current.Response.ContentType = "application/octet-stream";
-            HttpContext.Current.Response.AppendHeader("Content-Disposition", "attachment; filename*=UTF-8''" + Uri.EscapeDataString(fileName));
-            // TODO: different browsers behave totally different
-            HttpContext.Current.Response.TransmitFile(SavePath);
-            HttpContext.Current.Response.Flush();
-            HttpContext.Current.ApplicationInstance.CompleteRequest();
+            Utility.Download(SavePath, fileName);
         }
         /// <summary>
         /// Filename
