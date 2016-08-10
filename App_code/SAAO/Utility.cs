@@ -20,7 +20,6 @@ namespace SAAO
         public static void Log(string message)
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
-            si.InitParameter(5);
             si.AddParameter("@context", SqlIntegrate.DataType.Text, message);
             si.AddParameter("@IP", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.UserHostAddress, 50);
             si.AddParameter("@browser", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserAgent);
@@ -35,7 +34,6 @@ namespace SAAO
         public static void Log(Exception message)
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
-            si.InitParameter(5);
             si.AddParameter("@context", SqlIntegrate.DataType.Text, message.Message + message.StackTrace);
             si.AddParameter("@IP", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.UserHostAddress, 50);
             si.AddParameter("@browser", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserAgent);

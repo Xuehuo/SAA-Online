@@ -79,7 +79,6 @@ namespace SAAO
         {
             Username = username;
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.InitParameter(1);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
             var dr = si.Reader("SELECT * FROM [User] WHERE [username] = @username");
             _id = Convert.ToInt32(dr["ID"]);
@@ -108,7 +107,6 @@ namespace SAAO
         public static bool Exist(string username)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.InitParameter(1);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
             return Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE username = @username AND [activated] = 1")) == 1;
         }
@@ -210,7 +208,7 @@ namespace SAAO
                 si.Execute($"UPDATE [User] SET password = '{passwordEncrypted}' WHERE UUID = '{UUID}'");
                 si = new SqlIntegrate(SAAO.Mail.ConnStr);
                 // Update the user's password of SAA Mail (Hmailserver)
-                si.InitParameter(1);
+                si.ResetParameter();
                 si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, Username + "@" + SAAO.Mail.MailDomain, 50);
                 si.Execute($"UPDATE [hm_accounts] SET accountpassword = '{passwordEncrypted}' WHERE accountaddress = @accountaddress");
                 PasswordRaw = passwordNew;
