@@ -22,33 +22,216 @@
         background-color: #E74C3C;
     }
 
-    /*按钮扁平化*/
-    #calendar .fc-state-default {
-        background-image: none !important;
-        border: none !important;
-    }
-    /*今天颜色*/
-    #calendar .fc-unthemed .fc-today {
-        background-color: #F08080;
-    }
-    /*换行显示*/
-    #calendar .fc-day-grid-event > .fc-content {
-        white-space: normal;
-        font-size: 16px;
+    /*======Calendar style begin======*/
+
+    #calendar #container {
+        height: 100%;
     }
 
+        #calendar #container .dhx_cal_tab {
+            color: #E74C3C;
+        }
 
-@media(max-width:479px) {
-    /*年月字体大小*/
-    #calendar #container .fc-left h2 {
+            #calendar #container .dhx_cal_tab.active {
+                background-color: #E74C3C;
+                color: #FFFFFF;
+            }
+
+        #calendar #container .dhx_cal_navline .dhx_cal_date {
+            color: #E74C3C;
+            font-weight: normal;
+        }
+
+        #calendar #container .dhx_cal_today_button {
+            color: #E74C3C;
+        }
+
+        #calendar #container .dhx_scale_bar {
+            border-left: 0;
+            color: #E74C3C;
+        }
+
+        #calendar #container .dhx_cal_header {
+            border-right: 0;
+            border-top: 1px solid #E74C3C;
+        }
+
+        #calendar #container .dhx_multi_day_icon_small, #calendar #container .dhx_multi_day_icon {
+            background-image: none;
+            border-right: 1px solid #E74C3C;
+            border-bottom: 0;
+        }
+
+        #calendar #container .dhx_multi_day {
+            border-top: 1px solid #E74C3C;
+        }
+
+        #calendar #container .dhx_scale_hour {
+            border-bottom: 1px solid #E74C3C;
+            color: #E74C3C;
+        }
+
+        #calendar #container .dhx_cal_data {
+            border-top: 1px solid #E74C3C;
+        }
+
+            #calendar #container .dhx_cal_data .dhx_scale_holder_now, #calendar #container .dhx_cal_data .dhx_scale_holder {
+                border-right: 1px solid #E74C3C;
+            }
+
+            #calendar #container .dhx_cal_data .dhx_month_head {
+                border-right: 1px solid #E74C3C;
+                color: #E74C3C;
+            }
+
+            #calendar #container .dhx_cal_data .dhx_month_body {
+                border-right: 1px solid #E74C3C;
+                border-bottom: 1px solid #E74C3C;
+            }
+
+            #calendar #container .dhx_cal_data .dhx_cal_event_line {
+                background-color: #BBBBBB;
+            }
+
+    /*==新建日程模态框（从上到下）==*/
+    #calendar .dhx_cal_light {
+        box-shadow: none;
+        border: 2px solid #E74C3C;
+        border-radius: 5px;
+        color: #E74C3C;
+    }
+
+        #calendar .dhx_cal_light .dhx_cal_ltitle {
+            border: none;
+        }
+
+    #calendar .dhx_cal_light_wide {
+        width: auto;
+    }
+
+        #calendar .dhx_cal_light_wide .dhx_cal_larea {
+            width: 100%;
+            padding-left: 5%;
+            padding-right: 5%;
+            margin-left: 0;
+        }
+
+    #calendar .dhx_cal_light .dhx_wrap_section {
+        border: none;
+    }
+
+        #calendar .dhx_cal_light .dhx_wrap_section .dhx_cal_lsection {
+            display: none;
+        }
+
+        #calendar .dhx_cal_light .dhx_wrap_section .dhx_cal_ltext textarea {
+            padding: 5px;
+            border: none;
+            font-size: small;
+            color: #E74C3C;
+            background-color: white;
+        }
+
+            #calendar .dhx_cal_light .dhx_wrap_section .dhx_cal_ltext textarea:focus {
+                padding: 5px;
+                border: none;
+                font-size: small;
+                color: #666666;
+                background-color: #F9F9F9;
+                border-radius: 6px;
+            }
+
+    #calendar .dhx_cal_light select {
+        color: #E74C3C;
+    }
+
+    #calendar .dhx_cal_light .dhx_btn_set {
+        height: auto;
+        border-radius: 2px;
+    }
+
+    #calendar .dhx_cal_light .dhx_save_btn_set, #calendar .dhx_cal_light .dhx_cancel_btn_set {
+        border: 1px solid #E74C3C;
+        background-color: white;
+        color: #E74C3C;
+    }
+
+        #calendar .dhx_cal_light .dhx_save_btn_set:hover, #calendar .dhx_cal_light .dhx_cancel_btn_set:hover {
+            border: 1px solid #E74C3C;
+            background-color: #E74C3C;
+            color: white;
+        }
+
+    #calendar .dhx_cal_light .dhx_delete_btn_set:hover {
+        background-color: #888888;
+        color: white;
+    }
+    /*==新建日程模态框（从上到下）==*/
+
+    /*==新建日程块==*/
+    /*左边的菜单*/
+    #calendar #container .dhx_cal_data .dhx_cal_event.dhx_cal_select_menu .dhx_event_move.dhx_title {
+        display: none;
+    }
+
+    /*右边的日程主体时间头*/
+    #calendar #container .dhx_cal_data .dhx_cal_event:not(.dhx_cal_select_menu) .dhx_event_move.dhx_title {
+        background-color: #BBBBBB;
+        font-size: small;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+
+    #calendar #container .dhx_cal_data .dhx_cal_event .dhx_body {
+        background-color: #BBBBBB;
+    }
+
+    /*坑死人的绝对定位*/
+    #calendar #container .dhx_cal_data .dhx_cal_event.dhx_cal_editor {
+        margin-top: 6px;
+        margin-left: 1px;
+    }
+    /*==新建日程块==*/
+
+    #calendar .dhtmlx_modal_box.dhtmlx-alert {
+        box-shadow: 0 0 7px #888888;
+        border-radius: 5px;
+    }
+
+        #calendar .dhtmlx_modal_box.dhtmlx-alert .dhtmlx_popup_text {
+            color: #E74C3C;
+        }
+
+        #calendar .dhtmlx_modal_box.dhtmlx-alert .dhtmlx_popup_button {
+            border: 1px solid #E74C3C;
+            background-color: white;
+            border-radius: 2px;
+        }
+
+            #calendar .dhtmlx_modal_box.dhtmlx-alert .dhtmlx_popup_button > div {
+                color: #E74C3C;
+            }
+
+            #calendar .dhtmlx_modal_box.dhtmlx-alert .dhtmlx_popup_button:hover {
+                border: 1px solid #E74C3C;
+                background-color: #E74C3C;
+                border-radius: 2px;
+            }
+
+            #calendar .dhtmlx_modal_box.dhtmlx-alert .dhtmlx_popup_button > div:hover {
+                color: white;
+            }
+/*======Calendar style end======*/
+
+/*@media(max-width:479px) {
+    年月字体大小 #calendar #container .fc-left h2 {
         font-size: 18px;
         line-height: 30px;
     }
 }
 
 @media(max-width:767px) {
-    /*事件字体大小*/
-    #calendar .fc-day-grid-event > .fc-content {
+    事件字体大小 #calendar .fc-day-grid-event > .fc-content {
         font-size: 11px;
     }
-}
+}*/
