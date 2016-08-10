@@ -60,8 +60,9 @@ namespace SAAO
             if (!Guid.TryParse(str, out guid))
                 throw new ArgumentException();
             _guid = str.ToUpper();
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            var fileInfo = si.Reader($"SELECT * FROM [File] WHERE [GUID] = '{str.ToUpper()}'");
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, str.ToUpper());
+            var fileInfo = si.Reader("SELECT * FROM [File] WHERE [GUID] = @GUID");
             _name = fileInfo["name"].ToString();
             _info = fileInfo["info"].ToString();
             _extension = fileInfo["extension"].ToString();
@@ -72,8 +73,8 @@ namespace SAAO
             _savePath = StoragePath + str.ToUpper();
             _permission = (PermissionLevel)Convert.ToInt32(fileInfo["permission"]);
             Tag = new List<string>();
-            DataTable tagList = si.Adapter($"SELECT [name] FROM [Filetag] WHERE FUID = '{str.ToUpper()}'");
-            for (int i = 0; i < tagList.Rows.Count; i++)
+            var tagList = si.Adapter("SELECT [name] FROM [Filetag] WHERE FUID = @GUID");
+            for (var i = 0; i < tagList.Rows.Count; i++)
                 Tag.Add(tagList.Rows[i]["name"].ToString());
         }
 
@@ -81,8 +82,7 @@ namespace SAAO
         {
             string guid = Guid.NewGuid().ToString().ToUpper();
             file.SaveAs(StoragePath + guid);
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.InitParameter(2);
+            var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@name", SqlIntegrate.DataType.VarChar,
                 System.IO.Path.GetFileNameWithoutExtension(file.FileName), 50);
             si.AddParameter("@extension", SqlIntegrate.DataType.VarChar,
@@ -97,7 +97,6 @@ namespace SAAO
         public bool HasTag(string str)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.InitParameter(1);
             si.AddParameter("@name", SqlIntegrate.DataType.VarChar, str, 50);
             int count = Convert.ToInt32(si.Query(
                 $"SELECT COUNT(*) FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}'"));
@@ -114,7 +113,6 @@ namespace SAAO
             if (!HasTag(str)) return;
             Tag.Remove(str);
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.InitParameter(1);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.Execute($"DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}')");
         }
@@ -126,7 +124,6 @@ namespace SAAO
         {
             Tag.Add(str);
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.InitParameter(1);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.Execute($"INSERT INTO Filetag ([name], [FUID]) VALUES (@name, '{_guid}')");
         }
@@ -149,7 +146,6 @@ namespace SAAO
             {
                 _name = value;
                 SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-                si.InitParameter(1);
                 si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, value, 50);
                 si.Execute($"UPDATE [File] SET [name] = @name WHERE [GUID] = '{_guid}'");
             }
@@ -167,7 +163,6 @@ namespace SAAO
             {
                 _info = value;
                 SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-                si.InitParameter(1);
                 si.AddParameter("@info", SqlIntegrate.DataType.Text, value);
                 si.Execute($"UPDATE [File] SET [info] = @info WHERE [GUID] = '{_guid}'");
             }

@@ -67,7 +67,7 @@
         <div id="content">
             <div id="maillist">
                 <ol class="breadcrumb">
-                    <li><%=SAAO.User.Current.Mail %></li>
+                    <li><%=SAAO.User.Current.Username + "@" + SAAO.Mail.MailDomain %></li>
                     <li>收件箱</li>
                 </ol>
                 <table class="table table-hover">

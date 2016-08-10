@@ -219,7 +219,7 @@ namespace SAAO
         public void MoveTo(string folderName)
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
-            int uid = Convert.ToInt32(si.Query($"SELECT accountid FROM hm_accounts WHERE accountaddress = '{User.Current.Mail}'"));
+            int uid = Convert.ToInt32(si.Query($"SELECT accountid FROM hm_accounts WHERE accountaddress = '{User.Current.Username + "@" + MailDomain}'"));
             int folderid = Convert.ToInt32(si.Query($"SELECT folderid FROM hm_imapfolders WHERE foldername = '{folderName}' AND folderaccountid = {uid}"));
             // TODO: Care for SQL Inject of folderName
             si.Execute($"UPDATE hm_messages SET messagefolderid = {folderid} WHERE messageid = {_mailId}");
@@ -286,8 +286,7 @@ namespace SAAO
         public static void Send(string from, string receiver, string subject, bool isBodyHtml, string body, System.Net.NetworkCredential credential = null)
         {
             if (credential == null)
-                credential = new System.Net.NetworkCredential(User.Current.Mail,
-                    User.Current.PasswordRaw);
+                credential = new System.Net.NetworkCredential(User.Current.Username + "@" + MailDomain, User.Current.PasswordRaw);
             MailMessage mail = new MailMessage(from, receiver)
             {
                 SubjectEncoding = System.Text.Encoding.UTF8,
@@ -308,7 +307,7 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
             int uid = Convert.ToInt32(si.Query(
-                $"SELECT accountid FROM hm_accounts WHERE accountaddress = '{User.Current.Username}@xuehuo.org'"));
+                $"SELECT accountid FROM hm_accounts WHERE accountaddress = '{User.Current.Username + "@" + MailDomain}'"));
             int folderid = Convert.ToInt32(si.Query(
                 $"SELECT folderid FROM hm_imapfolders WHERE {(folder == "Sent" ? "(foldername = 'Sent' OR foldername = 'Sent Items' OR foldername = 'Sent Messages')" : "foldername = '" + folder + "'")} AND folderaccountid = {uid}"));
             DataTable list = si.Adapter(

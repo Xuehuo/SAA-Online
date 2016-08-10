@@ -33,12 +33,13 @@ namespace SAAO
         public static JObject DashboardJson()
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@group", SqlIntegrate.DataType.Int, User.Current.Group);
             JObject o = new JObject
             {
                 ["group"] = User.Current.GroupName,
-                ["begin"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [start] = CONVERT(varchar(10),getdate(),110)"),
-                ["doing"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [start] < getdate() AND [end] > getdate()"),
-                ["todo"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [end] = CONVERT(varchar(10),getdate(),110)")
+                ["begin"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = @group AND [start] = CONVERT(varchar(10),getdate(),110)"),
+                ["doing"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = @group AND [start] < getdate() AND [end] > getdate()"),
+                ["todo"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = @group AND [end] = CONVERT(varchar(10),getdate(),110)")
             };
             return o;
         }

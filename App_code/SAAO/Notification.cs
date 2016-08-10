@@ -59,7 +59,6 @@ namespace SAAO
         public Notification(string title, string content, PermissionType type)
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.InitParameter(2);
             si.AddParameter("@content", SqlIntegrate.DataType.Text, content);
             si.AddParameter("@title", SqlIntegrate.DataType.NVarChar, title, 50);
             Id = Convert.ToInt32(si.Query($"INSERT INTO Notification ([title], [content], [type], [UUID]) VALUES (@title, @content, {(int) type}, \'{User.Current.UUID}\'); SELECT @@IDENTITY"));
