@@ -68,7 +68,7 @@ public class MailHandler : Ajax
             if (to.Length == 0) return;
             foreach (var receiver in to)
                 SAAO.Mail.Send(
-                    @from: SAAO.User.Current.Mail, 
+                    @from: SAAO.User.Current.Username + "@" + SAAO.Mail.MailDomain, 
                     receiver: receiver, 
                     subject: context.Request.Form["subject"], 
                     isBodyHtml: true, 
@@ -79,7 +79,7 @@ public class MailHandler : Ajax
         {
             R.Data = new JObject
             {
-                ["mail"] = SAAO.User.Current.Mail,
+                ["mail"] = SAAO.User.Current.Username + "@" + SAAO.Mail.MailDomain,
                 ["password"] = SAAO.User.Current.PasswordRaw
             };
         }
