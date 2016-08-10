@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Net.Mail;
+using Newtonsoft.Json.Linq;
+
 namespace SAAO
 {
     /// <summary>
@@ -191,10 +193,10 @@ namespace SAAO
         /// <summary>
         /// Obtain attachment information in JSON
         /// </summary>
-        /// <returns>Attachment information in JSON</returns>
-        public string AttachmentJson()
+        /// <returns>Json array of attachment information</returns>
+        private JArray AttachmentJson()
         {
-            string rt = "";
+            JArray a = new JArray();
             if (AttachmentCount != 0)
             {
                 for (int i = 1; i <= AttachmentCount; i++)
@@ -205,12 +207,10 @@ namespace SAAO
                      */
                     if (!System.IO.File.Exists(_emlPath.Replace(".eml", "") + "_" + i + ".attach"))
                         _message.Attachments[i].SaveToFile(_emlPath.Replace(".eml", "") + "_" + i + ".attach");
-                    rt += "{\"filename\":\"" + Utility.String2Json(_message.Attachments[i].FileName) + "\"}";
-                    if (i != AttachmentCount)
-                        rt += ",";
+                    a.Add(new JObject { ["filename"] = _message.Attachments[i].FileName });
                 }
             }
-            return rt;
+            return a;
         }
         /// <summary>
         /// Move the mail to another folder
@@ -239,15 +239,20 @@ namespace SAAO
         /// Convert the mail information to JSON
         /// </summary>
         /// <returns>Mail information in JSON. {id,subject,from:{name,mail},to:[{name,mail},...],flag,time,attachcount,attachment:[ATTACHMENT JSON]}</returns>
-        public string ToJson()
+        public JObject ToJson()
         {
-            string toString = "";
-            for (int i = 0; i < To.Length; i++)
-                if (i != To.Length - 1)
-                    toString += "{\"name\":\"" + Utility.String2Json(To[i].Name) + "\",\"mail\":\"" + Utility.String2Json(To[i].Mail) + "\"},";
-                else
-                    toString += "{\"name\":\"" + Utility.String2Json(To[i].Name) + "\",\"mail\":\"" + Utility.String2Json(To[i].Mail) + "\"}";
-            return "{\"id\":" + _mailId + ",\"subject\":\"" + Utility.String2Json(Subject) + "\",\"from\":{\"name\":\"" + Utility.String2Json(From.Name) + "\",\"mail\":\"" + Utility.String2Json(From.Mail) + "\"},\"to\":[" + toString + "],\"flag\":" + (int)Flag + ",\"time\":\"" + SentOn.ToString("yyyy-MM-dd HH:mm:ss") + "\",\"attachcount\": " + AttachmentCount + ",\"attachment\":[" + AttachmentJson() + "]}";
+            JObject o = new JObject
+            {
+                ["id"] = _mailId,
+                ["subject"] = Subject,
+                ["from"] = (JObject) JToken.FromObject(From),
+                ["to"] = (JArray) JToken.FromObject(To),
+                ["flag"] = (int) Flag,
+                ["time"] = SentOn.ToString("yyyy-MM-dd HH:mm:ss"),
+                ["attachcount"] = AttachmentCount,
+                ["attachment"] = AttachmentJson()
+            };
+            return o;
         }
         /// <summary>
         /// Filter all HTML tags
@@ -291,8 +296,7 @@ namespace SAAO
                 BodyEncoding = System.Text.Encoding.UTF8,
                 Body = Utility.Base64Decode(body)
             };
-            SmtpClient smtp = new SmtpClient(ServerAddress);
-            smtp.Credentials = credential;
+            SmtpClient smtp = new SmtpClient(ServerAddress) {Credentials = credential};
             smtp.Send(mail);
         }
         /// <summary>
@@ -300,7 +304,7 @@ namespace SAAO
         /// </summary>
         /// <param name="folder">Folder name</param>
         /// <returns>JSON of mail(s) of the folder [{id,subject,from,thumb,flag,time,attachcount},...]</returns>
-        public static string ListJson(string folder)
+        public static JArray ListJson(string folder)
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
             int uid = Convert.ToInt32(si.Query(
@@ -309,16 +313,23 @@ namespace SAAO
                 $"SELECT folderid FROM hm_imapfolders WHERE {(folder == "Sent" ? "(foldername = 'Sent' OR foldername = 'Sent Items' OR foldername = 'Sent Messages')" : "foldername = '" + folder + "'")} AND folderaccountid = {uid}"));
             DataTable list = si.Adapter(
                 $"SELECT messageid FROM hm_messages WHERE messagefolderid = {folderid} AND messageaccountid = {uid} ORDER BY messageid DESC");
-            string data = "[";
+            JArray a = new JArray();
             for (int i = 0; i < list.Rows.Count; i++)
             {
                 Mail message = new Mail(Convert.ToInt32(list.Rows[i]["messageid"]));
-                data += "{\"id\":" + list.Rows[i]["messageid"] + ",\"subject\":\"" + message.Subject + "\",\"from\":\"" + message.From.Name.Replace("\"","") + "\",\"thumb\":\"" + message.Thumb() + "\",\"flag\":" + (int)message.Flag + ",\"time\":\"" + message.SentOn + "\",\"attachcount\": " + message.AttachmentCount + "}";
-                if (i != list.Rows.Count - 1)
-                    data += ",";
+                JObject o = new JObject
+                {
+                    ["id"] = list.Rows[i]["messageid"].ToString(),
+                    ["subject"] = message.Subject,
+                    ["from"] = message.From.Name.Replace("\"", ""),
+                    ["thumb"] = message.Thumb(),
+                    ["flag"] = (int) message.Flag,
+                    ["time"] = message.SentOn.ToString("yyyy-MM-dd HH:mm"),
+                    ["attachcount"] = message.AttachmentCount
+                };
+                a.Add(o);
             }
-            data += "]";
-            return data;
+            return a;
         }
     }
 }

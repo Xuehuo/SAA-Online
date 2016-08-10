@@ -1,164 +1,88 @@
-﻿<%@ WebHandler Language="C#" Class="fileHandler" %>
+﻿<%@ WebHandler Language="C#" Class="FileHandler" %>
 using System;
-using System.Web;
-using System.Web.SessionState;
-public class fileHandler : IHttpHandler, IRequiresSessionState
+public class FileHandler : Ajax
 {
-    public void ProcessRequest(HttpContext context)
+    public override void Process(System.Web.HttpContext context)
     {
-        context.Response.ContentType = "application/json";
         if (context.Request["action"] == null || !SAAO.User.IsLogin) return;
         if (context.Request["action"] == "upload")
         {
-            if (context.Request.Files.Count != 0)
-            {
-                try
-                {
-                    foreach (HttpPostedFile file in context.Request.Files)
-                    {
-                        SAAO.File.Upload(file);
-                    }
-                    context.Response.Write("{\"flag\":0}");
-                }
-                catch (Exception ex)
-                {
-                    context.Response.Write("{\"flag\":3}");
-                    SAAO.Utility.Log(ex);
-                }
-            }
+            if (context.Request.Files.Count == 0) return;
+            foreach (System.Web.HttpPostedFile file in context.Request.Files)
+                SAAO.File.Upload(file);
         }
         else if (context.Request["action"] == "list")
         {
-            try
-            {
-                context.Response.Write("{\"flag\":0,\"data\":" + SAAO.File.ListJson() + "}");
-            }
-            catch (Exception ex)
-            {
-                context.Response.Write("{\"flag\":3}");
-                SAAO.Utility.Log(ex);
-            }
+            R.Data = SAAO.File.ListJson();
         }
         else if (context.Request["action"] == "info")
         {
-            {
-                Guid guid;
-                if (Guid.TryParse(context.Request["id"], out guid))
-                {
-                    SAAO.File file = new SAAO.File(guid.ToString().ToUpper());
-                    if (file.Visible(SAAO.User.Current))
-                    {
-                        try
-                        {
-                            context.Response.Write("{\"flag\":0,\"data\":" + file.ToJson() + "}");
-                        }
-                        catch (Exception ex)
-                        {
-                            context.Response.Write("{\"flag\":3}");
-                            SAAO.Utility.Log(ex);
-                        }
-                    }
-                    else
-                        context.Response.Write("{\"flag\":2}");
-                }
-                else
-                    context.Response.Write("{\"flag\":2}");
-            }
+            if (context.Request["id"] == null) return;
+            Guid guid;
+            if (!Guid.TryParse(context.Request["id"], out guid)) return;
+            var file = new SAAO.File(guid.ToString().ToUpper());
+            if (file.Visible(SAAO.User.Current))
+                R.Data = file.ToJson();
+            else
+                R.Flag = 2;
         }
         else if (context.Request["action"] == "update")
         {
+            if (context.Request["id"] == null) return;
+            Guid guid;
+            if (!Guid.TryParse(context.Request["id"], out guid)) return;
+            var file = new SAAO.File(guid.ToString().ToUpper());
+            if (file.Visible(SAAO.User.Current))
             {
-                try
+                file.Name = context.Request.Form["name"];
+                file.Info = context.Request.Form["info"];
+                if (context.Request.Form["permission"] != "")
+                    file.Permission =
+                        (SAAO.File.PermissionLevel) int.Parse(context.Request.Form["permission"]);
+                else
+                    file.Permission = SAAO.File.PermissionLevel.All;
+                var tags = context.Request.Form["tag"].Split(',');
+                var tagsOriginal = file.Tag.ToArray();
+                foreach (var tag in tagsOriginal)
                 {
-                    Guid guid;
-                    if (Guid.TryParse(context.Request["id"], out guid))
-                    {
-                        SAAO.File file = new SAAO.File(guid.ToString().ToUpper());
-                        if (file.Visible(SAAO.User.Current))
+                    bool exist = false;
+                    for (var i = 0; i < tags.Length; i++)
+                        if (tag == tagsOriginal[i])
                         {
-                            file.Name = context.Request.Form["name"];
-                            file.Info = context.Request.Form["info"];
-                            if (context.Request.Form["permission"] != "")
-                                file.Permission =
-                                    (SAAO.File.PermissionLevel) int.Parse(context.Request.Form["permission"]);
-                            else
-                                file.Permission = SAAO.File.PermissionLevel.All;
-                            string[] tags = context.Request.Form["tag"].Split(',');
-                            string[] tagsOriginal = file.Tag.ToArray();
-                            foreach (string tag in tagsOriginal)
-                            {
-                                bool exist = false;
-                                for (int i = 0; i < tags.Length; i++)
-                                    if (tag == tagsOriginal[i])
-                                    {
-                                        exist = true;
-                                        break;
-                                    }
-                                if (!exist)
-                                    file.RemoveTag(tag);
-                            }
-                            foreach (string tag in tags)
-                                if (!file.HasTag(tag))
-                                    file.AddTag(tag);
-                            context.Response.Write("{\"flag\":0}");
+                            exist = true;
+                            break;
                         }
-                        else
-                            context.Response.Write("{\"flag\":2}");
-                    }
-                    else
-                        context.Response.Write("{\"flag\":2}");
+                    if (!exist)
+                        file.RemoveTag(tag);
                 }
-                catch (Exception ex)
-                {
-                    SAAO.Utility.Log(ex);
-                    context.Response.Write("{\"flag\":3}");
-                }
+                foreach (var tag in tags)
+                    if (!file.HasTag(tag))
+                        file.AddTag(tag);
             }
+            else
+                R.Flag = 2;
         }
         else if (context.Request["action"] == "download")
         {
+            if (context.Request["id"] == null) return;
             Guid guid;
-            if (Guid.TryParse(context.Request["id"], out guid))
-            {
-                SAAO.File file = new SAAO.File(guid.ToString().ToUpper());
-                if (file.Visible(SAAO.User.Current))
-                {
-                    file.Download();
-                }
-                else
-                {
-                    context.Response.Write("Invalid Request!");
-                }
-            }
+            if (!Guid.TryParse(context.Request["id"], out guid)) return;
+            var file = new SAAO.File(guid.ToString().ToUpper());
+            if (file.Visible(SAAO.User.Current))
+                file.Download();
+            else
+                R.Flag = 2;
         }
         else if (context.Request["action"] == "delete")
         {
-            try
-            {
-                if (context.Request["id"] != null)
-                {
-                    Guid guid;
-                    if (Guid.TryParse(context.Request["id"], out guid))
-                    {
-                        SAAO.File file = new SAAO.File(guid.ToString().ToUpper());
-                        if (file.Visible(SAAO.User.Current))
-                        {
-                            file.Delete();
-                            context.Response.Write("{\"flag\":0}");
-                        }
-                        else
-                            context.Response.Write("{\"flag\":2}");
-                    }
-                    else
-                        context.Response.Write("{\"flag\":2}");
-                }
-            }
-            catch (Exception ex)
-            {
-                SAAO.Utility.Log(ex);
-                context.Response.Write("{\"flag\":3}");
-            }
+            if (context.Request["id"] == null) return;
+            Guid guid;
+            if (!Guid.TryParse(context.Request["id"], out guid)) return;
+            var file = new SAAO.File(guid.ToString().ToUpper());
+            if (file.Visible(SAAO.User.Current))
+                file.Delete();
+            else
+                R.Flag = 2;
         }
     }
-    public bool IsReusable => false;
 }

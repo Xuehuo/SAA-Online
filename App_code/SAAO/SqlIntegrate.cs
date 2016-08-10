@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace SAAO
 {
@@ -56,7 +57,7 @@ namespace SAAO
         /// <param name="length">Max length (if necessary)</param>
         public void AddParameter(string key, DataType datatype, object value, int length = 0)
         {
-            SqlParameter para = ((int)datatype != (int)SqlDbType.Text || length == 0) ? new SqlParameter(key, (SqlDbType)datatype, length) : new SqlParameter(key, (SqlDbType)datatype);
+            var para = ((int)datatype != (int)SqlDbType.Text || length == 0) ? new SqlParameter(key, (SqlDbType)datatype, length) : new SqlParameter(key, (SqlDbType)datatype);
             para.Value = value;
             _paralist[_paraindex] = para;
             _paraindex++;
@@ -70,7 +71,7 @@ namespace SAAO
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
             if (_paraindex != 0)
-                foreach (SqlParameter para in _paralist)
+                foreach (var para in _paralist)
                     _cmd.Parameters.Add(para);
             _conn.Open();
             _cmd.ExecuteNonQuery();
@@ -86,7 +87,7 @@ namespace SAAO
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
             if (_paraindex != 0)
-                foreach (SqlParameter para in _paralist)
+                foreach (var para in _paralist)
                     _cmd.Parameters.Add(para);
             _conn.Open();
             var back = _cmd.ExecuteScalar();
@@ -105,7 +106,7 @@ namespace SAAO
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
             if (_paraindex != 0)
-                foreach (SqlParameter para in _paralist)
+                foreach (var para in _paralist)
                     _cmd.Parameters.Add(para);
             _conn.Open();
             _dr = _cmd.ExecuteReader();
@@ -132,11 +133,11 @@ namespace SAAO
         {
             _da = new SqlDataAdapter(command, _sqlConnStr);
             if (_paraindex != 0)
-                foreach (SqlParameter para in _paralist)
+                foreach (var para in _paralist)
                     _da.SelectCommand.Parameters.Add(para);
             _ds = new DataSet();
             _da.Fill(_ds);
-            DataTable dt = _ds.Tables[0];
+            var dt = _ds.Tables[0];
             return dt;
         }
         /// <summary>
@@ -144,61 +145,46 @@ namespace SAAO
         /// </summary>
         /// <param name="command">SQL query command</param>
         /// <returns>A row of data in JSON</returns>
-        public string QueryJson(string command)
+        public JObject QueryJson(string command)
         {
-            string back = "{";
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
             if (_paraindex != 0)
-                foreach (SqlParameter para in _paralist)
+                foreach (var para in _paralist)
                     _cmd.Parameters.Add(para);
             _conn.Open();
             _dr = _cmd.ExecuteReader();
             if (!_dr.HasRows)
                 throw new DataException();
-            while (_dr.Read())
-                for (int i = 0; i < _dr.FieldCount; i++)
-                    if (_dr[i].GetType() == new byte().GetType() || _dr[i].GetType() == new int().GetType() || _dr[i].GetType() == new float().GetType() || _dr[i].GetType() == new double().GetType())
-                        back += "\"" + _dr.GetName(i) + "\":" + _dr[i] + ",";
-                    else if (_dr[i].GetType() == new DateTime().GetType())
-                        back += "\"" + _dr.GetName(i) + "\":\"" + Convert.ToDateTime(_dr[i]).ToString("yyyy-MM-dd HH:mm:ss").Replace(" 00:00:00", "") + "\",";
-                    else
-                        back += "\"" + _dr.GetName(i) + "\":\"" + Utility.String2Json(_dr[i].ToString()) + "\",";
-            back += "}";
-            _dr.Close();
-            _conn.Close();
-            return back.Replace(",}", "}");
+            var cols = new List<string>();
+            for (var i = 0; i < _dr.FieldCount; i++)
+                cols.Add(_dr.GetName(i));
+            if (_dr.Read())
+                return (JObject) JToken.FromObject(cols.ToDictionary(col => col, col => _dr[col]));
+            throw new DataException();
         }
         /// <summary>
         /// Execute a SQL query and return a table of data in JSON
         /// </summary>
         /// <param name="command">SQL query command</param>
         /// <returns>A table of data in JSON</returns>
-        public string AdapterJson(string command)
+        public JArray AdapterJson(string command)
         {
-            string back = "[";
             _da = new SqlDataAdapter(command, _sqlConnStr);
             if (_paraindex != 0)
-                foreach (SqlParameter para in _paralist)
+                foreach (var para in _paralist)
                     _da.SelectCommand.Parameters.Add(para);
             _ds = new DataSet();
             _da.Fill(_ds);
-            for (int i = 0; i < _ds.Tables[0].Rows.Count; i++)
+            var a = new JArray();
+            foreach (DataRow dr in _ds.Tables[0].Rows)
             {
-                back += "{";
-                for (int j = 0; j < _ds.Tables[0].Columns.Count; j++)
-                {
-                    if (_ds.Tables[0].Rows[i][j].GetType() == new byte().GetType() || _ds.Tables[0].Rows[i][j].GetType() == new int().GetType() || _ds.Tables[0].Rows[i][j].GetType() == new float().GetType() || _ds.Tables[0].Rows[i][j].GetType() == new double().GetType())
-                        back += "\"" + _ds.Tables[0].Columns[j].ColumnName + "\":" + _ds.Tables[0].Rows[i][j] + ",";
-                    else if (_ds.Tables[0].Rows[i][j].GetType() == new DateTime().GetType())
-                        back += "\"" + _ds.Tables[0].Columns[j].ColumnName + "\":\"" + Convert.ToDateTime(_ds.Tables[0].Rows[i][j].ToString()).ToString("yyyy-MM-dd HH:mm:ss").Replace(" 00:00:00", "") + "\",";
-                    else
-                        back += "\"" + _ds.Tables[0].Columns[j].ColumnName + "\":\"" + Utility.String2Json(_ds.Tables[0].Rows[i][j].ToString()) + "\",";
-                }
-                back += "},";
+                var o = new JObject();
+                foreach (DataColumn col in _ds.Tables[0].Columns)
+                    o.Add(col.ColumnName.Trim(), JToken.FromObject(dr[col]));
+                a.Add(o);
             }
-            back += "]";
-            return back.Replace(",}", "}").Replace(",]", "]");
+            return a;
         }
 
         public void Dispose()

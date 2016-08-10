@@ -76,25 +76,6 @@ namespace SAAO
             return hash;
         }
         /// <summary>
-        /// Replace with escape character in a string to join in a JSON
-        /// </summary>
-        /// <param name="str">String</param>
-        /// <returns>String without escape character</returns>
-        public static string String2Json(string str)
-        {
-            str = str.Replace(">", "&gt;");
-            str = str.Replace("<", "&lt;");
-            str = str.Replace(" ", "");
-            str = str.Replace("	", "");
-            str = str.Replace("\"", "&quot;");
-            str = str.Replace("\'", "&#39;");
-            str = str.Replace("\\", "\\\\");
-            str = str.Replace("\n", "\\n");
-            str = str.Replace("\r", "\\r");
-            return str;
-        }
-
-        /// <summary>
         /// Download a file (via current response)
         /// </summary>
         /// <param name="path">File absolute path</param>

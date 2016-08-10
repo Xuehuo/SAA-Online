@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data;
+using Newtonsoft.Json.Linq;
+
 namespace SAAO
 {
     /// <summary>
@@ -59,7 +61,7 @@ namespace SAAO
             _class = Convert.ToInt32(dr["class"]);
             Mail = dr["mail"].ToString();
             Phone = dr["phone"].ToString();
-            Initial = Convert.ToInt32(dr["initial"]);
+            Initial = dr["username"].ToString()[dr["realname"].ToString().Length - 1] - 'a' + 1;
             Group = Convert.ToInt32(dr["group"].ToString());
             Job = Convert.ToInt32(dr["job"].ToString());
             GroupName = Organization.Current.GetGroupName(Group);
@@ -221,26 +223,31 @@ namespace SAAO
         /// List activated users in the database in JSON
         /// </summary>
         /// <returns>JSON of activated users. [{realname,senior,group,initial,jobName,groupName,phone,mail},...]</returns>
-        public static string ListJson()
+        public static JArray ListJson()
         {
-            string data = "[";
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             DataTable dt = si.Adapter("SELECT * FROM [User] WHERE [activated]=1");
+            JArray a = new JArray();
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                data += "{";
-                data += "\"realname\":\"" + Utility.String2Json(dt.Rows[i]["realname"].ToString()) + "\",";
-                data += "\"senior\":" + ((dt.Rows[i]["SN"].ToString().Substring(0, 4) == Organization.Current.State.StructureCurrent) ? "2" : "1") + ",";
-                data += "\"group\":" + dt.Rows[i]["group"] + ",";
-                data += "\"initial\":" + dt.Rows[i]["initial"] + ",";
-                data += "\"jobName\":\"" + Utility.String2Json(Organization.Current.GetJobName(Convert.ToInt32(dt.Rows[i]["job"].ToString()))) + "\",";
-                data += "\"groupName\":\"" + Utility.String2Json(Organization.Current.GetGroupName(Convert.ToInt32(dt.Rows[i]["group"].ToString()))) + "\",";
-                data += "\"phone\":\"" + dt.Rows[i]["phone"] + "\",";
-                data += "\"mail\":\"" + Utility.String2Json(dt.Rows[i]["mail"].ToString()) + "\"},";
+                JObject o = new JObject
+                {
+                    ["realname"] = dt.Rows[i]["realname"].ToString(),
+                    ["senior"] =
+                        (dt.Rows[i]["SN"].ToString().Substring(0, 4) == Organization.Current.State.StructureCurrent)
+                            ? 2
+                            : 1,
+                    ["group"] = dt.Rows[i]["group"].ToString(),
+                    ["initial"] = dt.Rows[i]["username"].ToString()[dt.Rows[i]["realname"].ToString().Length - 1] - 'a' + 1, //int.Parse(dt.Rows[i]["initial"].ToString()),
+                    ["jobName"] = Organization.Current.GetJobName(Convert.ToInt32(dt.Rows[i]["job"].ToString())),
+                    ["groupName"] = Organization.Current.GetGroupName(Convert.ToInt32(dt.Rows[i]["group"].ToString())),
+                    ["phone"] = dt.Rows[i]["phone"].ToString(),
+                    ["mail"] = dt.Rows[i]["mail"].ToString(),
+                    ["class"] = int.Parse(dt.Rows[i]["class"].ToString())
+                };
+                a.Add(o);
             }
-            data += "]";
-            data = data.Replace(",]", "]");
-            return data;
+            return a;
         }
     }
 }

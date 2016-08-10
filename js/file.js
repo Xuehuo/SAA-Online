@@ -209,7 +209,7 @@ fileList();
 
 $("#filemodal").on("hidden.bs.modal", function () {
     $('#filetagbox').tagging('destroy');
-    fileList();
+    //fileList();
 });
 $("#uploadmodal").on("hidden.bs.modal", function () {
     fileList();

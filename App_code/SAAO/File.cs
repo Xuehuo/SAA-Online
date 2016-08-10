@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using Newtonsoft.Json.Linq;
+
 namespace SAAO
 {
     /// <summary>
@@ -243,51 +245,53 @@ namespace SAAO
         /// Convert the file information to JSON
         /// </summary>
         /// <returns>File information in JSON. {guid,permission,name,extension,uploadTime,size,uploader,group,downloadCount,tag(string),info(string)}</returns>
-        public string ToJson()
+        public JObject ToJson()
         {
-            string data = "{";
-            data += "\"guid\":\"" + _guid + "\",";
-            data += "\"permission\":" + (int)_permission + ",";
-            data += "\"name\":\"" + Utility.String2Json(_name) + "\",";
-            data += "\"extension\":\"" + _extension + "\",";
-            data += "\"uploadTime\":\"" + _uploadTime.ToString("yyyy-MM-dd HH:mm") + "\",";
-            data += "\"size\":" + _size + ",";
-            data += "\"uploader\":\"" + Utility.String2Json(_uploader.Realname) + "\",";
-            data += "\"group\":\"" + Utility.String2Json(_uploader.GroupName) + "\",";
-            data += "\"downloadCount\":" + _downloadCount + ",";
-            data += "\"tag\":\"" + Utility.String2Json(string.Join(",", Tag)) + "\",";
-            data += "\"info\":\"" + (_info == null ? "" : Utility.String2Json(_info)) + "\"";
-            data += "}";
-            return data;
+            JObject o = new JObject
+            {
+                ["guid"] = _guid,
+                ["permission"] = (int) _permission,
+                ["name"] = _name,
+                ["extension"] = _extension,
+                ["uploadTime"] = _uploadTime.ToString("yyyy-MM-dd HH:mm"),
+                ["size"] = _size,
+                ["uploader"] = _uploader.Realname,
+                ["group"] = _uploader.GroupName,
+                ["downloadCount"] = _downloadCount,
+                ["tag"] = string.Join(",", Tag),
+                ["info"] = _info ?? ""
+            };
+            return o;
         }
         /// <summary>
         /// List current files in the database in JSON
         /// </summary>
         /// <returns>JSON of current files [{guid,name,extension,uploaderName,datetime,info(bool)},...]</returns>
-        public static string ListJson()
+        public static JArray ListJson()
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataTable dt = si.Adapter("SELECT * FROM [File] ORDER BY [ID] DESC");
-            string data = "[";
+            DataTable dt = si.Adapter("SELECT TOP 50 * FROM [File] ORDER BY [ID] DESC");
+            JArray a = new JArray();
             for (int i = 0; i < dt.Rows.Count; i++)
             {
+                
                 User uploader = new User(Guid.Parse(dt.Rows[i]["uploader"].ToString()));
                 if (Visible((PermissionLevel)Convert.ToInt32(dt.Rows[i]["permission"].ToString()),uploader,User.Current))
                 {
-                    data += "{";
-                    data += "\"guid\":\"" + dt.Rows[i]["GUID"] + "\",";
-                    data += "\"name\":\"" + Utility.String2Json(dt.Rows[i]["name"].ToString()) + "\",";
-                    data += "\"extension\":\"" + dt.Rows[i]["extension"] + "\",";
-                    data += "\"downloadCount\":" + dt.Rows[i]["downloadCount"] + ",";
-                    data += "\"uploaderName\":\"" + Utility.String2Json(uploader.Realname) + "\",";
-                    data += "\"datetime\":\"" + DateTime.Parse(dt.Rows[i]["uploadTime"].ToString()).ToString("yyyy-MM-dd HH:mm") + "\",";
-                    data += "\"info\":" + (dt.Rows[i]["info"].ToString() == "" ? "false" : "true") + "";
-                    data += "},";
+                    JObject o = new JObject
+                    {
+                        ["guid"] = dt.Rows[i]["GUID"].ToString(),
+                        ["name"] = dt.Rows[i]["name"].ToString(),
+                        ["extension"] = dt.Rows[i]["extension"].ToString(),
+                        ["downloadCount"] = int.Parse(dt.Rows[i]["downloadCount"].ToString()),
+                        ["uploaderName"] = uploader.Realname,
+                        ["datetime"] = DateTime.Parse(dt.Rows[i]["uploadTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
+                        ["info"] = dt.Rows[i]["info"].ToString() != ""
+                    };
+                    a.Add(o);
                 }
             }
-            data += "]";
-            data = data.Replace(",]", "]");
-            return data;
+            return a;
         }
     }
 }

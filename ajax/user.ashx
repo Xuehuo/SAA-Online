@@ -1,59 +1,32 @@
-﻿<%@ WebHandler Language="C#" Class="userHandler" %>
-using System;
-using System.Web;
-using System.Web.SessionState;
-public class userHandler : IHttpHandler, IRequiresSessionState
+﻿<%@ WebHandler Language="C#" Class="UserHandler" %>
+public class UserHandler : Ajax
 {
-    public void ProcessRequest(HttpContext context)
+    public override void Process(System.Web.HttpContext context)
     {
-        context.Response.ContentType = "application/json";
-        // user login
-        if (context.Request["action"] != null && context.Request["action"] == "login" && context.Request.Form["username"] != null && context.Request.Form["password"] != null && !SAAO.User.IsLogin)
+        if (context.Request["action"] == null) return;
+        if (context.Request["action"] == "login")
         {
-            string username = context.Request.Form["username"].ToLower();
-            string password = context.Request.Form["password"];
-            try
+            if (context.Request.Form["username"] == null 
+                    || context.Request.Form["password"] == null 
+                    || SAAO.User.IsLogin) return;
+            if (SAAO.User.Exist(context.Request.Form["username"].ToLower()))
             {
-                if (SAAO.User.Exist(username))
-                {
-                    SAAO.User user = new SAAO.User(username);
-                    if (user.Login(password))
-                        context.Response.Write("{\"flag\": 0}");
-                    else
-                        context.Response.Write("{\"flag\": 2}");
-                }
-                else
-                    context.Response.Write("{\"flag\": 2}");
+                SAAO.User user = new SAAO.User(context.Request.Form["username"].ToLower());
+                if (!user.Login(context.Request.Form["password"]))
+                    R.Flag = 2;
             }
-            catch (Exception ex)
-            {
-                SAAO.Utility.Log(ex);
-                context.Response.Write("{\"flag\": 3}");
-            }
+            else
+                R.Flag = 2;
         }
-        if (context.Request["action"] == null || !SAAO.User.IsLogin) return;
+        if (!SAAO.User.IsLogin) return;
         if (context.Request["action"] == "password")
         {
-            string password = context.Request.Form["password"];
-            string passwordNew = context.Request.Form["newpassword"];
-            try
-            {
-                if (SAAO.User.Current.SetPassword(password, passwordNew))
-                    context.Response.Write("{\"flag\": 0}");
-                else
-                    context.Response.Write("{\"flag\": 2}");
-            }
-            catch (Exception ex)
-            {
-                SAAO.Utility.Log(ex.Message);
-                context.Response.Write("{\"flag\": 3}");
-            }
+            if (!SAAO.User.Current.SetPassword(context.Request.Form["password"], context.Request.Form["newpassword"]))
+                R.Flag = 2;
         }
         else if (context.Request["action"] == "logout")
         {
             SAAO.User.Current.Logout();
-            context.Response.Write("{\"flag\": 0}");
         }
     }
-    public bool IsReusable => false;
 }

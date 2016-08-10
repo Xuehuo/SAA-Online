@@ -44,7 +44,7 @@ $.ajax({
             var initial = new Array(result.data.length);
             for (var i = 0; i < result.data.length; i++) {
                 var classstr = "s" + result.data[i].senior + " g" + result.data[i].group + " c" + result.data[i].initial;
-                var datastr = "data-job=\"" + result.data[i].jobName + "\" data-group=\"" + result.data[i].groupName + "\" data-phone=\"" + result.data[i].phone + "\" data-mail=\"" + result.data[i].mail + "\" data-class=\"" + result.data[i].grade + "(" + result.data[i].class + ")班\"";
+                var datastr = "data-job=\"" + result.data[i].jobName + "\" data-group=\"" + result.data[i].groupName + "\" data-phone=\"" + result.data[i].phone + "\" data-mail=\"" + result.data[i].mail + "\" data-class=\"" + (result.data[i].senior == 2 ? '高二' : '高一') + "(" + result.data[i].class + ")班\"";
                 $("#container").append("<div onclick=\"contactShowInfo(this)\" class=\"mix " + classstr + "\" " + datastr + ">" + result.data[i].realname + "</div>");
                 initial[i] = result.data[i].initial;
             }
