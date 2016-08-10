@@ -18,8 +18,7 @@ namespace SAAO
         private SqlDataReader _dr;
         private SqlDataAdapter _da;
         private DataSet _ds;
-        private int _paraindex;
-        private SqlParameter[] _paralist;
+        private List<SqlParameter> _para;
         /// <summary>
         /// SQL data type
         /// </summary>
@@ -38,15 +37,14 @@ namespace SAAO
         public SqlIntegrate(string connstr)
         {
             _sqlConnStr = connstr;
+            _para = new List<SqlParameter>();
         }
         /// <summary>
-        /// Initialize parameter array
+        /// Reset parameter list
         /// </summary>
-        /// <param name="paracount">Number of parameter(s)</param>
-        public void InitParameter(int paracount)
+        public void ResetParameter()
         {
-            _paraindex = 0;
-            _paralist = new SqlParameter[paracount];
+            _para = new List<SqlParameter>();
         }
         /// <summary>
         /// Add a parameter
@@ -59,8 +57,7 @@ namespace SAAO
         {
             var para = ((int)datatype != (int)SqlDbType.Text || length == 0) ? new SqlParameter(key, (SqlDbType)datatype, length) : new SqlParameter(key, (SqlDbType)datatype);
             para.Value = value;
-            _paralist[_paraindex] = para;
-            _paraindex++;
+            _para.Add(para);
         }
         /// <summary>
         /// Execute a SQL query with no return
@@ -70,9 +67,8 @@ namespace SAAO
         {
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
-            if (_paraindex != 0)
-                foreach (var para in _paralist)
-                    _cmd.Parameters.Add(para);
+            foreach (var para in _para)
+                _cmd.Parameters.Add(para);
             _conn.Open();
             _cmd.ExecuteNonQuery();
             _conn.Close();
@@ -86,9 +82,8 @@ namespace SAAO
         {
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
-            if (_paraindex != 0)
-                foreach (var para in _paralist)
-                    _cmd.Parameters.Add(para);
+            foreach (var para in _para)
+                _cmd.Parameters.Add(para);
             _conn.Open();
             var back = _cmd.ExecuteScalar();
             _conn.Close();
@@ -105,9 +100,8 @@ namespace SAAO
         {
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
-            if (_paraindex != 0)
-                foreach (var para in _paralist)
-                    _cmd.Parameters.Add(para);
+            foreach (var para in _para)
+                _cmd.Parameters.Add(para);
             _conn.Open();
             _dr = _cmd.ExecuteReader();
             if (!_dr.HasRows)
@@ -132,9 +126,8 @@ namespace SAAO
         public DataTable Adapter(string command)
         {
             _da = new SqlDataAdapter(command, _sqlConnStr);
-            if (_paraindex != 0)
-                foreach (var para in _paralist)
-                    _da.SelectCommand.Parameters.Add(para);
+            foreach (var para in _para)
+                _da.SelectCommand.Parameters.Add(para);
             _ds = new DataSet();
             _da.Fill(_ds);
             var dt = _ds.Tables[0];
@@ -149,9 +142,8 @@ namespace SAAO
         {
             _conn = new SqlConnection(_sqlConnStr);
             _cmd = new SqlCommand(command, _conn);
-            if (_paraindex != 0)
-                foreach (var para in _paralist)
-                    _cmd.Parameters.Add(para);
+            foreach (var para in _para)
+                _cmd.Parameters.Add(para);
             _conn.Open();
             _dr = _cmd.ExecuteReader();
             if (!_dr.HasRows)
@@ -171,9 +163,8 @@ namespace SAAO
         public JArray AdapterJson(string command)
         {
             _da = new SqlDataAdapter(command, _sqlConnStr);
-            if (_paraindex != 0)
-                foreach (var para in _paralist)
-                    _da.SelectCommand.Parameters.Add(para);
+            foreach (var para in _para)
+                _da.SelectCommand.Parameters.Add(para);
             _ds = new DataSet();
             _da.Fill(_ds);
             var a = new JArray();
