@@ -40,9 +40,9 @@ function fileInfo(obj) {
                     for (var i = 0; i < result.data.tag.split(",").length; i++)
                         $("#filetagbox").tagging("add", result.data.tag.split(",")[i]);
                 $("#filemodal .btn-group").children().removeClass("btn-primary").addClass("btn-default")
+                if (!result.data.permission)
+                    result.data.permission = 0;
                 $("#filemodal .btn-group").children().eq(result.data.permission).removeClass("btn-default").addClass("btn-primary");
-
-
                 $("#file #filemodal").modal("show");
             }
         },
