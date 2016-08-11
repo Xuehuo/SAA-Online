@@ -22,8 +22,9 @@ namespace SAAO
         /// <returns>JSON of current events [{title,start,end,backgroundColor},...]</returns>
         public static JArray ListJson()
         {
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            si.AdapterJson("SELECT * FROM [Calendar]");
             return new JArray();
-            // TODO: implement this!
         }
 
         /// <summary>
