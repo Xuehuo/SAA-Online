@@ -165,7 +165,7 @@ namespace SAAO
                         ["notifyTime"] =
                             Convert.ToDateTime(dt.Rows[i]["notifyTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
                         ["type"] = dt.Rows[i]["type"].ToString(),
-                        ["important"] = (Convert.ToInt32(dt.Rows[i]["important"]) - 1)
+                        ["important"] = Convert.ToInt32(dt.Rows[i]["important"])
                     };
                     if (Convert.ToInt32(dt.Rows[i]["type"]) == (int)PermissionType.Supervise)
                         o["reportFile"] = dt.Rows[i]["reportFile"].ToString();
