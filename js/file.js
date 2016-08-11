@@ -23,7 +23,7 @@ function fileInfo(obj) {
                 info.val(result.data.info);
                 info.text(info.val());
                 $("#filetagbox").tagging({
-                    "case-sensitive": true,
+                    "case-sensitive": false,
                     "edit-on-delete": false,
                     "forbidden-chars-text": "以下字符是非法的：",
                     "forbidden-chars-callback": function (text) {
