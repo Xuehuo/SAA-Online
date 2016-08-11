@@ -15,8 +15,8 @@ public class NotificationHandler : Ajax
             Guid guid;
             if (!Guid.TryParse(context.Request["id"], out guid)) return;
             SAAO.Utility.Download(
-                path: SAAO.Notification.StoragePath + context.Request["id"], 
-                fileName: "监督报告", 
+                path: SAAO.Notification.StoragePath + context.Request["id"],
+                fileName: "监督报告",
                 contentType: "application/pdf"
             );
         }
@@ -31,8 +31,8 @@ public class NotificationHandler : Ajax
                 (context.Request.Form["important"] != "0" &&
                  (context.Request.Form["important"] != "1" || !SAAO.User.Current.IsExecutive))) return;
             var n = new SAAO.Notification(
-                title: context.Request.Form["title"], 
-                content: context.Request.Form["content"], 
+                title: context.Request.Form["title"],
+                content: context.Request.Form["content"],
                 type: (SAAO.Notification.PermissionType)int.Parse(context.Request.Form["type"])
             );
             if (context.Request.Form["type"] == "2")
@@ -41,10 +41,11 @@ public class NotificationHandler : Ajax
                 context.Request.Files[0].SaveAs(SAAO.Notification.StoragePath + guid);
                 n.AttachReport(guid);
             }
-            else
-                n.Broadcast(); // broadcast automatically if not supervising report
-            if (context.Request.Form["important"] == "1")
+            else if (context.Request.Form["important"] == "1")
+            {
                 n.SetImportant();
+                n.Broadcast();
+            }
         }
     }
 }
