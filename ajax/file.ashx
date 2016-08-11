@@ -1,5 +1,7 @@
 ﻿<%@ WebHandler Language="C#" Class="FileHandler" %>
 using System;
+using System.Linq;
+
 public class FileHandler : Ajax
 {
     public override void Process(System.Web.HttpContext context)
@@ -43,21 +45,10 @@ public class FileHandler : Ajax
                     file.Permission = SAAO.File.PermissionLevel.All;
                 var tags = context.Request.Form["tag"].Split(',');
                 var tagsOriginal = file.Tag.ToArray();
-                foreach (var tag in tagsOriginal)
-                {
-                    bool exist = false;
-                    for (var i = 0; i < tags.Length; i++)
-                        if (tag == tagsOriginal[i])
-                        {
-                            exist = true;
-                            break;
-                        }
-                    if (!exist)
-                        file.RemoveTag(tag);
-                }
-                foreach (var tag in tags)
-                    if (!file.HasTag(tag))
-                        file.AddTag(tag);
+                foreach (var tag in tags.Except(tagsOriginal))
+                    file.AddTag(tag);
+                foreach (var tag in tagsOriginal.Except(tags))
+                    file.RemoveTag(tag);
             }
             else
                 R.Flag = 2;
