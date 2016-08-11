@@ -116,7 +116,7 @@ namespace SAAO
             Tag.Remove(str);
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
-            si.Execute($"DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}')");
+            si.Execute($"DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}'");
         }
         /// <summary>
         /// Add a tag to the file
