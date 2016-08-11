@@ -13,7 +13,7 @@ namespace SAAO
         public Event()
         {
             //
-            // TODO: finish the OOP design of Event
+            // TODO: Merge from brave-new-calendar
             //
         }
         /// <summary>
@@ -23,7 +23,6 @@ namespace SAAO
         public static JArray ListJson()
         {
             return new JArray();
-            // TODO: implement this!
         }
 
         /// <summary>
@@ -32,13 +31,12 @@ namespace SAAO
         /// <returns>Event Json for dashboard</returns>
         public static JObject DashboardJson()
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            JObject o = new JObject
+            var o = new JObject
             {
                 ["group"] = User.Current.GroupName,
-                ["begin"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [start] = CONVERT(varchar(10),getdate(),110)"),
-                ["doing"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [start] < getdate() AND [end] > getdate()"),
-                ["todo"] = si.AdapterJson($"SELECT * FROM [Calendar] WHERE [group] = '{User.Current.Group}' AND [end] = CONVERT(varchar(10),getdate(),110)")
+                ["begin"] = null,
+                ["doing"] = null,
+                ["todo"] = null
             };
             return o;
         }
