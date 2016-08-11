@@ -10,8 +10,7 @@ public class FileHandler : Ajax
         if (context.Request["action"] == "upload")
         {
             if (context.Request.Files.Count == 0) return;
-            foreach (System.Web.HttpPostedFile file in context.Request.Files)
-                SAAO.File.Upload(file);
+            SAAO.File.Upload(context.Request.Files[0]);
         }
         else if (context.Request["action"] == "list")
         {
