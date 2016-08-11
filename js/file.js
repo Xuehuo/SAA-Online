@@ -7,11 +7,10 @@ function fileInfo(obj) {
         url: "file.info.id=" + fileid,
         type: "get",
         cache: false,
-        success: function (result) {
-            if (result.flag != 0) {
+        success: function(result) {
+            if (result.flag !== 0) {
                 msg("错误", "加载文件属性失败，请刷新重试", "error");
-            }
-            else {
+            } else {
                 $("#filemodal dl").children("dd").eq(0).children().val(result.data.name);
                 $("#filemodal dl").children("dd").eq(1).html(result.data.extension);
                 $("#filemodal dl").children("dd").eq(2).html(result.data.uploadTime);
@@ -22,34 +21,39 @@ function fileInfo(obj) {
                 var info = $("#filemodal dl").children("dd").eq(7).children();
                 info.val(result.data.info);
                 info.text(info.val());
-                $("#filetagbox").tagging({
-                    "case-sensitive": false,
-                    "edit-on-delete": false,
-                    "forbidden-chars-text": "以下字符是非法的：",
-                    "forbidden-chars-callback": function (text) {
-                        msg("错误的标签", text, "error")
-                    },
-                    "no-backspace": true,
-                    "no-duplicate-text": "重复的标签：",
-                    "no-duplicate-callback": function (text) {
-                        msg("错误的标签", text, "error")
-                    }
-                });
+                $("#filetagbox")
+                    .tagging({
+                        "case-sensitive": false,
+                        "edit-on-delete": false,
+                        "forbidden-chars-text": "以下字符是非法的：",
+                        "forbidden-chars-callback": function(text) {
+                            msg("错误的标签", text, "error");
+                        },
+                        "no-backspace": true,
+                        "no-duplicate-text": "重复的标签：",
+                        "no-duplicate-callback": function(text) {
+                            msg("错误的标签", text, "error");
+                        }
+                    });
                 $("#filetagbox").tagging("removeAll");
-                if (result.data.tag != "")
+                if (result.data.tag !== "")
                     for (var i = 0; i < result.data.tag.split(",").length; i++)
                         $("#filetagbox").tagging("add", result.data.tag.split(",")[i]);
-                $("#filemodal .btn-group").children().removeClass("btn-primary").addClass("btn-default")
+                $("#filemodal .btn-group").children().removeClass("btn-primary").addClass("btn-default");
                 if (!result.data.permission)
                     result.data.permission = 0;
-                $("#filemodal .btn-group").children().eq(result.data.permission).removeClass("btn-default").addClass("btn-primary");
+                $("#filemodal .btn-group")
+                    .children()
+                    .eq(result.data.permission)
+                    .removeClass("btn-default")
+                    .addClass("btn-primary");
                 $("#file #filemodal").modal("show");
             }
         },
-        error: function () {
+        error: function() {
             msg("获取文件信息失败", "网络中断或服务器错误", "error");
         }
-    })
+    });
 }
 
 function fileGetTypeClass(extension) {
@@ -57,35 +61,32 @@ function fileGetTypeClass(extension) {
         "|bmp|jpg|jpeg|png|tiff|gif|pcx|tga|exif|fpx|svg|psd|cdr|pcd|dxf|ufo|eps|ai|raw|cgm|wmf|emf|pict|",
         "|wmv|asf|asx|rm|rmvb|mpg|mpeg|mpe|3gp|mov|mp4|m4v|avi|dat|mkv|flv|vob|",
         "|rar|zip|7z|cab|arj|lzh|tar|gz|ace|uue|bz2|jar|"];
-
-    var filetype = extension;
-    var rt = "othertype";
-    if (typeClass[0].indexOf("|" + extension + "|") != -1)
-        rt = "doctype";
-    else if (typeClass[1].indexOf("|" + extension + "|") != -1)
-        rt = "imagetype";
-    else if (typeClass[2].indexOf("|" + extension + "|") != -1)
-        rt = "videotype";
-    else if (typeClass[3].indexOf("|" + extension + "|") != -1)
-        rt = "ziptype";
-    return rt;
+    if (typeClass[0].indexOf("|" + extension + "|") !== -1)
+        return "doctype";
+    if (typeClass[1].indexOf("|" + extension + "|") !== -1)
+        return "imagetype";
+    if (typeClass[2].indexOf("|" + extension + "|") !== -1)
+        return "videotype";
+    if (typeClass[3].indexOf("|" + extension + "|") !== -1)
+        return "ziptype";
+    return "othertype";
 }
 
 function fileGetAutoSize(size, roundCount) {
-    var KBCount = 1024;
-    var MBCount = KBCount * 1024;
-    var GBCount = MBCount * 1024;
-    var TBCount = GBCount * 1024;
-    if (KBCount > size)
+    var kbCount = 1024;
+    var mbCount = kbCount * 1024;
+    var gbCount = mbCount * 1024;
+    var tbCount = gbCount * 1024;
+    if (kbCount > size)
         return Math.round(size, roundCount) + "B";
-    else if (MBCount > size)
-        return Math.round(size / KBCount, roundCount) + "KB";
-    else if (GBCount > size)
-        return Math.round(size / MBCount, roundCount) + "MB";
-    else if (TBCount > size)
-        return Math.round(size / GBCount, roundCount) + "GB";
+    else if (mbCount > size)
+        return Math.round(size / kbCount, roundCount) + "KB";
+    else if (gbCount > size)
+        return Math.round(size / mbCount, roundCount) + "MB";
+    else if (tbCount > size)
+        return Math.round(size / gbCount, roundCount) + "GB";
     else
-        return Math.round(size / TBCount, roundCount) + "TB";
+        return Math.round(size / tbCount, roundCount) + "TB";
 }
 
 function fileDelete() {
@@ -94,15 +95,13 @@ function fileDelete() {
         type: "get",
         async: false,
         success: function (result) {
-            if (result.flag == 0) {
+            if (result.flag === 0) {
                 msg("成功", "文件删除成功", "success");
                 $("#file #filemodal").modal("hide");
-                fileList();
+                $("#container > table[data-id='" + fileCurrent + "']").remove();
             }
             else {
                 msg("错误", "文件删除失败", "error");
-                $("#file #filemodal").modal("hide");
-                fileList();
             }
         },
         error: function () {
@@ -116,6 +115,7 @@ function fileDownload() {
     window.open("file.download.id=" + fileCurrent);
     var obj = $("#filemodal dl").children("dd").eq(6);
     obj.html(parseInt(obj.html()) + 1);
+    $("#container > table[data-id='" + fileCurrent + "'] .downloadcount").html(parseInt(obj.html()));
 }
 
 function filePermission(obj) {
@@ -124,52 +124,53 @@ function filePermission(obj) {
 }
 
 function fileSave() {
-    if ($("#file #filemodal #filename").val().trim() != "") {
-        if ($("#file #filemodal textarea").val().length < 600 && $("#file #filemodal textarea").val().trim() != "" && $("#file #filemodal textarea").val() != "在此输入对该文件的必要描述（600字以内）") {
-            var tagvalid = true;
-            var tags = $("#file #filetagbox").tagging("getTags");
-            var tagstring = "";
-            for (var i = 0; i < tags.length; i++)
-                if (tags[i].length > 20)
-                    tagvalid = false;
-                else
-                    if (i != tags.length - 1)
-                        tagstring += tags[i] + ",";
-                    else
-                        tagstring += tags[i];
-            if (tagvalid) {
-
-                $.ajax({
-                    url: "file.update.id=" + fileCurrent,
-                    type: "post",
-                    data: { name: $("#file #filemodal #filename").val().trim(), info: $("#file #filemodal textarea").val(), permission: parseInt($("#filemodal .btn-group").children(".btn-primary").data("per")), tag: tagstring },
-                    async: false,
-                    success: function (result) {
-                        if (result.flag != 0) {
-                            msg("错误", "更新文件信息失败，请重试", "error");
-                        }
-                        else {
-                            msg("成功", "更新文件信息成功", "success");
-                            $("#file #filemodal").modal("hide");
-                        }
-                        fileList();
-                    },
-                    error: function () {
-                        msg("更新文件信息失败", "网络中断或服务器错误", "error");
-                    }
-                });
-            }
-            else {
-                msg("错误", "标签的长度超过20字", "error");
-            }
-        }
-        else {
-            msg("错误", "文件描述为空或描述过长", "error");
-        }
+    if ($("#filename").val().replace(/(^\s*)|(\s*$)/g, "")=== "") {
+        msg("文件名为空", "请填写文件名", "error");
+        return;
     }
-    else {
-        msg("错误", "文件名为空", "error");
+    if ($("#filemodal textarea").val().length >= 600 ||
+        $("#filemodal textarea").val().replace(/(^\s*)|(\s*$)/g, "").length === 0 ||
+        $("#filemodal textarea").val() === "在此输入对该文件的必要描述（600字以内）") {
+        msg("文件描述为空或过长", "请正确填写描述", "error");
+        return;
     }
+    if (!parseInt($("#filemodal .btn-group").children(".btn-primary").data("per"))) {
+        msg("文件的权限级别为空", "请选择文件的权限级别", "error");
+        return;
+    }
+    var tags = $("#filetagbox").tagging("getTags");
+    var tagstring = "";
+    for (var i = 0; i < tags.length; i++)
+        if (tags[i].length > 20) {
+            msg("标签的长度过长", "请检查过长标签并修正", "error");
+            return;
+        }
+        else if (i !== tags.length - 1)
+            tagstring += tags[i] + ",";
+        else
+            tagstring += tags[i];
+    $.ajax({
+        url: "file.update.id=" + fileCurrent,
+        type: "post",
+        data: {
+            name: $("#filename").val().trim(),
+            info: $("#filemodal textarea").val(),
+            permission: parseInt($("#filemodal .btn-group").children(".btn-primary").data("per")),
+            tag: tagstring
+        },
+        success: function(result) {
+            if (result.flag === 0) {
+                msg("成功", "更新文件信息成功", "success");
+                $("#container > table[data-id='" + fileCurrent + "'] .filetitle > td").html($("#filename").val().trim());
+                $("#container > table[data-id='" + fileCurrent + "'] .downloadcount > strong").remove();
+                $("#filemodal").modal("hide");
+            } else 
+                msg("错误", "更新文件信息失败，请重试", "error");
+        },
+        error: function() {
+            msg("更新文件信息失败", "网络中断或服务器错误", "error");
+        }
+    });
 }
 
 function fileList() {
@@ -180,7 +181,7 @@ function fileList() {
             type: "get",
             cache: false,
             success: function (result) {
-                if (result.flag == 0) {
+                if (result.flag === 0) {
                     if (result.data.length > 0) {
                         for (var i = 0; i < result.data.length; i++) {
                             $("#container").append("<table onclick=\"fileInfo(this)\" data-id=\"" + result.data[i].guid + "\"><tr class=\"filetitle\"><td>" + result.data[i].name + "</td></tr><tr class=\"filevertype\"><td><table><tr><td class=\"downloadcount\">" + result.data[i].downloadCount + "次下载" + (!result.data[i].info ? "  <strong>[需要描述]</strong>" : "") + "</td><td class=\"filetype " + fileGetTypeClass(result.data[i].extension) + "\">" + result.data[i].extension + "</td></tr></table></td></tr><tr class=\"fileowntime\"><td>" + result.data[i].uploaderName + " 于 " + result.data[i].datetime + "</td></tr></table>");
@@ -209,7 +210,6 @@ fileList();
 
 $("#filemodal").on("hidden.bs.modal", function () {
     $('#filetagbox').tagging('destroy');
-    //fileList();
 });
 $("#uploadmodal").on("hidden.bs.modal", function () {
     fileList();
@@ -245,18 +245,18 @@ var fileDropZone = new Dropzone("#uploadmodal", {
             msg("文件上传", "上传队列已经处理完毕，请及时为新上传的文件添加标签及说明", "info");
         }),
         this.on("error", function (file, errorMessage) {
-            $(file.previewTemplate).children('.upfiledivtwo').animate({ backgroundColor: "rgb(239, 127, 127)" }, 120);
-            $(file.previewTemplate).children('.upfileaction').animate({ backgroundColor: "rgb(239, 127, 127)" }, 120);
+            $(file.previewTemplate).children(".upfiledivtwo").animate({ backgroundColor: "rgb(239, 127, 127)" }, 120);
+            $(file.previewTemplate).children(".upfileaction").animate({ backgroundColor: "rgb(239, 127, 127)" }, 120);
             $(file.previewTemplate).find(".uploadstatep").fadeOut("fast");
             $(file.previewTemplate).find(".uploadstatep").text("出错");
             $(file.previewTemplate).find(".uploadstatep").fadeIn("fast");
             if (file.size > 2048 * 1024 * 1024) {
-                msg("上传失败", "文件大于2G。请分段压缩上传或联系网络组", "error");
+                msg("上传失败", "文件大于2G。请分段压缩上传或联系网络组" + errorMessage, "error");
             }
         }),
         this.on("success", function (file) {
-            $(file.previewTemplate).children('.upfiledivtwo').animate({ backgroundColor: "rgb(60,178,112)" }, 120);
-            $(file.previewTemplate).children('.upfileaction').animate({ backgroundColor: "rgb(60,178,112)" }, 120);
+            $(file.previewTemplate).children(".upfiledivtwo").animate({ backgroundColor: "rgb(60,178,112)" }, 120);
+            $(file.previewTemplate).children(".upfileaction").animate({ backgroundColor: "rgb(60,178,112)" }, 120);
             $(file.previewTemplate).find(".uploadstatep").fadeOut("fast");
             $(file.previewTemplate).find(".uploadstatep").text("成功");
             $(file.previewTemplate).find(".uploadstatep").fadeIn("fast");
@@ -272,7 +272,7 @@ var fileDropZone = new Dropzone("#uploadmodal", {
                 $("#btnstartupload").fadeOut();
                 $("#btnclearqueue").fadeOut();
             }, 150);
-        })
+        });
     },
     autoProcessQueue: false,
     previewsContainer: "#uploadqueue",
