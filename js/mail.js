@@ -1,16 +1,8 @@
-﻿function mailFolder(obj) {
+﻿function mailFolder() {
     mailList();
-    var folder;
-    if (arguments[0]) {
-        folder = $(obj).data("folder");
-        $("#maillist .breadcrumb li").eq(1).html($(obj).html());
-        $("#maillist .breadcrumb li span").remove();
-    }
-    else
-        folder = "INBOX";
     $("#maillist tbody").empty();
     $.ajax({
-        url: "mail.list.folder=" + folder,
+        url: "mail.list.folder=INBOX",
         type: "get",
         success: function (result) {
             if (result.flag != 3) {

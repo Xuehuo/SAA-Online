@@ -39,16 +39,6 @@
                 </div>
                 <ul class="nav navbar-nav navbar-left">
                     <li><a href="#" onclick="mailCompose()"><span class="glyphicon glyphicon-pencil"></span><span class="hidden-xs">撰写邮件</span></a></li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span><span class="hidden-xs">文件夹</span> <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" data-folder="INBOX" onclick="mailFolder(this)"><span class="glyphicon glyphicon-inbox"></span>收件箱</a></li>
-                            <li><a href="#" data-folder="Sent" onclick="mailFolder(this)"><span class="glyphicon glyphicon-send"></span>发件箱</a></li>
-                            <li><a href="#" data-folder="Drafts" onclick="mailFolder(this)"><span class="glyphicon glyphicon-pencil"></span>草稿</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#" data-folder="Trash" onclick="mailFolder(this)"><span class="glyphicon glyphicon-trash"></span>垃圾箱</a></li>
-                        </ul>
-                    </li>
                     <li><a href="../mail/webmail.aspx" target="_blank"><span class="glyphicon glyphicon-share-alt"></span><span class="hidden-xs">完整邮箱</span></a></li>
                     <li class="hidden-xs"><a href="#" data-toggle="modal" data-target="#helpmodal"><span class="glyphicon glyphicon-question-sign"></span><span class="hidden-xs">帮助</span></a></li>
                 </ul>
