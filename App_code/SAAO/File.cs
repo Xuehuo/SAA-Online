@@ -78,6 +78,7 @@ namespace SAAO
             var tagList = si.Adapter("SELECT [name] FROM [Filetag] WHERE FUID = @FUID");
             for (var i = 0; i < tagList.Rows.Count; i++)
                 Tag.Add(tagList.Rows[i]["name"].ToString());
+            si.Dispose();
         }
 
         public static void Upload(System.Web.HttpPostedFile file)
@@ -90,6 +91,7 @@ namespace SAAO
             si.AddParameter("@extension", SqlIntegrate.DataType.VarChar,
                 System.IO.Path.GetExtension(file.FileName).TrimStart('.').ToLower(), 10);
             si.Execute($"INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES ('{guid}',@name,@extension,{file.ContentLength},'{User.Current.UUID}')");
+            si.Dispose();
         }
         /// <summary>
         /// Check whether the file has a tag
@@ -102,6 +104,7 @@ namespace SAAO
             si.AddParameter("@name", SqlIntegrate.DataType.VarChar, str, 50);
             int count = Convert.ToInt32(si.Query(
                 $"SELECT COUNT(*) FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}'"));
+            si.Dispose();
             if (count != 0)
                 return true;
             return false;
@@ -117,6 +120,7 @@ namespace SAAO
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.Execute($"DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}'");
+            si.Dispose();
         }
         /// <summary>
         /// Add a tag to the file
@@ -125,9 +129,10 @@ namespace SAAO
         public void AddTag(string str)
         {
             Tag.Add(str);
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.Execute($"INSERT INTO Filetag ([name], [FUID]) VALUES (@name, '{_guid}')");
+            si.Dispose();
         }
         /// <summary>
         /// Download the file (Write stream to current http response)
@@ -135,9 +140,10 @@ namespace SAAO
         public void Download()
         {
             _downloadCount++;
-            new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{_guid}'");
-            string fileName = Name + "." + _extension;
-            Utility.Download(_savePath, fileName);
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{_guid}'");
+            si.Dispose();
+            Utility.Download(_savePath, _name + "." + _extension);
         }
         /// <summary>
         /// Filename
@@ -147,9 +153,10 @@ namespace SAAO
             set
             {
                 _name = value;
-                SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+                var si = new SqlIntegrate(Utility.ConnStr);
                 si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, value, 50);
                 si.Execute($"UPDATE [File] SET [name] = @name WHERE [GUID] = '{_guid}'");
+                si.Dispose();
             }
             get
             {
@@ -164,9 +171,10 @@ namespace SAAO
             set
             {
                 _info = value;
-                SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+                var si = new SqlIntegrate(Utility.ConnStr);
                 si.AddParameter("@info", SqlIntegrate.DataType.Text, value);
                 si.Execute($"UPDATE [File] SET [info] = @info WHERE [GUID] = '{_guid}'");
+                si.Dispose();
             }
             get
             {
@@ -181,6 +189,7 @@ namespace SAAO
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.Execute($"DELETE FROM [File] WHERE [GUID] = '{_guid}'");
             si.Execute($"DELETE FROM [Filetag] WHERE [FUID] = '{_guid}'");
+            si.Dispose();
             System.IO.File.Delete(_savePath);
         }
         /// <summary>
@@ -197,6 +206,7 @@ namespace SAAO
                 _permission = value;
                 SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
                 si.Execute($"UPDATE [File] SET [permission] = {(int) value} WHERE [GUID] = '{_guid}'");
+                si.Dispose();
             }
         }
         /// <summary>
@@ -268,6 +278,7 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             DataTable dt = si.Adapter("SELECT TOP 50 * FROM [File] ORDER BY [ID] DESC");
+            si.Dispose();
             JArray a = new JArray();
             for (int i = 0; i < dt.Rows.Count; i++)
             {

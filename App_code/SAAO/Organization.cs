@@ -26,7 +26,9 @@ namespace SAAO
         public Organization(DateTime dt)
         {
             State = new State(dt);
-            Structure = new SqlIntegrate(Utility.ConnStr).Adapter($"SELECT * FROM [Org] WHERE [year]='{State.StructureCurrent}{(int) State.EventCurrent}'");
+            var si = new SqlIntegrate(Utility.ConnStr);
+            Structure = si.Adapter($"SELECT * FROM [Org] WHERE [year]='{State.StructureCurrent}{(int) State.EventCurrent}'");
+            si.Dispose();
         }
         /// <summary>
         /// Current organization structure

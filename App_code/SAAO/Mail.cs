@@ -105,6 +105,7 @@ namespace SAAO
             SqlIntegrate si = new SqlIntegrate(ConnStr);
             var mailInfo = si.Reader($"SELECT * FROM hm_messages WHERE messageid = {mailId}");
             Username = si.Query($"DECLARE @uid int; SELECT @uid = messageaccountid FROM hm_messages WHERE messageid = {mailId}; SELECT accountaddress FROM hm_accounts WHERE accountid = @uid;").ToString().Replace("@" + MailDomain, "");
+            si.Dispose();
             /* The eml file is storage in this way:
              *
              * When hmailserver receives an email, it writes information in database and stores the eml file.
@@ -223,6 +224,7 @@ namespace SAAO
             int folderid = Convert.ToInt32(si.Query($"SELECT folderid FROM hm_imapfolders WHERE foldername = '{folderName}' AND folderaccountid = {uid}"));
             // TODO: Care for SQL Inject of folderName
             si.Execute($"UPDATE hm_messages SET messagefolderid = {folderid} WHERE messageid = {_mailId}");
+            si.Dispose();
             _folderid = folderid;
         }
         /// <summary>
@@ -233,6 +235,7 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
             si.Execute($"UPDATE hm_messages SET messageflags = {(int) newflag} WHERE messageid = {_mailId}");
+            si.Dispose();
             Flag = newflag;
         }
         /// <summary>
@@ -312,6 +315,7 @@ namespace SAAO
                 $"SELECT folderid FROM hm_imapfolders WHERE {(folder == "Sent" ? "(foldername = 'Sent' OR foldername = 'Sent Items' OR foldername = 'Sent Messages')" : "foldername = '" + folder + "'")} AND folderaccountid = {uid}"));
             DataTable list = si.Adapter(
                 $"SELECT messageid FROM hm_messages WHERE messagefolderid = {folderid} AND messageaccountid = {uid} ORDER BY messageid DESC");
+            si.Dispose();
             JArray a = new JArray();
             for (int i = 0; i < list.Rows.Count; i++)
             {

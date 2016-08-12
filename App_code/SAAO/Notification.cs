@@ -40,6 +40,7 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             var dr = si.Reader($"SELECT * FROM Notification WHERE ID ={id}");
+            si.Dispose();
             Content = dr["content"].ToString();
             Title = dr["title"].ToString();
             Id = id;
@@ -62,6 +63,7 @@ namespace SAAO
             si.AddParameter("@content", SqlIntegrate.DataType.Text, content);
             si.AddParameter("@title", SqlIntegrate.DataType.NVarChar, title, 50);
             Id = Convert.ToInt32(si.Query($"INSERT INTO Notification ([title], [content], [type], [UUID]) VALUES (@title, @content, {(int) type}, \'{User.Current.UUID}\'); SELECT @@IDENTITY"));
+            si.Dispose();
             Type = type;
             Title = title;
             Content = content;
@@ -78,7 +80,7 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             DataTable dt = si.Adapter($"SELECT mail, SN FROM [User] WHERE activated = 1{(_group != -1 ? " AND [group] =" + _group : "")}");
-
+            si.Dispose();
             for (int i = 0; i < dt.Rows.Count; i++)
                 SendMail(dt.Rows[i]["mail"].ToString());
         }
@@ -88,8 +90,10 @@ namespace SAAO
         /// </summary>
         public void SetImportant()
         {
-            int important = Convert.ToInt32(new SqlIntegrate(Utility.ConnStr).Query("SELECT MAX(important) FROM Notification"));
-            new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE Notification SET important ={(important + 1)} WHERE ID={Id}");
+            var si = new SqlIntegrate(Utility.ConnStr);
+            int important = Convert.ToInt32(si.Query("SELECT MAX(important) FROM Notification"));
+            si.Execute($"UPDATE Notification SET important ={(important + 1)} WHERE ID={Id}");
+            si.Dispose();
         }
 
         /// <summary>
@@ -98,7 +102,9 @@ namespace SAAO
         /// <param name="guid">Supervising report storage GUID</param>
         public void AttachReport(string guid)
         {
-            new SqlIntegrate(Utility.ConnStr).Execute("UPDATE Notification SET reportFile ='" + guid + "' WHERE ID=" + Id);
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.Execute("UPDATE Notification SET reportFile ='" + guid + "' WHERE ID=" + Id);
+            si.Dispose();
         }
 
         /// <summary>
@@ -152,25 +158,26 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             DataTable dt = si.Adapter("SELECT Notification.reportFile, Notification.ID, Notification.important, Notification.type, Notification.title, Notification.[content], Notification.notifyTime, [User].realname, [User].[group] FROM Notification INNER JOIN [User] ON Notification.UUID = [User].UUID ORDER BY Notification.important DESC, ID DESC");
+            si.Dispose();
             JArray a = new JArray();
             for (int i = 0; i < dt.Rows.Count; i++)
-                if (Visible(Convert.ToInt32(dt.Rows[i]["group"]), PermissionType.SelfGroupOnly))
+            {
+                if (!Visible(Convert.ToInt32(dt.Rows[i]["group"]), PermissionType.SelfGroupOnly)) continue;
+                JObject o = new JObject
                 {
-                    JObject o = new JObject
-                    {
-                        ["ID"] = dt.Rows[i]["ID"].ToString(),
-                        ["title"] = dt.Rows[i]["title"].ToString(),
-                        ["user"] = dt.Rows[i]["realname"].ToString(),
-                        ["content"] = dt.Rows[i]["content"].ToString(),
-                        ["notifyTime"] =
-                            Convert.ToDateTime(dt.Rows[i]["notifyTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
-                        ["type"] = dt.Rows[i]["type"].ToString(),
-                        ["important"] = Convert.ToInt32(dt.Rows[i]["important"])
-                    };
-                    if (Convert.ToInt32(dt.Rows[i]["type"]) == (int)PermissionType.Supervise)
-                        o["reportFile"] = dt.Rows[i]["reportFile"].ToString();
-                    a.Add(o);
-                }
+                    ["ID"] = dt.Rows[i]["ID"].ToString(),
+                    ["title"] = dt.Rows[i]["title"].ToString(),
+                    ["user"] = dt.Rows[i]["realname"].ToString(),
+                    ["content"] = dt.Rows[i]["content"].ToString(),
+                    ["notifyTime"] =
+                        Convert.ToDateTime(dt.Rows[i]["notifyTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
+                    ["type"] = dt.Rows[i]["type"].ToString(),
+                    ["important"] = Convert.ToInt32(dt.Rows[i]["important"])
+                };
+                if (Convert.ToInt32(dt.Rows[i]["type"]) == (int)PermissionType.Supervise)
+                    o["reportFile"] = dt.Rows[i]["reportFile"].ToString();
+                a.Add(o);
+            }
             return a;
         }
     }
