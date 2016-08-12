@@ -36,7 +36,6 @@ namespace SAAO
                 si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
                 si.AddParameter("@class", SqlIntegrate.DataType.Int, value);
                 si.Execute("UPDATE [User] SET [class] = @class WHERE [UUID] = @UUID");
-                si.Dispose();
             }
         }
 
@@ -55,7 +54,6 @@ namespace SAAO
                 si.AddParameter("@mail", SqlIntegrate.DataType.VarChar, value, 50);
                 si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
                 si.Execute("UPDATE [User] SET [mail] = @mail WHERE [UUID] = @UUID");
-                si.Dispose();
             }
         }
 
@@ -71,7 +69,6 @@ namespace SAAO
                 si.AddParameter("@phone", SqlIntegrate.DataType.VarChar, value, 11);
                 si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
                 si.Execute("UPDATE [User] SET [phone] = @phone WHERE [UUID] = @UUID");
-                si.Dispose();
             }
         }
         /// <summary>
@@ -101,7 +98,6 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
             var dr = si.Reader("SELECT * FROM [User] WHERE [UUID] = @UUID");
-            si.Dispose();
             _id = Convert.ToInt32(dr["ID"]);
             _password = dr["password"].ToString();
             Realname = dr["realname"].ToString();
@@ -129,7 +125,6 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
             var dr = si.Reader("SELECT * FROM [User] WHERE [username] = @username");
-            si.Dispose();
             _id = Convert.ToInt32(dr["ID"]);
             UUID = dr["UUID"].ToString();
             _password = dr["password"].ToString();
@@ -157,11 +152,8 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
-            int count = Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE [username] = @username AND [activated] = 1"));
-            si.Dispose();
-            if (count == 1)
-                return true;
-            return false;
+            var count = Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE [username] = @username AND [activated] = 1"));
+            return count == 1;
         }
         /// <summary>
         /// Logged user of current session (values null if not logged)
@@ -260,14 +252,12 @@ namespace SAAO
             si.AddParameter("@password", SqlIntegrate.DataType.VarChar, passwordEncrypted);
             si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
             si.Execute("UPDATE [User] SET [password] = @password WHERE [UUID] = @UUID");
-            si.Dispose();
             si = new SqlIntegrate(SAAO.Mail.ConnStr);
             // Update the user's password of SAA Mail (Hmailserver)
             si.ResetParameter();
             si.AddParameter("@accountpassword", SqlIntegrate.DataType.VarChar, passwordEncrypted);
             si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, Username + "@" + SAAO.Mail.MailDomain, 50);
             si.Execute("UPDATE [hm_accounts] SET accountpassword = @accountpassword WHERE accountaddress = @accountaddress");
-            si.Dispose();
             PasswordRaw = passwordNew;
             return true;
         }
@@ -280,7 +270,6 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             var dt = si.Adapter("SELECT * FROM [User] WHERE [activated] = 1");
-            si.Dispose();
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {

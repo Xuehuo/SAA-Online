@@ -41,7 +41,6 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@ID", SqlIntegrate.DataType.Int, id);
             var dr = si.Reader("SELECT * FROM Notification WHERE ID = @ID");
-            si.Dispose();
             Content = dr["content"].ToString();
             Title = dr["title"].ToString();
             Id = id;
@@ -66,7 +65,6 @@ namespace SAAO
             si.AddParameter("@type", SqlIntegrate.DataType.Int, (int)type);
             si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, User.Current.UUID);
             Id = Convert.ToInt32(si.Query("INSERT INTO Notification ([title], [content], [type], [UUID]) VALUES (@title, @content, @type, @UUID); SELECT @@IDENTITY"));
-            si.Dispose();
             Type = type;
             Title = title;
             Content = content;
@@ -90,7 +88,6 @@ namespace SAAO
                 si.AddParameter("@group", SqlIntegrate.DataType.Int, _group);
                 dt = si.Adapter("SELECT mail FROM [User] WHERE activated = 1 AND [group] = @group");
             }
-            si.Dispose();
             for (var i = 0; i < dt.Rows.Count; i++)
                 SendMail(dt.Rows[i]["mail"].ToString());
         }
@@ -103,7 +100,6 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@ID", SqlIntegrate.DataType.Int, Id);
             si.Execute("UPDATE Notification SET important = ((SELECT MAX(important) FROM Notification) + 1) WHERE ID = @ID");
-            si.Dispose();
         }
 
         /// <summary>
@@ -116,7 +112,6 @@ namespace SAAO
             si.AddParameter("@reportFile", SqlIntegrate.DataType.VarChar, guid);
             si.AddParameter("@ID", SqlIntegrate.DataType.Int, Id);
             si.Execute("UPDATE Notification SET reportFile = @reportFile WHERE ID = @ID");
-            si.Dispose();
         }
 
         /// <summary>
@@ -170,7 +165,6 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             var dt = si.Adapter("SELECT Notification.reportFile, Notification.ID, Notification.important, Notification.type, Notification.title, Notification.[content], Notification.notifyTime, [User].realname, [User].[group] FROM Notification INNER JOIN [User] ON Notification.UUID = [User].UUID ORDER BY Notification.important DESC, ID DESC");
-            si.Dispose();
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {

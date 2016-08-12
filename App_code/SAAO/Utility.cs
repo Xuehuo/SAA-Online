@@ -26,7 +26,6 @@ namespace SAAO
             si.AddParameter("@OS", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.Browser.Platform, 50);
             si.AddParameter("@session", SqlIntegrate.DataType.VarChar, User.IsLogin ? User.Current.Username : "未登录用户", 50);
             si.Execute("INSERT INTO Log ([context], [IP], [browser], [OS], [session]) VALUES (@context, @IP, @browser, @OS, @session)");
-            si.Dispose();
         }
         /// <summary>
         /// Write message (error one most possibly) to database
@@ -41,7 +40,6 @@ namespace SAAO
             si.AddParameter("@OS", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.Browser.Platform, 50);
             si.AddParameter("@session", SqlIntegrate.DataType.VarChar, User.IsLogin ? User.Current.Username : "未登录用户", 50);
             si.Execute("INSERT INTO Log ([context], [IP], [browser], [OS], [session]) VALUES (@context, @IP, @browser, @OS, @session)");
-            si.Dispose();
         }
         /// <summary>
         /// Use Base64 to encode a string

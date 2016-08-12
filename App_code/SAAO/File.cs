@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -78,7 +77,6 @@ namespace SAAO
             var tagList = si.Adapter("SELECT [name] FROM [Filetag] WHERE FUID = @FUID");
             for (var i = 0; i < tagList.Rows.Count; i++)
                 Tag.Add(tagList.Rows[i]["name"].ToString());
-            si.Dispose();
         }
 
         public static void Upload(System.Web.HttpPostedFile file)
@@ -94,7 +92,6 @@ namespace SAAO
             si.AddParameter("@size", SqlIntegrate.DataType.Int, file.ContentLength);
             si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, User.Current.UUID);
             si.Execute("INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES (@GUID,@name,@extension,@size,@UUID)");
-            si.Dispose();
         }
         /// <summary>
         /// Check whether the file has a tag
@@ -108,7 +105,6 @@ namespace SAAO
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
             var count = Convert.ToInt32(si.Query(
                 "SELECT COUNT(*) FROM [Filetag] WHERE [name] = @name AND [FUID] = @FUID"));
-            si.Dispose();
             return count != 0;
         }
         /// <summary>
@@ -123,7 +119,6 @@ namespace SAAO
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
             si.Execute("DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = @FUID");
-            si.Dispose();
         }
         /// <summary>
         /// Add a tag to the file
@@ -136,7 +131,6 @@ namespace SAAO
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
             si.Execute("INSERT INTO Filetag ([name], [FUID]) VALUES (@name, @FUID)");
-            si.Dispose();
         }
         /// <summary>
         /// Download the file (Write stream to current http response)
@@ -147,7 +141,6 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
             si.Execute("UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = @GUID");
-            si.Dispose();
             Utility.Download(_savePath, _name + "." + _extension);
         }
         /// <summary>
@@ -162,7 +155,6 @@ namespace SAAO
                 si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, value, 50);
                 si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
                 si.Execute("UPDATE [File] SET [name] = @name WHERE [GUID] = @GUID");
-                si.Dispose();
             }
             get
             {
@@ -181,7 +173,6 @@ namespace SAAO
                 si.AddParameter("@info", SqlIntegrate.DataType.Text, value);
                 si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
                 si.Execute("UPDATE [File] SET [info] = @info WHERE [GUID] = @GUID");
-                si.Dispose();
             }
             get
             {
@@ -199,7 +190,6 @@ namespace SAAO
             si.ResetParameter();
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
             si.Execute("DELETE FROM [Filetag] WHERE [FUID] = @FUID");
-            si.Dispose();
             System.IO.File.Delete(_savePath);
         }
         /// <summary>
@@ -218,7 +208,6 @@ namespace SAAO
                 si.AddParameter("@permission", SqlIntegrate.DataType.Int, (int) value);
                 si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
                 si.Execute("UPDATE [File] SET [permission] = @permission WHERE [GUID] = @GUID");
-                si.Dispose();
             }
         }
         /// <summary>
@@ -294,7 +283,6 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] ORDER BY [File].[ID] DESC");
-            si.Dispose();
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {

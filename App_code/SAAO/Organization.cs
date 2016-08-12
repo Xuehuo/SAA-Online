@@ -29,7 +29,6 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@year", SqlIntegrate.DataType.VarChar, State.StructureCurrent + (int) State.EventCurrent);
             Structure = si.Adapter("SELECT * FROM [Org] WHERE [year] = @year");
-            si.Dispose();
         }
         /// <summary>
         /// Current organization structure

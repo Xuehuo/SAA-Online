@@ -104,7 +104,6 @@ namespace SAAO
             si.ResetParameter();
             si.AddParameter("@messageid", SqlIntegrate.DataType.Int, mailId);
             Username = si.Query("DECLARE @uid int; SELECT @uid = messageaccountid FROM hm_messages WHERE messageid = @messageid; SELECT accountaddress FROM hm_accounts WHERE accountid = @uid;").ToString().Split('@')[0];
-            si.Dispose();
             /* The eml file is storage in this way:
              *
              * When hmailserver receives an email, it writes information in database and stores the eml file.
@@ -228,7 +227,6 @@ namespace SAAO
             si.AddParameter("@messageid", SqlIntegrate.DataType.Int, _mailId);
             si.Execute("DECLARE @uid int; SELECT @uid = accountid FROM hm_accounts WHERE accountaddress = @accountaddress;" + 
                 "UPDATE hm_messages SET messagefolderid = (SELECT folderid FROM hm_imapfolders WHERE foldername = @foldername AND folderaccountid = @uid) WHERE messageid = @messageid");
-            si.Dispose();
         }
         /// <summary>
         /// Set a new flag of the mail
@@ -240,7 +238,6 @@ namespace SAAO
             si.AddParameter("@messageflags", SqlIntegrate.DataType.Int, (int)newflag);
             si.AddParameter("@messageid", SqlIntegrate.DataType.Int, _mailId);
             si.Execute("UPDATE hm_messages SET messageflags = @messageflags WHERE messageid = @messageid");
-            si.Dispose();
             Flag = newflag;
         }
         /// <summary>
@@ -319,7 +316,6 @@ namespace SAAO
             var list = si.Adapter(
                 "DECLARE @uid int; SELECT @uid = accountid FROM hm_accounts WHERE accountaddress = @accountaddress;" +
                 "SELECT messageid FROM hm_messages WHERE messagefolderid = (SELECT folderid FROM hm_imapfolders WHERE foldername = @foldername AND folderaccountid = @uid) AND messageaccountid = @uid ORDER BY messageid DESC");
-            si.Dispose();
             var a = new JArray();
             for (var i = 0; i < list.Rows.Count; i++)
             {
