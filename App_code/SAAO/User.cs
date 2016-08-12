@@ -220,8 +220,8 @@ namespace SAAO
              *        └──────┴───────────────┘
              *  At last, store [C] in the database
              */
-            string salt = _password.Substring(0, 6);
-            string passwordVerify = salt + Utility.Encrypt(salt + password);
+            var salt = _password.Substring(0, 6);
+            var passwordVerify = salt + Utility.Encrypt(salt + password);
             return (_password == passwordVerify);
         }
         /// <summary>
@@ -252,27 +252,24 @@ namespace SAAO
         /// <returns>Whether the original password is correct</returns>
         public bool SetPassword(string password, string passwordNew)
         {
-            if (Verify(password))
-            {
-                var si = new SqlIntegrate(Utility.ConnStr);
-                string salt = _password.Substring(0, 6);
-                string passwordEncrypted = salt + Utility.Encrypt(salt + passwordNew);
-                // Update the user's password of SAA Online
-                si.AddParameter("@password", SqlIntegrate.DataType.VarChar, passwordEncrypted);
-                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
-                si.Execute("UPDATE [User] SET [password] = @password WHERE [UUID] = @UUID");
-                si.Dispose();
-                si = new SqlIntegrate(SAAO.Mail.ConnStr);
-                // Update the user's password of SAA Mail (Hmailserver)
-                si.ResetParameter();
-                si.AddParameter("@accountpassword", SqlIntegrate.DataType.VarChar, passwordEncrypted);
-                si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, Username + "@" + SAAO.Mail.MailDomain, 50);
-                si.Execute("UPDATE [hm_accounts] SET accountpassword = @accountpassword WHERE accountaddress = @accountaddress");
-                si.Dispose();
-                PasswordRaw = passwordNew;
-                return true;
-            }
-            return false;
+            if (!Verify(password)) return false;
+            var si = new SqlIntegrate(Utility.ConnStr);
+            var salt = _password.Substring(0, 6);
+            var passwordEncrypted = salt + Utility.Encrypt(salt + passwordNew);
+            // Update the user's password of SAA Online
+            si.AddParameter("@password", SqlIntegrate.DataType.VarChar, passwordEncrypted);
+            si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
+            si.Execute("UPDATE [User] SET [password] = @password WHERE [UUID] = @UUID");
+            si.Dispose();
+            si = new SqlIntegrate(SAAO.Mail.ConnStr);
+            // Update the user's password of SAA Mail (Hmailserver)
+            si.ResetParameter();
+            si.AddParameter("@accountpassword", SqlIntegrate.DataType.VarChar, passwordEncrypted);
+            si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, Username + "@" + SAAO.Mail.MailDomain, 50);
+            si.Execute("UPDATE [hm_accounts] SET accountpassword = @accountpassword WHERE accountaddress = @accountaddress");
+            si.Dispose();
+            PasswordRaw = passwordNew;
+            return true;
         }
 
         /// <summary>
@@ -281,13 +278,13 @@ namespace SAAO
         /// <returns>JSON of activated users. [{realname,senior,group,initial,jobName,groupName,phone,mail},...]</returns>
         public static JArray ListJson()
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataTable dt = si.Adapter("SELECT * FROM [User] WHERE [activated] = 1");
+            var si = new SqlIntegrate(Utility.ConnStr);
+            var dt = si.Adapter("SELECT * FROM [User] WHERE [activated] = 1");
             si.Dispose();
-            JArray a = new JArray();
-            for (int i = 0; i < dt.Rows.Count; i++)
+            var a = new JArray();
+            for (var i = 0; i < dt.Rows.Count; i++)
             {
-                JObject o = new JObject
+                var o = new JObject
                 {
                     ["realname"] = dt.Rows[i]["realname"].ToString(),
                     ["senior"] =

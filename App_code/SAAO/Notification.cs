@@ -38,8 +38,9 @@ namespace SAAO
         /// <param name="id">Notification ID in database</param>
         public Notification(int id)
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            var dr = si.Reader($"SELECT * FROM Notification WHERE ID ={id}");
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@ID", SqlIntegrate.DataType.Int, id);
+            var dr = si.Reader("SELECT * FROM Notification WHERE ID = @ID");
             si.Dispose();
             Content = dr["content"].ToString();
             Title = dr["title"].ToString();
@@ -59,10 +60,12 @@ namespace SAAO
         /// <param name="type">Notification type</param>
         public Notification(string title, string content, PermissionType type)
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.AddParameter("@content", SqlIntegrate.DataType.Text, content);
+            var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@title", SqlIntegrate.DataType.NVarChar, title, 50);
-            Id = Convert.ToInt32(si.Query($"INSERT INTO Notification ([title], [content], [type], [UUID]) VALUES (@title, @content, {(int) type}, \'{User.Current.UUID}\'); SELECT @@IDENTITY"));
+            si.AddParameter("@content", SqlIntegrate.DataType.Text, content);
+            si.AddParameter("@type", SqlIntegrate.DataType.Int, (int)type);
+            si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, User.Current.UUID);
+            Id = Convert.ToInt32(si.Query("INSERT INTO Notification ([title], [content], [type], [UUID]) VALUES (@title, @content, @type, @UUID); SELECT @@IDENTITY"));
             si.Dispose();
             Type = type;
             Title = title;
@@ -78,10 +81,17 @@ namespace SAAO
         /// </summary>
         public void Broadcast()
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataTable dt = si.Adapter($"SELECT mail, SN FROM [User] WHERE activated = 1{(_group != -1 ? " AND [group] =" + _group : "")}");
+            var si = new SqlIntegrate(Utility.ConnStr);
+            DataTable dt;
+            if (_group == -1)
+                dt = si.Adapter("SELECT mail FROM [User] WHERE activated = 1");
+            else
+            {
+                si.AddParameter("@group", SqlIntegrate.DataType.Int, _group);
+                dt = si.Adapter("SELECT mail FROM [User] WHERE activated = 1 AND [group] = @group");
+            }
             si.Dispose();
-            for (int i = 0; i < dt.Rows.Count; i++)
+            for (var i = 0; i < dt.Rows.Count; i++)
                 SendMail(dt.Rows[i]["mail"].ToString());
         }
 
@@ -91,8 +101,8 @@ namespace SAAO
         public void SetImportant()
         {
             var si = new SqlIntegrate(Utility.ConnStr);
-            int important = Convert.ToInt32(si.Query("SELECT MAX(important) FROM Notification"));
-            si.Execute($"UPDATE Notification SET important ={(important + 1)} WHERE ID={Id}");
+            si.AddParameter("@ID", SqlIntegrate.DataType.Int, Id);
+            si.Execute("UPDATE Notification SET important = ((SELECT MAX(important) FROM Notification) + 1) WHERE ID = @ID");
             si.Dispose();
         }
 
@@ -103,7 +113,9 @@ namespace SAAO
         public void AttachReport(string guid)
         {
             var si = new SqlIntegrate(Utility.ConnStr);
-            si.Execute("UPDATE Notification SET reportFile ='" + guid + "' WHERE ID=" + Id);
+            si.AddParameter("@reportFile", SqlIntegrate.DataType.VarChar, guid);
+            si.AddParameter("@ID", SqlIntegrate.DataType.Int, Id);
+            si.Execute("UPDATE Notification SET reportFile = @reportFile WHERE ID = @ID");
             si.Dispose();
         }
 
@@ -156,21 +168,21 @@ namespace SAAO
         /// <returns>JSON of current notifications [{ID,title,user,content,notifyTime,type,imprtant,(reportFile)},...]</returns>
         public static JArray ListJson()
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataTable dt = si.Adapter("SELECT Notification.reportFile, Notification.ID, Notification.important, Notification.type, Notification.title, Notification.[content], Notification.notifyTime, [User].realname, [User].[group] FROM Notification INNER JOIN [User] ON Notification.UUID = [User].UUID ORDER BY Notification.important DESC, ID DESC");
+            var si = new SqlIntegrate(Utility.ConnStr);
+            var dt = si.Adapter("SELECT Notification.reportFile, Notification.ID, Notification.important, Notification.type, Notification.title, Notification.[content], Notification.notifyTime, [User].realname, [User].[group] FROM Notification INNER JOIN [User] ON Notification.UUID = [User].UUID ORDER BY Notification.important DESC, ID DESC");
             si.Dispose();
-            JArray a = new JArray();
-            for (int i = 0; i < dt.Rows.Count; i++)
+            var a = new JArray();
+            for (var i = 0; i < dt.Rows.Count; i++)
             {
                 if (!Visible(Convert.ToInt32(dt.Rows[i]["group"]), PermissionType.SelfGroupOnly)) continue;
-                JObject o = new JObject
+                var o = new JObject
                 {
                     ["ID"] = dt.Rows[i]["ID"].ToString(),
                     ["title"] = dt.Rows[i]["title"].ToString(),
                     ["user"] = dt.Rows[i]["realname"].ToString(),
                     ["content"] = dt.Rows[i]["content"].ToString(),
                     ["notifyTime"] =
-                        Convert.ToDateTime(dt.Rows[i]["notifyTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
+                        Convert.ToDateTime(dt.Rows[i]["notifyTime"]).ToString("yyyy-MM-dd HH:mm"),
                     ["type"] = dt.Rows[i]["type"].ToString(),
                     ["important"] = Convert.ToInt32(dt.Rows[i]["important"])
                 };

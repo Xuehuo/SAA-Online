@@ -27,7 +27,8 @@ namespace SAAO
         {
             State = new State(dt);
             var si = new SqlIntegrate(Utility.ConnStr);
-            Structure = si.Adapter($"SELECT * FROM [Org] WHERE [year]='{State.StructureCurrent}{(int) State.EventCurrent}'");
+            si.AddParameter("@year", SqlIntegrate.DataType.VarChar, State.StructureCurrent + (int) State.EventCurrent);
+            Structure = si.Adapter("SELECT * FROM [Org] WHERE [year] = @year");
             si.Dispose();
         }
         /// <summary>
@@ -98,9 +99,9 @@ namespace SAAO
         /// <param name="dt">Datetime</param>
         public State(DateTime dt)
         {
-            string year = dt.Year.ToString();
-            DateTime summerDivider = DateTime.Parse(year + "-8-1 00:00:00");
-            DateTime winterDivider = DateTime.Parse(year + "-2-15 00:00:00");
+            var year = dt.Year.ToString();
+            var summerDivider = DateTime.Parse(year + "-8-1 00:00:00");
+            var winterDivider = DateTime.Parse(year + "-2-15 00:00:00");
             if (dt < winterDivider)
             {
                 SeniorOne = (dt.Year - 1).ToString();
