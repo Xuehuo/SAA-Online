@@ -23,8 +23,7 @@ namespace SAAO
         public static JArray ListJson()
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.AdapterJson("SELECT * FROM [Calendar]");
-            return new JArray();
+            return si.AdapterJson("SELECT * FROM [Calendar]");
         }
 
         /// <summary>
