@@ -10,14 +10,9 @@ namespace SAAO
     /// <summary>
     /// SqlIntegrate 数据库交互
     /// </summary>
-    public class SqlIntegrate : IDisposable
+    public class SqlIntegrate
     {
         private readonly string _sqlConnStr;
-        private SqlConnection _conn;
-        private SqlCommand _cmd;
-        private SqlDataReader _dr;
-        private SqlDataAdapter _da;
-        private DataSet _ds;
         private List<SqlParameter> _para;
         /// <summary>
         /// SQL data type
@@ -65,13 +60,16 @@ namespace SAAO
         /// <param name="command">SQL query command</param>
         public void Execute(string command)
         {
-            _conn = new SqlConnection(_sqlConnStr);
-            _cmd = new SqlCommand(command, _conn);
-            foreach (var para in _para)
-                _cmd.Parameters.Add(para);
-            _conn.Open();
-            _cmd.ExecuteNonQuery();
-            _conn.Close();
+            using (var conn = new SqlConnection(_sqlConnStr))
+            {
+                using (var cmd = new SqlCommand(command, conn))
+                {
+                    foreach (var para in _para)
+                        cmd.Parameters.Add(para);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
         /// <summary>
         /// Execute a SQL query and return a single value
@@ -80,16 +78,19 @@ namespace SAAO
         /// <returns>Query result (a single value)</returns>
         public object Query(string command)
         {
-            _conn = new SqlConnection(_sqlConnStr);
-            _cmd = new SqlCommand(command, _conn);
-            foreach (var para in _para)
-                _cmd.Parameters.Add(para);
-            _conn.Open();
-            var back = _cmd.ExecuteScalar();
-            _conn.Close();
-            if (!Convert.IsDBNull(back) && back != null)
-                return back;
-            return "";
+            using (var conn = new SqlConnection(_sqlConnStr))
+            {
+                using (var cmd = new SqlCommand(command, conn))
+                {
+                    foreach (var para in _para)
+                        cmd.Parameters.Add(para);
+                    conn.Open();
+                    var back = cmd.ExecuteScalar();
+                    if (!Convert.IsDBNull(back) && back != null)
+                        return back;
+                    return null;
+                }
+            }
         }
         /// <summary>
         /// Execute a SQL query and return a row of data
@@ -98,25 +99,26 @@ namespace SAAO
         /// <returns>A row of data</returns>
         public Dictionary<string, object> Reader(string command)
         {
-            _conn = new SqlConnection(_sqlConnStr);
-            _cmd = new SqlCommand(command, _conn);
-            foreach (var para in _para)
-                _cmd.Parameters.Add(para);
-            _conn.Open();
-            _dr = _cmd.ExecuteReader();
-            if (!_dr.HasRows)
-                throw new DataException();
-            var cols = new List<string>();
-            for (var i = 0; i < _dr.FieldCount; i++)
-                cols.Add(_dr.GetName(i));
-            Dictionary<string, object> result;
-            if (_dr.Read())
-                result = cols.ToDictionary(col => col, col => _dr[col]);
-            else
-                throw new DataException();
-            _dr.Close();
-            _conn.Close();
-            return result;
+            using (var conn = new SqlConnection(_sqlConnStr))
+            {
+                using (var cmd = new SqlCommand(command, conn))
+                {
+                    foreach (var para in _para)
+                        cmd.Parameters.Add(para);
+                    conn.Open();
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (!dr.HasRows)
+                            return null;
+                        var cols = new List<string>();
+                        for (var i = 0; i < dr.FieldCount; i++)
+                            cols.Add(dr.GetName(i));
+                        while (dr.Read())
+                            return cols.ToDictionary(col => col, col => dr[col]);
+                        return null;
+                    }
+                }
+            }
         }
         /// <summary>
         /// Execute a SQL query and return a table of data
@@ -125,13 +127,16 @@ namespace SAAO
         /// <returns>A table of data</returns>
         public DataTable Adapter(string command)
         {
-            _da = new SqlDataAdapter(command, _sqlConnStr);
-            foreach (var para in _para)
-                _da.SelectCommand.Parameters.Add(para);
-            _ds = new DataSet();
-            _da.Fill(_ds);
-            var dt = _ds.Tables[0];
-            return dt;
+            using (var da = new SqlDataAdapter(command, _sqlConnStr))
+            {
+                foreach (var para in _para)
+                    da.SelectCommand.Parameters.Add(para);
+                using (var ds = new DataSet())
+                {
+                    da.Fill(ds);
+                    return ds.Tables[0];
+                }
+            }
         }
         /// <summary>
         /// Execute a SQL query and return a row of data in JSON
@@ -140,20 +145,26 @@ namespace SAAO
         /// <returns>A row of data in JSON</returns>
         public JObject QueryJson(string command)
         {
-            _conn = new SqlConnection(_sqlConnStr);
-            _cmd = new SqlCommand(command, _conn);
-            foreach (var para in _para)
-                _cmd.Parameters.Add(para);
-            _conn.Open();
-            _dr = _cmd.ExecuteReader();
-            if (!_dr.HasRows)
-                throw new DataException();
-            var cols = new List<string>();
-            for (var i = 0; i < _dr.FieldCount; i++)
-                cols.Add(_dr.GetName(i));
-            if (_dr.Read())
-                return (JObject) JToken.FromObject(cols.ToDictionary(col => col, col => _dr[col]));
-            throw new DataException();
+            using (var conn = new SqlConnection(_sqlConnStr))
+            {
+                using (var cmd = new SqlCommand(command, conn))
+                {
+                    foreach (var para in _para)
+                        cmd.Parameters.Add(para);
+                    conn.Open();
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (!dr.HasRows)
+                            return null;
+                        var cols = new List<string>();
+                        for (var i = 0; i < dr.FieldCount; i++)
+                            cols.Add(dr.GetName(i));
+                        if (dr.Read())
+                            return (JObject)JToken.FromObject(cols.ToDictionary(col => col, col => dr[col]));
+                        return null;
+                    }
+                }
+            }
         }
         /// <summary>
         /// Execute a SQL query and return a table of data in JSON
@@ -162,28 +173,24 @@ namespace SAAO
         /// <returns>A table of data in JSON</returns>
         public JArray AdapterJson(string command)
         {
-            _da = new SqlDataAdapter(command, _sqlConnStr);
-            foreach (var para in _para)
-                _da.SelectCommand.Parameters.Add(para);
-            _ds = new DataSet();
-            _da.Fill(_ds);
-            var a = new JArray();
-            foreach (DataRow dr in _ds.Tables[0].Rows)
+            using (var da = new SqlDataAdapter(command, _sqlConnStr))
             {
-                var o = new JObject();
-                foreach (DataColumn col in _ds.Tables[0].Columns)
-                    o.Add(col.ColumnName.Trim(), JToken.FromObject(dr[col]));
-                a.Add(o);
+                foreach (var para in _para)
+                    da.SelectCommand.Parameters.Add(para);
+                using (var ds = new DataSet())
+                {
+                    da.Fill(ds);
+                    var a = new JArray();
+                    foreach (DataRow dr in ds.Tables[0].Rows)
+                    {
+                        var o = new JObject();
+                        foreach (DataColumn col in ds.Tables[0].Columns)
+                            o.Add(col.ColumnName.Trim(), JToken.FromObject(dr[col]));
+                        a.Add(o);
+                    }
+                    return a;
+                }
             }
-            return a;
-        }
-
-        public void Dispose()
-        {
-            _conn.Dispose();
-            _cmd.Dispose();
-            _dr.Dispose();
-            _da.Dispose();
         }
     }
 }
