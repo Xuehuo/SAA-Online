@@ -11,7 +11,7 @@ public class UserHandler : Ajax
                     || SAAO.User.IsLogin) return;
             if (SAAO.User.Exist(context.Request.Form["username"].ToLower()))
             {
-                SAAO.User user = new SAAO.User(context.Request.Form["username"].ToLower());
+                var user = new SAAO.User(context.Request.Form["username"].ToLower());
                 if (!user.Login(context.Request.Form["password"]))
                     R.Flag = 2;
             }

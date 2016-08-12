@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -82,14 +81,17 @@ namespace SAAO
 
         public static void Upload(System.Web.HttpPostedFile file)
         {
-            string guid = Guid.NewGuid().ToString().ToUpper();
+            var guid = Guid.NewGuid().ToString().ToUpper();
             file.SaveAs(StoragePath + guid);
             var si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, guid);
             si.AddParameter("@name", SqlIntegrate.DataType.VarChar,
                 System.IO.Path.GetFileNameWithoutExtension(file.FileName), 50);
             si.AddParameter("@extension", SqlIntegrate.DataType.VarChar,
                 System.IO.Path.GetExtension(file.FileName).TrimStart('.').ToLower(), 10);
-            si.Execute($"INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES ('{guid}',@name,@extension,{file.ContentLength},'{User.Current.UUID}')");
+            si.AddParameter("@size", SqlIntegrate.DataType.Int, file.ContentLength);
+            si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, User.Current.UUID);
+            si.Execute("INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES (@GUID,@name,@extension,@size,@UUID)");
         }
         /// <summary>
         /// Check whether the file has a tag
@@ -98,13 +100,12 @@ namespace SAAO
         /// <returns>whether the file has this tag</returns>
         public bool HasTag(string str)
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@name", SqlIntegrate.DataType.VarChar, str, 50);
-            int count = Convert.ToInt32(si.Query(
-                $"SELECT COUNT(*) FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}'"));
-            if (count != 0)
-                return true;
-            return false;
+            si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
+            var count = Convert.ToInt32(si.Query(
+                "SELECT COUNT(*) FROM [Filetag] WHERE [name] = @name AND [FUID] = @FUID"));
+            return count != 0;
         }
         /// <summary>
         /// Remove a tag of the file (if existed)
@@ -114,9 +115,10 @@ namespace SAAO
         {
             if (!HasTag(str)) return;
             Tag.Remove(str);
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
-            si.Execute($"DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}'");
+            si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
+            si.Execute("DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = @FUID");
         }
         /// <summary>
         /// Add a tag to the file
@@ -125,9 +127,10 @@ namespace SAAO
         public void AddTag(string str)
         {
             Tag.Add(str);
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
-            si.Execute($"INSERT INTO Filetag ([name], [FUID]) VALUES (@name, '{_guid}')");
+            si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
+            si.Execute("INSERT INTO Filetag ([name], [FUID]) VALUES (@name, @FUID)");
         }
         /// <summary>
         /// Download the file (Write stream to current http response)
@@ -135,9 +138,10 @@ namespace SAAO
         public void Download()
         {
             _downloadCount++;
-            new SqlIntegrate(Utility.ConnStr).Execute($"UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = '{_guid}'");
-            string fileName = Name + "." + _extension;
-            Utility.Download(_savePath, fileName);
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+            si.Execute("UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = @GUID");
+            Utility.Download(_savePath, _name + "." + _extension);
         }
         /// <summary>
         /// Filename
@@ -147,9 +151,10 @@ namespace SAAO
             set
             {
                 _name = value;
-                SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+                var si = new SqlIntegrate(Utility.ConnStr);
                 si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, value, 50);
-                si.Execute($"UPDATE [File] SET [name] = @name WHERE [GUID] = '{_guid}'");
+                si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+                si.Execute("UPDATE [File] SET [name] = @name WHERE [GUID] = @GUID");
             }
             get
             {
@@ -164,9 +169,10 @@ namespace SAAO
             set
             {
                 _info = value;
-                SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+                var si = new SqlIntegrate(Utility.ConnStr);
                 si.AddParameter("@info", SqlIntegrate.DataType.Text, value);
-                si.Execute($"UPDATE [File] SET [info] = @info WHERE [GUID] = '{_guid}'");
+                si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+                si.Execute("UPDATE [File] SET [info] = @info WHERE [GUID] = @GUID");
             }
             get
             {
@@ -178,9 +184,12 @@ namespace SAAO
         /// </summary>
         public void Delete()
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            si.Execute($"DELETE FROM [File] WHERE [GUID] = '{_guid}'");
-            si.Execute($"DELETE FROM [Filetag] WHERE [FUID] = '{_guid}'");
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+            si.Execute("DELETE FROM [File] WHERE [GUID] = @GUID");
+            si.ResetParameter();
+            si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
+            si.Execute("DELETE FROM [Filetag] WHERE [FUID] = @FUID");
             System.IO.File.Delete(_savePath);
         }
         /// <summary>
@@ -195,8 +204,10 @@ namespace SAAO
             set
             {
                 _permission = value;
-                SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-                si.Execute($"UPDATE [File] SET [permission] = {(int) value} WHERE [GUID] = '{_guid}'");
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@permission", SqlIntegrate.DataType.Int, (int) value);
+                si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+                si.Execute("UPDATE [File] SET [permission] = @permission WHERE [GUID] = @GUID");
             }
         }
         /// <summary>
@@ -206,25 +217,27 @@ namespace SAAO
         /// <returns>whether a user has the permission to the file</returns>
         public bool Visible(User user)
         {
-            return Visible(_permission, _uploader, user);
+            return Visible(_permission, _uploader.UUID, _uploader.Group, user);
         }
+
         /// <summary>
         /// Check whether a user has the permission to a file (static function)
         /// </summary>
         /// <param name="permission">Permission setting</param>
-        /// <param name="uploader">Uploader of the file</param>
+        /// <param name="uuid">UUID (of uploader)</param>
+        /// <param name="group">Group (of uploader)</param>
         /// <param name="user">User (current one most possibly)</param>
         /// <returns>whether a user has the permission to a file</returns>
-        public static bool Visible(PermissionLevel permission, User uploader, User user)
+        public static bool Visible(PermissionLevel permission, string uuid, int group, User user)
         {
-            if (uploader.UUID == user.UUID)
+            if (uuid == user.UUID)
                 return true;
             switch (permission)
             {
                 case PermissionLevel.All:
                     return true;
                 case PermissionLevel.SelfGroupOnly:
-                    if (uploader.Group == user.Group)
+                    if (group == user.Group)
                         return true;
                     break;
                 case PermissionLevel.SeniorTwoOnly:
@@ -235,6 +248,8 @@ namespace SAAO
                     if (user.IsExecutive)
                         return true;
                     break;
+                default:
+                    return false;
             }
             return false;
         }
@@ -244,7 +259,7 @@ namespace SAAO
         /// <returns>File information in JSON. {guid,permission,name,extension,uploadTime,size,uploader,group,downloadCount,tag(string),info(string)}</returns>
         public JObject ToJson()
         {
-            JObject o = new JObject
+            var o = new JObject
             {
                 ["guid"] = _guid,
                 ["permission"] = (int) _permission,
@@ -266,27 +281,26 @@ namespace SAAO
         /// <returns>JSON of current files [{guid,name,extension,uploaderName,datetime,info(bool)},...]</returns>
         public static JArray ListJson()
         {
-            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
-            DataTable dt = si.Adapter("SELECT TOP 50 * FROM [File] ORDER BY [ID] DESC");
-            JArray a = new JArray();
-            for (int i = 0; i < dt.Rows.Count; i++)
+            var si = new SqlIntegrate(Utility.ConnStr);
+            var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] ORDER BY [File].[ID] DESC");
+            var a = new JArray();
+            for (var i = 0; i < dt.Rows.Count; i++)
             {
-                
-                User uploader = new User(Guid.Parse(dt.Rows[i]["uploader"].ToString()));
-                if (Visible((PermissionLevel)Convert.ToInt32(dt.Rows[i]["permission"].ToString()),uploader,User.Current))
+                if (
+                    !Visible((PermissionLevel) Convert.ToInt32(dt.Rows[i]["permission"].ToString()),
+                        dt.Rows[i]["uploader"].ToString(), Convert.ToInt32(dt.Rows[i]["group"]),
+                        User.Current)) continue;
+                var o = new JObject
                 {
-                    JObject o = new JObject
-                    {
-                        ["guid"] = dt.Rows[i]["GUID"].ToString(),
-                        ["name"] = dt.Rows[i]["name"].ToString(),
-                        ["extension"] = dt.Rows[i]["extension"].ToString(),
-                        ["downloadCount"] = int.Parse(dt.Rows[i]["downloadCount"].ToString()),
-                        ["uploaderName"] = uploader.Realname,
-                        ["datetime"] = DateTime.Parse(dt.Rows[i]["uploadTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
-                        ["info"] = dt.Rows[i]["info"].ToString() != ""
-                    };
-                    a.Add(o);
-                }
+                    ["guid"] = dt.Rows[i]["GUID"].ToString(),
+                    ["name"] = dt.Rows[i]["name"].ToString(),
+                    ["extension"] = dt.Rows[i]["extension"].ToString(),
+                    ["downloadCount"] = int.Parse(dt.Rows[i]["downloadCount"].ToString()),
+                    ["uploaderName"] = dt.Rows[i]["realname"].ToString(),
+                    ["datetime"] = DateTime.Parse(dt.Rows[i]["uploadTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
+                    ["info"] = dt.Rows[i]["info"].ToString() != ""
+                };
+                a.Add(o);
             }
             return a;
         }
