@@ -73,7 +73,9 @@ namespace SAAO
             _savePath = StoragePath + str.ToUpper();
             _permission = (PermissionLevel)Convert.ToInt32(fileInfo["permission"]);
             Tag = new List<string>();
-            var tagList = si.Adapter("SELECT [name] FROM [Filetag] WHERE FUID = @GUID");
+            si.ResetParameter();
+            si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, str.ToUpper());
+            var tagList = si.Adapter("SELECT [name] FROM [Filetag] WHERE FUID = @FUID");
             for (var i = 0; i < tagList.Rows.Count; i++)
                 Tag.Add(tagList.Rows[i]["name"].ToString());
         }
@@ -114,7 +116,7 @@ namespace SAAO
             Tag.Remove(str);
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@name", SqlIntegrate.DataType.NVarChar, str, 50);
-            si.Execute($"DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}')");
+            si.Execute($"DELETE FROM [Filetag] WHERE [name] = @name AND [FUID] = '{_guid}'");
         }
         /// <summary>
         /// Add a tag to the file

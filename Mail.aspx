@@ -39,16 +39,6 @@
                 </div>
                 <ul class="nav navbar-nav navbar-left">
                     <li><a href="#" onclick="mailCompose()"><span class="glyphicon glyphicon-pencil"></span><span class="hidden-xs">撰写邮件</span></a></li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-folder-open"></span><span class="hidden-xs">文件夹</span> <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" data-folder="INBOX" onclick="mailFolder(this)"><span class="glyphicon glyphicon-inbox"></span>收件箱</a></li>
-                            <li><a href="#" data-folder="Sent" onclick="mailFolder(this)"><span class="glyphicon glyphicon-send"></span>发件箱</a></li>
-                            <li><a href="#" data-folder="Drafts" onclick="mailFolder(this)"><span class="glyphicon glyphicon-pencil"></span>草稿</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#" data-folder="Trash" onclick="mailFolder(this)"><span class="glyphicon glyphicon-trash"></span>垃圾箱</a></li>
-                        </ul>
-                    </li>
                     <li><a href="../mail/webmail.aspx" target="_blank"><span class="glyphicon glyphicon-share-alt"></span><span class="hidden-xs">完整邮箱</span></a></li>
                     <li class="hidden-xs"><a href="#" data-toggle="modal" data-target="#helpmodal"><span class="glyphicon glyphicon-question-sign"></span><span class="hidden-xs">帮助</span></a></li>
                 </ul>
@@ -66,10 +56,6 @@
         </nav>
         <div id="content">
             <div id="maillist">
-                <ol class="breadcrumb">
-                    <li><%=SAAO.User.Current.Username + "@" + SAAO.Mail.MailDomain %></li>
-                    <li>收件箱</li>
-                </ol>
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -111,7 +97,7 @@
         </div>
     </div>
     <div class="modal fade" id="mailmodal" tabindex="-1" role="dialog" aria-hidden="true">
-        <form class="modal-dialog modal-lg">
+        <form class="modal-dialog modal-lg dropzone">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -135,9 +121,8 @@
                     </div>
                     <textarea id="mailcontent"></textarea>
                 </div>
-                <div class="modal-footer">
-                    <!--<button type="button" class="btn btn-primary btn-xs pull-left">添加附件</button>-->
-                    <p class="text-muted pull-left">暂不提供附件服务。</p>
+                <div class="modal-footer" id="maildropzone">
+                    <button id="btnaddfiles" type="button" class="btn btn-primary pull-left" style="margin-right: 10px;">添加附件</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
                     <button type="submit" class="btn btn-primary">发送</button>
                 </div>
@@ -216,6 +201,7 @@
     <script src="//cdn.bootcss.com/tinymce/4.2.0/tinymce.min.js"></script>
     <script src="//cdn.bootcss.com/tinymce/4.2.0/langs/zh_CN.js"></script>
     <script src="plugin/base64.min.js"></script>
+    <script src="plugin/dropzone.min.js"></script>
     <script src="js/basic.js"></script>
     <script src="js/mail.js"></script>
 </body>

@@ -1,16 +1,8 @@
-﻿function mailFolder(obj) {
+﻿function mailFolder() {
     mailList();
-    var folder;
-    if (arguments[0]) {
-        folder = $(obj).data("folder");
-        $("#maillist .breadcrumb li").eq(1).html($(obj).html());
-        $("#maillist .breadcrumb li span").remove();
-    }
-    else
-        folder = "INBOX";
     $("#maillist tbody").empty();
     $.ajax({
-        url: "mail.list.folder=" + folder,
+        url: "mail.list.folder=INBOX",
         type: "get",
         success: function (result) {
             if (result.flag != 3) {
@@ -133,9 +125,10 @@ function mailDelete() {
     });
 }
 
+
 mailFolder();
 $.get("mail.login", function (result) {
-    $.post("../mail/default.aspx?mode=submit", { advanced_login: "0", email: result.data.mail, login: result.data.mail.replace("@xuehuo.org",""), password: result.data.password, sign_me: "0" });
+    $.post("../mail/default.aspx?mode=submit", { advanced_login: "0", email: result.data.mail, login: result.data.mail.replace("@xuehuo.org", ""), password: result.data.password, sign_me: "0" });
 });
 
 tinymce.init({
@@ -184,4 +177,15 @@ $("#mailmodal>form").submit(function (e) {
             $("#mailmodal>form button[type=\"submit\"]").removeAttr("disabled");
         }
     });
+});
+
+var mailDropzone = new Dropzone("#maildropzone",
+{
+    previewTemplate: "<div class=\"tag pull-left\"><span data-dz-name></span><a class=\"tag-i\" role=\"button\" data-dz-remove>×</a></div>",
+    url: "mail.upload",
+    clickable: "#btnaddfiles",
+    parallelUploads: 1,
+    maxFilesize: 2048,
+    uploadMultiple: true,
+    autoProcessQueue: false
 });
