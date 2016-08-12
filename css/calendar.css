@@ -89,7 +89,7 @@
                 border-bottom: 1px solid #E74C3C;
             }
 
-            #calendar #container .dhx_cal_data .dhx_cal_event_line {
+            #calendar #container .dhx_cal_data .dhx_cal_event_line, #calendar #container .dhx_multi_day .dhx_cal_event_line {
                 background-color: #BBBBBB;
             }
 

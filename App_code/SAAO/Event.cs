@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System;
 
 namespace SAAO
 {
@@ -24,6 +25,23 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             return si.AdapterJson("SELECT * FROM [Calendar]");
+        }
+
+        /// <summary>
+        /// Create or update an event
+        /// </summary>
+        /// <returns>A new id of the event (GUID)</returns>
+        public static string UpdateEvent(JObject event_obj)
+        {
+            Guid event_guid;
+            if (Guid.TryParse(event_obj.GetValue("event_id").ToString(), out event_guid))
+            {
+                //update
+            }
+            else
+            {
+                //create
+            }
         }
 
         /// <summary>
