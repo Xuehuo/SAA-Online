@@ -93,6 +93,13 @@
                 background-color: #BBBBBB;
             }
 
+            #calendar #container .dhx_cal_data .dhx_cal_event_clear {
+                color: white;
+                height: auto;
+                padding-top: 1px;
+                padding-bottom: 1px;
+            }
+
     /*==新建日程模态框（从上到下）==*/
     #calendar .dhx_cal_light {
         box-shadow: none;

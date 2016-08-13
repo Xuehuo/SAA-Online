@@ -47,9 +47,16 @@ function update_event(event_obj) {
         },
         success: function (result) {
             if (result.flag == 0) {
-                alert(result.data);
-                if (result.data != null && event_obj.id != result.data)
-                    scheduler.changeEventId(event_obj.id, result.data);
+                if (result.data.idORerr == "event-does-not-exist") {
+                    msg("更新日历事件失败", "该事件已不存在，请刷新页面", "error");
+                }
+                else {
+                    if (event_obj.id != result.data.idORerr)
+                        scheduler.changeEventId(event_obj.id, result.data.idORerr);     //ChangeID
+                    scheduler.getEvent(result.data.idORerr).color = result.data.color;      //ChangeColor
+                    scheduler.setCurrentView();     //Refresh
+                    msg("更新日历事件成功", "数据已更新", "success");
+                }
             }
             else if (result.flag == 2)
                 msg("更新日历事件失败", "事件内容不能为空", "error");
@@ -65,7 +72,23 @@ function update_event(event_obj) {
 }
 
 scheduler.attachEvent("onEventDeleted", function (id) {
-    alert("deleted!");
+    $.ajax({
+        url: "calendar.delete.id=" + id,
+        type: "get",
+        async: false,
+        success: function (result) {
+            if (result.flag == 0) {
+                msg("成功", "事件删除成功", "success");
+            }
+            else if (result.flag == 3)
+                msg("删除事件时出错", "服务器错误", "error");
+            else
+                msg("删除事件时出错", "服务器错误", "error");
+        },
+        error: function () {
+            msg("删除事件时出错", "网络中断或服务器错误", "error");
+        }
+    });
 });
 
 

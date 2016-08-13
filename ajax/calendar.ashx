@@ -27,5 +27,10 @@ public class CalendarHandler : Ajax
                 R.Data = SAAO.Event.UpdateEvent(o);
             }
         }
+        else if (context.Request["action"] == "delete")
+        {
+            if (context.Request["id"] == null) return;
+            SAAO.Event.DeleteEvent(context.Request["id"].ToString());
+        }
     }
 }
