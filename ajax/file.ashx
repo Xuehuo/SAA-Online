@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 
-public class FileHandler : Ajax
+public class FileHandler : AjaxHandler
 {
     public override void Process(System.Web.HttpContext context)
     {

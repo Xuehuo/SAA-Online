@@ -1,5 +1,5 @@
 ﻿<%@ WebHandler Language="C#" Class="CalendarHandler" %>
-public class CalendarHandler : Ajax
+public class CalendarHandler : AjaxHandler
 {
     public override void Process(System.Web.HttpContext context)
     {

@@ -7,7 +7,7 @@ using Newtonsoft.Json.Serialization;
 /// <summary>
 /// General Ajax processing handler
 /// </summary>
-public class Ajax : IHttpHandler, IRequiresSessionState
+public class AjaxHandler : IHttpHandler, IRequiresSessionState
 {
     protected struct Return
     {

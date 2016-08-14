@@ -1,5 +1,5 @@
 ﻿<%@ WebHandler Language="C#" Class="DashboardHandler" %>
-public class DashboardHandler : Ajax
+public class DashboardHandler : AjaxHandler
 {
     public override void Process(System.Web.HttpContext context)
     {

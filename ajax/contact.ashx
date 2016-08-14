@@ -1,5 +1,5 @@
 ﻿<%@ WebHandler Language="C#" Class="ContactHandler" %>
-public class ContactHandler : Ajax
+public class ContactHandler : AjaxHandler
 {
     public override void Process(System.Web.HttpContext context)
     {
