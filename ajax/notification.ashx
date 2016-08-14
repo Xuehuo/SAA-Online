@@ -1,7 +1,7 @@
 ﻿<%@ WebHandler Language="C#" Class="NotificationHandler" %>
 using System;
 
-public class NotificationHandler : Ajax
+public class NotificationHandler : AjaxHandler
 {
     public override void Process(System.Web.HttpContext context)
     {

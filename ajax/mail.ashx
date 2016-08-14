@@ -2,7 +2,7 @@
 using System;
 using Newtonsoft.Json.Linq;
 
-public class MailHandler : Ajax
+public class MailHandler : AjaxHandler
 {
     public override void Process(System.Web.HttpContext context)
     {
