@@ -1,5 +1,4 @@
 ﻿<%@ Page Language="C#" MasterPageFile="MasterPage.master" AutoEventWireup="true" CodeFile="Calendar.aspx.cs" Inherits="CalendarPage" %>
-
 <%@ MasterType TypeName="MasterPage" %>
 
 <asp:Content ContentPlaceHolderID="PageMenu" runat="server">
