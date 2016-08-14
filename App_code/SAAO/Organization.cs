@@ -27,7 +27,7 @@ namespace SAAO
         {
             State = new State(dt);
             var si = new SqlIntegrate(Utility.ConnStr);
-            si.AddParameter("@year", SqlIntegrate.DataType.VarChar, State.StructureCurrent + (int) State.EventCurrent);
+            si.AddParameter("@year", SqlIntegrate.DataType.VarChar, State.StructureCurrent + (int)State.EventCurrent);
             Structure = si.Adapter("SELECT * FROM [Org] WHERE [year] = @year");
         }
         /// <summary>
@@ -52,6 +52,16 @@ namespace SAAO
         public string GetGroupName(int i)
         {
             return Structure.Select("[group]=" + i)[0]["name"].ToString();
+        }
+        /// <summary>
+        /// Get group index
+        /// </summary>
+        /// <param name="gname">Group name</param>
+        /// <returns>Group Index (-1: The group name does not exist)</returns>
+        public int GetGroupIndex(string gname)
+        {
+            var rows = Structure.Select($"[name]='{gname}'");
+            return rows.Length == 0 ? -1 : int.Parse(rows[0]["group"].ToString());
         }
         /// <summary>
         /// Get job (title) name

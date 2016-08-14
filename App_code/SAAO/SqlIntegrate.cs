@@ -55,10 +55,11 @@ namespace SAAO
             _para.Add(para);
         }
         /// <summary>
-        /// Execute a SQL query with no return
+        /// Execute a SQL query and return the number of rows affected
         /// </summary>
         /// <param name="command">SQL query command</param>
-        public void Execute(string command)
+        /// <return>the number of rows affected</return>
+        public int Execute(string command)
         {
             using (var conn = new SqlConnection(_sqlConnStr))
             {
@@ -67,7 +68,7 @@ namespace SAAO
                     foreach (var para in _para)
                         cmd.Parameters.Add(para);
                     conn.Open();
-                    cmd.ExecuteNonQuery();
+                    return cmd.ExecuteNonQuery();
                 }
             }
         }
