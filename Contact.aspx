@@ -37,38 +37,6 @@
                                 <% } %>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>姓</label>
-                            <div class="btn-group btn-group-xs" role="group">
-                                <button type="button" class="btn btn-default" data-filter="c1" onclick="contactFilter(2, this)">A</button>
-                                <button type="button" class="btn btn-default" data-filter="c2" onclick="contactFilter(2, this)">B</button>
-                                <button type="button" class="btn btn-default" data-filter="c3" onclick="
-contactFilter(2, this)">C</button>
-                                <button type="button" class="btn btn-default" data-filter="c4" onclick="contactFilter(2, this)">D</button>
-                                <button type="button" class="btn btn-default" data-filter="c5" onclick="contactFilter(2, this)">E</button>
-                                <button type="button" class="btn btn-default" data-filter="c6" onclick="contactFilter(2, this)">F</button>
-                                <button type="button" class="btn btn-default" data-filter="c7" onclick="contactFilter(2, this)">G</button>
-                                <button type="button" class="btn btn-default" data-filter="c8" onclick="contactFilter(2, this)">H</button>
-                                <button type="button" class="btn btn-default" data-filter="c9" onclick="contactFilter(2, this)">I</button>
-                                <button type="button" class="btn btn-default" data-filter="c10" onclick="contactFilter(2, this)">J</button>
-                                <button type="button" class="btn btn-default" data-filter="c11" onclick="contactFilter(2, this)">K</button>
-                                <button type="button" class="btn btn-default" data-filter="c12" onclick="contactFilter(2, this)">L</button>
-                                <button type="button" class="btn btn-default" data-filter="c13" onclick="contactFilter(2, this)">M</button>
-                                <button type="button" class="btn btn-default" data-filter="c14" onclick="contactFilter(2, this)">N</button>
-                                <button type="button" class="btn btn-default" data-filter="c15" onclick="contactFilter(2, this)">O</button>
-                                <button type="button" class="btn btn-default" data-filter="c16" onclick="contactFilter(2, this)">P</button>
-                                <button type="button" class="btn btn-default" data-filter="c17" onclick="contactFilter(2, this)">Q</button>
-                                <button type="button" class="btn btn-default" data-filter="c18" onclick="contactFilter(2, this)">R</button>
-                                <button type="button" class="btn btn-default" data-filter="c19" onclick="contactFilter(2, this)">S</button>
-                                <button type="button" class="btn btn-default" data-filter="c20" onclick="contactFilter(2, this)">T</button>
-                                <button type="button" class="btn btn-default" data-filter="c21" onclick="contactFilter(2, this)">U</button>
-                                <button type="button" class="btn btn-default" data-filter="c22" onclick="contactFilter(2, this)">V</button>
-                                <button type="button" class="btn btn-default" data-filter="c23" onclick="contactFilter(2, this)">W</button>
-                                <button type="button" class="btn btn-default" data-filter="c24" onclick="contactFilter(2, this)">X</button>
-                                <button type="button" class="btn btn-default" data-filter="c25" onclick="contactFilter(2, this)">Y</button>
-                                <button type="button" class="btn btn-default" data-filter="c26" onclick="contactFilter(2, this)">Z</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
