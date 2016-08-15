@@ -36,6 +36,8 @@
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="//cdn.bootcss.com/pnotify/2.0.0/pnotify.all.min.js"></script>
     <link href="//cdn.bootcss.com/pnotify/2.0.0/pnotify.all.min.css" rel="stylesheet">
+    <script src="plugin/aes.js"></script>
+    <script src="plugin/sha256.js"></script>
     <script src="js/login.js"></script>
 </body>
 </html>

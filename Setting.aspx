@@ -6,10 +6,10 @@
 </asp:Content>
 
 <asp:Content ContentPlaceHolderID="PageContent" runat="server">
-    <div class="panel panel-default" style="display: none">
+    <div class="panel panel-default">
         <div class="panel-heading">账号登陆</div>
         <div class="panel-body">
-            <div class="col-md-6">
+            <div class="col-md-6" style="display: none">
                 <h4>微信绑定</h4>
                 <ol>
                     <li>关注学活订阅号（SMS_SAA）</li>
@@ -23,18 +23,23 @@
                     <li>订阅号回复一个一次性的登录链接</li>
                     <li>打开链接（打开即自动登录），在微信浏览器中使用SAAO</li>
                 </ol>
-                <p>当前已绑定微信号<code>test</code> <button class="btn btn-danger btn-xs">解除绑定</button></p>
+                <p>当前已绑定微信号<code>test</code> <button class="btn btn-danger btn-xs">解除绑定</button>
+                </p>
             </div>
             <div class="col-md-6">
                 <h4>登陆链接</h4>
-                <p>在此处可获得一个永久性的登录链接，您可以将其保存为桌面上的快捷方式或者浏览器书签以便快速登陆。为保安全，在生成该链接前需要您设置一个四位<code>PIN</code>，在使用该链接登录时，只需在密码栏输入4位的<code>PIN</code>即可。需要特别注意的是，这个<code>PIN</code>不会被存储在服务器上，丢失后可重新生成，之前生成的链接将会失效。</p>
+                <p>在此处可获得一个永久性的登录链接，您可以将其保存为桌面上的快捷方式或者浏览器书签以便快速登陆。为保安全，在生成该链接前需要您设置一个四位<code>PIN</code>，在使用该链接登录时，只需在密码栏输入4位的<code>PIN</code>即可。需要特别注意的是，这个<code>PIN</code>不会被存储在服务器上，丢失后可重新生成，之前生成的链接不会失效，若不慎泄露链接，请修改密码。
+                </p>
                 <form class="form-inline">
                     <div class="form-group">
-                        <label for="PIN">PIN</label>
-                        <input type="text" class="form-control" id="PIN" placeholder="PIN" maxlength="4" value="3453">
+                        <label for="pin">PIN</label>
+                        <input type="text" class="form-control" id="pin" placeholder="PIN" maxlength="4" style="width: 60px">
                     </div>
-                    <button type="submit" class="btn btn-default">生成链接</button>
-                    <a href="https://xuehuo.shenzhong.net/work/login?username=test&api=xsfpdkd24ad80a4114&hash=43tver54eb9b8fe693b3a31d06b791d495773de8da6a105984f389789c14d7cadfd68c" class="btn btn-success">请保存此链接</a>
+                    <div class="form-group">
+                        <label for="pwd">密码</label>
+                        <input type="password" class="form-control" id="pwd" placeholder="密码">
+                    </div>
+                    <a href="#" class="btn btn-default" onclick="settingGenerateLink(this);return false;">生成</a>
                 </form>
             </div>
         </div>
@@ -85,7 +90,7 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label">用户名</label>
                     <div class="col-sm-10">
-                        <p class="form-control-static"><%=SAAO.User.Current.Username %></p>
+                        <p class="form-control-static" id="username"><%=SAAO.User.Current.Username %></p>
                     </div>
                 </div>
                 <div class="form-group">
@@ -136,5 +141,6 @@
 </asp:Content>
 
 <asp:Content ContentPlaceHolderID="PageScript" runat="server">
-
+    <script src="plugin/aes.js"></script>
+    <script src="plugin/sha256.js"></script>
 </asp:Content>
