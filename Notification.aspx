@@ -37,7 +37,10 @@
 </asp:Content>
 
 <asp:Content ContentPlaceHolderID="PageContent" runat="server">
-
+    <ol class="breadcrumb">
+        <li id="folder">全部通知</li>
+    </ol>
+    <div id="container"></div>
 </asp:Content>
 
 <asp:Content ContentPlaceHolderID="PageModal" runat="server">
