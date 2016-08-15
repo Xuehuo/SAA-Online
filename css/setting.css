@@ -1,0 +1,37 @@
+﻿#setting {
+    background-color: #FFF;
+}
+
+    #setting #menu {
+        background-color: #2C3E50;
+    }
+
+        #setting #menu ul li {
+            background-color: #34495E;
+        }
+
+            #setting #menu ul li:nth-child(7) {
+                background-color: #324558;
+            }
+
+            #setting #menu ul li a:hover {
+                background-color: #253B51;
+            }
+
+        #setting #topbar {
+           background-color: #324558;
+        }
+
+    #setting #content .panel {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: #F5F5F5;
+    }
+
+        #setting #content .panel .panel-heading {
+            background-color:#324558;
+            color:#FFF;
+            border-bottom: none;
+            border-radius: 0;
+        }
