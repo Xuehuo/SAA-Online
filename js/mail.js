@@ -58,7 +58,7 @@ function mailDisplay(obj) {
                     $("#mailfrom").html(result.data.from.Name + " <small>" + result.data.from.Mail + "</small>");
                     $("#mailto").empty();
                     for (var i = 0; i < result.data.to.length; i++)
-                        $("#mailto").append(result.data.to[i].Name + " S<small>" + result.data.to[i].Mail + "</small> ");
+                        $("#mailto").append(result.data.to[i].Name + " <small>" + result.data.to[i].Mail + "</small> ");
                     $("#mailtime").html(result.data.time);
                     if (result.data.attachcount == 0) {
                         $("#mailattach").css("display", "none");

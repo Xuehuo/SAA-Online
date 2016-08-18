@@ -19,6 +19,7 @@ public class NotificationHandler : AjaxHandler
                 fileName: "监督报告",
                 contentType: "application/pdf"
             );
+            R.Flag = -1;
         }
         else if (context.Request["action"] == "create") // create a notification
         {

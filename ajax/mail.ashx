@@ -32,7 +32,10 @@ public class MailHandler : AjaxHandler
                 !int.TryParse(context.Request["index"], out index)) return;
             var message = new SAAO.Mail(mailId);
             if (message.Username == SAAO.User.Current.Username)
+            {
                 message.DownloadAttachment(index);
+                R.Flag = -1;
+            }
             else
                 R.Flag = 2;
         }
@@ -45,7 +48,7 @@ public class MailHandler : AjaxHandler
             if (message.Username == SAAO.User.Current.Username)
             {
                 context.Response.Write(message.Body());
-                context.ApplicationInstance.CompleteRequest();
+                R.Flag = -1;
                 message.SetFlag(SAAO.Mail.MailFlag.Seen);
             }
             else
@@ -69,10 +72,10 @@ public class MailHandler : AjaxHandler
             if (to.Length == 0) return;
             foreach (var receiver in to)
                 SAAO.Mail.Send(
-                    @from: SAAO.User.Current.Username + "@" + SAAO.Mail.MailDomain, 
-                    receiver: receiver, 
-                    subject: context.Request.Form["subject"], 
-                    isBodyHtml: true, 
+                    @from: SAAO.User.Current.Username + "@" + SAAO.Mail.MailDomain,
+                    receiver: receiver,
+                    subject: context.Request.Form["subject"],
+                    isBodyHtml: true,
                     body: context.Request.Form["content"]
                 );
         }

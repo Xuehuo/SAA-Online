@@ -29,6 +29,7 @@ public class AjaxHandler : IHttpHandler, IRequiresSessionState
             R.Flag = 3;
             SAAO.Utility.Log(ex);
         }
+        if (R.Flag == -1) return;
         context.Response.Write(JsonConvert.SerializeObject(
             value: R,
             formatting: Formatting.Indented,

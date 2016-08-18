@@ -59,7 +59,10 @@ public class FileHandler : AjaxHandler
             if (!Guid.TryParse(context.Request["id"], out guid)) return;
             var file = new SAAO.File(guid.ToString().ToUpper());
             if (file.Visible(SAAO.User.Current))
+            {
                 file.Download();
+                R.Flag = -1;
+            }
             else
                 R.Flag = 2;
         }
