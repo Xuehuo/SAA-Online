@@ -45,6 +45,7 @@ public class MailHandler : AjaxHandler
             if (message.Username == SAAO.User.Current.Username)
             {
                 context.Response.Write(message.Body());
+                context.ApplicationInstance.CompleteRequest();
                 message.SetFlag(SAAO.Mail.MailFlag.Seen);
             }
             else

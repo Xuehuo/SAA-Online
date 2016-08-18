@@ -55,10 +55,10 @@ function mailDisplay(obj) {
             success: function (result) {
                 if (result.flag == 0) {
                     $("#mailsubject").html(result.data.subject);
-                    $("#mailfrom").html(result.data.from.name + "<small>" + result.data.from.mail + "</small>");
+                    $("#mailfrom").html(result.data.from.Name + " <small>" + result.data.from.Mail + "</small>");
                     $("#mailto").empty();
                     for (var i = 0; i < result.data.to.length; i++)
-                        $("#mailto").append(result.data.to[i].name + "<small>" + result.data.to[i].mail + "</small> ");
+                        $("#mailto").append(result.data.to[i].Name + " S<small>" + result.data.to[i].Mail + "</small> ");
                     $("#mailtime").html(result.data.time);
                     if (result.data.attachcount == 0) {
                         $("#mailattach").css("display", "none");
