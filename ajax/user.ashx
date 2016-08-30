@@ -45,12 +45,17 @@ public class UserHandler : AjaxHandler
         else if (context.Request["action"] == "unbind")
         {
             SAAO.User.Current.Wechat = "";
+            SAAO.User.Current.Sso = Guid.NewGuid().ToString().ToUpper().Substring(0, 8);
         }
         else if (context.Request["action"] == "pin")
         {
             int pin;
             if (context.Request.Form["pin"] == null || !int.TryParse(context.Request.Form["pin"], out pin)) return;
             SAAO.User.Current.Pin = context.Request.Form["pin"];
+        }
+        else if (context.Request["action"] == "refresh")
+        {
+            SAAO.User.Current = new SAAO.User(SAAO.User.Current.Username);
         }
     }
 }

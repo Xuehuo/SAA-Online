@@ -14,9 +14,9 @@
                 <h4>微信绑定</h4>
                 <ol>
                     <li>关注学活订阅号（SMS_SAA）</li>
-                    <li>发送<code>sso<%= SAAO.User.Current.Sso %></code>到订阅号</li>
+                    <li>发送<code>sso<%= SAAO.User.Current.Sso.ToLower() %></code>到订阅号</li>
                     <li>订阅号回复绑定成功</li>
-                    <li>点击<a href="setting">这里</a>刷新状态</li>
+                    <li>点击<a href="#" onclick="settingRefresh()">这里</a>刷新状态</li>
                 </ol>
                 <% } else { %>
                 <h4>微信登陆</h4>

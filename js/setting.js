@@ -98,5 +98,11 @@ $("form#info").submit(function(e) {
 
 function settingUnbind() {
     $.get("user.unbind");
+    $.get("user.refresh");
+    window.location.href = "setting";
+}
+
+function settingRefresh() {
+    $.get("user.refresh");
     window.location.href = "setting";
 }
