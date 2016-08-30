@@ -103,6 +103,6 @@ function settingUnbind() {
 }
 
 function settingRefresh() {
-    $.get("user.refresh");
+    $.get("user.reload");
     window.location.href = "setting";
 }
