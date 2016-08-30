@@ -6,12 +6,12 @@ public partial class LoginPage : System.Web.UI.Page
     {
         if (SAAO.User.IsLogin)
         {
-            Response.Redirect("/");
+            Response.Redirect("dashboard");
             return;
         }
         Guid otl;
         if (Request["otl"] == null || !Guid.TryParse(Request["otl"], out otl)) return;
         SAAO.User.Login(otl);
-        Response.Redirect("/");
+        Response.Redirect("dashboard");
     }
 }
