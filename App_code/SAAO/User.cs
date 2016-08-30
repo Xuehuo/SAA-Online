@@ -279,9 +279,9 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@otl", SqlIntegrate.DataType.VarChar, otl.ToString().ToUpper());
-            object r = si.Query(
+            var r = si.Query(
                 "SELECT [username] FROM [User] WHERE [otlExpire] > getdate() AND [otl] = @otl");
-            if (Convert.IsDBNull(r)) return false;
+            if (r == null) return false;
             Current = new User(r.ToString());
             return true;
         }

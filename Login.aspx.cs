@@ -11,7 +11,7 @@ public partial class LoginPage : System.Web.UI.Page
         }
         Guid otl;
         if (Request["otl"] == null || !Guid.TryParse(Request["otl"], out otl)) return;
-        SAAO.User.Login(otl);
-        Response.Redirect("dashboard");
+        if (SAAO.User.Login(otl))
+            Response.Redirect("dashboard");
     }
 }
