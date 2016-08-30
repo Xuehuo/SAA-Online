@@ -96,13 +96,7 @@ $("form#info").submit(function(e) {
     });
 });
 
-function settingGenerateLink(obj) {
-    var cipher = Aes.Ctr.encrypt($("#pwd").val(), $("#pin").val() + sha256_digest($("#pwd").val()), 256);
-    $(obj).removeClass("btn-default");
-    $(obj).addClass("btn-success");
-    $(obj).removeAttr("onclick");
-    $(obj).html("SAAO");
-    $(obj).attr("href", location.href.replace("#", "").replace("setting", "login") + "?username=" + $("#username").html() + "&cipher=" + encodeURI(cipher) + "&hash=" + sha256_digest($("#pwd").val()));
-    $(obj).before("<p>请保存该链接：</p>");
-    $(obj).parent().children(".form-group").remove();
+function settingUnbind() {
+    $.get("user.unbind");
+    window.location.href = "setting";
 }

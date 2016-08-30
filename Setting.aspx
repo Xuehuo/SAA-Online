@@ -9,24 +9,26 @@
     <div class="panel panel-default">
         <div class="panel-heading">账号登陆</div>
         <div class="panel-body">
-            <div class="col-md-6" style="display: none">
+            <div class="col-md-6">
+                <% if (SAAO.User.Current.Wechat == "") { %>
                 <h4>微信绑定</h4>
                 <ol>
                     <li>关注学活订阅号（SMS_SAA）</li>
-                    <li>发送<code>xsfpdkd24ad80a4114</code>到订阅号</li>
+                    <li>发送<code>sso<%= SAAO.User.Current.Sso %></code>到订阅号</li>
                     <li>订阅号回复绑定成功</li>
-                    <li>点击<a href="#">这里</a>刷新状态</li>
+                    <li>点击<a href="setting">这里</a>刷新状态</li>
                 </ol>
+                <% } else { %>
                 <h4>微信登陆</h4>
                 <ol>
                     <li>向订阅号发送<code>saao</code>（不区分大小写）</li>
                     <li>订阅号回复一个一次性的登录链接</li>
-                    <li>打开链接（打开即自动登录），在微信浏览器中使用SAAO</li>
+                    <li>打开链接即可使用</li>
                 </ol>
-                <p>当前已绑定微信号<code>test</code> <button class="btn btn-danger btn-xs">解除绑定</button>
-                </p>
+                <p>当前已绑定微信号 <button class="btn btn-danger btn-xs" onclick="settingUnbind()">解除绑定</button></p>
+                <% } %>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6" style="display: none">
                 <h4>登陆链接</h4>
                 <p>在此处可获得一个永久性的登录链接，您可以将其保存为桌面上的快捷方式或者浏览器书签以便快速登陆。为保安全，在生成该链接前需要您设置一个四位<code>PIN</code>，在使用该链接登录时，只需在密码栏输入4位的<code>PIN</code>即可。需要特别注意的是，这个<code>PIN</code>不会被存储在服务器上，丢失后可重新生成，之前生成的链接不会失效，若不慎泄露链接，请修改密码。
                 </p>
@@ -141,6 +143,5 @@
 </asp:Content>
 
 <asp:Content ContentPlaceHolderID="PageScript" runat="server">
-    <script src="plugin/aes.js"></script>
-    <script src="plugin/sha256.js"></script>
+    
 </asp:Content>

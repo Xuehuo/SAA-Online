@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Web.Caching;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -76,6 +77,47 @@ namespace SAAO
         /// </summary>
         public readonly int Initial;
 
+        private string _sso;
+        public string Sso
+        {
+            get { return _sso; }
+            set
+            {
+                _phone = value;
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@sso", SqlIntegrate.DataType.VarChar, value);
+                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
+                si.Execute("UPDATE [User] SET [sso] = @sso WHERE [UUID] = @UUID");
+            }
+        }
+        private string _wechat;
+        public string Wechat
+        {
+            get { return _wechat; }
+            set
+            {
+                _phone = value;
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@wechat", SqlIntegrate.DataType.VarChar, value);
+                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
+                si.Execute("UPDATE [User] SET [wechat] = @wechat WHERE [UUID] = @UUID");
+            }
+        }
+
+        private string _pin;
+        public string Pin
+        {
+            get { return _pin; }
+            set
+            {
+                _phone = value;
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@pin", SqlIntegrate.DataType.VarChar, value);
+                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
+                si.Execute("UPDATE [User] SET [pin] = @pin WHERE [UUID] = @UUID");
+            }
+        }
+
         public int Group;
         public string GroupName;
         public int Job;
@@ -105,6 +147,8 @@ namespace SAAO
             _class = Convert.ToInt32(dr["class"]);
             _mail = dr["mail"].ToString();
             _phone = dr["phone"].ToString();
+            _sso = dr["sso"].ToString();
+            _wechat = dr["wechat"].ToString();
             Initial = dr["username"].ToString()[dr["realname"].ToString().Length - 1] - 'a' + 1;
             Group = Convert.ToInt32(dr["group"].ToString());
             Job = Convert.ToInt32(dr["job"].ToString());
@@ -133,6 +177,8 @@ namespace SAAO
             _class = Convert.ToInt32(dr["class"]);
             _mail = dr["mail"].ToString();
             _phone = dr["phone"].ToString();
+            _sso = dr["sso"].ToString();
+            _wechat = dr["wechat"].ToString();
             Initial = dr["username"].ToString()[dr["realname"].ToString().Length - 1] - 'a' + 1;
             Group = Convert.ToInt32(dr["group"].ToString());
             Job = Convert.ToInt32(dr["job"].ToString());
@@ -229,6 +275,17 @@ namespace SAAO
             return true;
         }
 
+        public static bool Login(Guid otl)
+        {
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@otl", SqlIntegrate.DataType.VarChar, otl.ToString().ToUpper());
+            object r = si.Query(
+                "SELECT [username] FROM [User] WHERE [otlExpire] > getdate() AND [otl] = @otl");
+            if (Convert.IsDBNull(r)) return false;
+            Current = new User(r.ToString());
+            return true;
+        }
+
         /// <summary>
         /// Logout the user of current session
         /// </summary>
@@ -261,7 +318,7 @@ namespace SAAO
             PasswordRaw = passwordNew;
             return true;
         }
-
+        
         /// <summary>
         /// List activated users in the database in JSON
         /// </summary>

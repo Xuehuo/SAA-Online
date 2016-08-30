@@ -42,5 +42,15 @@ public class UserHandler : AjaxHandler
             SAAO.User.Current.Mail = context.Request.Form["mail"];
             SAAO.User.Current.Class = int.Parse(context.Request.Form["classnum"]);
         }
+        else if (context.Request["action"] == "unbind")
+        {
+            SAAO.User.Current.Wechat = "";
+        }
+        else if (context.Request["action"] == "pin")
+        {
+            int pin;
+            if (context.Request.Form["pin"] == null || !int.TryParse(context.Request.Form["pin"], out pin)) return;
+            SAAO.User.Current.Pin = context.Request.Form["pin"];
+        }
     }
 }

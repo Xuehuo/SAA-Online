@@ -42,25 +42,3 @@ $("form").submit(function (e) {
         });
     }
 });
-
-function getUrlPara(name) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null) return unescape(r[2]); return null;
-}
-
-if (getUrlPara("username") && getUrlPara("cipher") && getUrlPara("hash")) {
-    $("#username").val(getUrlPara("username"));
-    $("form").data("pin", "using");
-    requestPIN("请输入您设置的PIN以完成登陆");
-}
-
-function requestPIN(str) {
-    $("form").css("opacity", 0);
-    $("#username").val(getUrlPara("username"));
-    var pin = prompt(str);
-    if (pin) {
-        $("#password").val(Aes.Ctr.decrypt(getUrlPara("cipher"), pin + getUrlPara("hash"), 256));
-        $("form").submit();
-    }
-}
