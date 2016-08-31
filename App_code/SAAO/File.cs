@@ -284,7 +284,7 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@start", SqlIntegrate.DataType.Date, Organization.Current.State.EventStart);
             si.AddParameter("@end", SqlIntegrate.DataType.Date, Organization.Current.State.EventEnd);
-            var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] AND [File].[datetime] BETWEEN @start AND @end ORDER BY [File].[ID] DESC");
+            var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] AND [File].[uploadTime] BETWEEN @start AND @end ORDER BY [File].[ID] DESC");
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {
