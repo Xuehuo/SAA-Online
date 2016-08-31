@@ -127,9 +127,6 @@ function mailDelete() {
 
 
 mailFolder();
-$.get("mail.login", function (result) {
-    $.post("../mail/default.aspx?mode=submit", { advanced_login: "0", email: result.data.mail, login: result.data.mail.replace("@xuehuo.org", ""), password: result.data.password, sign_me: "0" });
-});
 
 tinymce.init({
     //language: "zh_CN",

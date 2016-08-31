@@ -79,13 +79,5 @@ public class MailHandler : AjaxHandler
                     body: context.Request.Form["content"]
                 );
         }
-        else if (context.Request["action"] == "login")
-        {
-            R.Data = new JObject
-            {
-                ["mail"] = SAAO.User.Current.Username + "@" + SAAO.Mail.MailDomain,
-                ["password"] = SAAO.User.Current.PasswordRaw
-            };
-        }
     }
 }

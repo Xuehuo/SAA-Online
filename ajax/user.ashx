@@ -24,7 +24,9 @@ public class UserHandler : AjaxHandler
         if (!SAAO.User.IsLogin) return;
         if (context.Request["action"] == "password")
         {
-            if (!SAAO.User.Current.SetPassword(context.Request.Form["password"], context.Request.Form["newpassword"]))
+            if (SAAO.User.Current.Verify(context.Request.Form["password"]))
+                SAAO.User.Current.PasswordRaw = context.Request.Form["newpassword"];
+            else
                 R.Flag = 2;
         }
         else if (context.Request["action"] == "logout")

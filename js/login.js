@@ -20,15 +20,12 @@ $("form").submit(function (e) {
             dataType: "json",
             success: function (result) {
                 if (result.flag == 0) {
+                    $.post("../mail/default.aspx?mode=submit", { advanced_login: "0", email: $("#username").val() + "@xuehuo.org", login: $("#username").val(), password: $("#password").val(), sign_me: "0" });
                     window.location.href = "dashboard";
                 }
                 else if (result.flag == 2) {
-                    if ($("form").data("pin"))
-                        requestPIN("输入的PIN不正确，请重试");
-                    else {
-                        msg("凭证错误", "请更正您的用户名或密码后重试", "error");
-                        $("form")[0].reset();
-                    }
+                    msg("凭证错误", "请更正您的用户名或密码后重试", "error");
+                    $("form")[0].reset();
                 }
                 else if (result.flag == 3) {
                     msg("系统错误", "请刷新重试或联系技术部网络组", "error");

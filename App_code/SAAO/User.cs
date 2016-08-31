@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -14,7 +15,29 @@ namespace SAAO
         private readonly int _id;
         public string UUID;
         public string Username;
-        private readonly string _password;
+        private string _password;
+        private string _passwordRaw;
+        public string PasswordRaw
+        {
+            get { return _passwordRaw; }
+            set
+            {
+                _passwordRaw = value;
+                var si = new SqlIntegrate(Utility.ConnStr);
+                var salt = _password.Substring(0, 6);
+                _password = salt + Utility.Encrypt(salt + value);
+                // Update the user's password of SAA Online
+                si.AddParameter("@password", SqlIntegrate.DataType.VarChar, _password);
+                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
+                si.Execute("UPDATE [User] SET [password] = @password WHERE [UUID] = @UUID");
+                si = new SqlIntegrate(SAAO.Mail.ConnStr);
+                // Update the user's password of SAA Mail (Hmailserver)
+                si.ResetParameter();
+                si.AddParameter("@accountpassword", SqlIntegrate.DataType.VarChar, _password);
+                si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, Username + "@" + SAAO.Mail.MailDomain, 50);
+                si.Execute("UPDATE [hm_accounts] SET accountpassword = @accountpassword WHERE accountaddress = @accountaddress");
+            }
+        }
         /// <summary>
         /// Student number
         /// </summary>
@@ -132,10 +155,6 @@ namespace SAAO
         public string GroupName;
         public int Job;
         public string JobName;
-        /// <summary>
-        /// Raw password string (only filled when it is current user)
-        /// </summary>
-        public string PasswordRaw;
         /// <summary>
         /// Senior (1 or 2)
         /// </summary>
@@ -255,7 +274,7 @@ namespace SAAO
         /// </summary>
         /// <param name="password">Raw password</param>
         /// <returns>Whether a string is the password of the user</returns>
-        private bool Verify(string password)
+        public bool Verify(string password)
         {
             /* The raw password is encrypted in this way:
              *  (SALT is generated randomly and its length is 6)
@@ -280,8 +299,8 @@ namespace SAAO
         public bool Login(string password)
         {
             if (!Verify(password)) return false;
-            PasswordRaw = password;
             Current = this;
+            _passwordRaw = password;
             return true;
         }
 
@@ -293,6 +312,7 @@ namespace SAAO
                 "SELECT [username] FROM [User] WHERE [otlExpire] > getdate() AND [otl] = @otl");
             if (r == null) return false;
             Current = new User(r.ToString());
+            // TODO: no raw password raw storage!
             return true;
         }
 
@@ -312,20 +332,6 @@ namespace SAAO
         public bool SetPassword(string password, string passwordNew)
         {
             if (!Verify(password)) return false;
-            var si = new SqlIntegrate(Utility.ConnStr);
-            var salt = _password.Substring(0, 6);
-            var passwordEncrypted = salt + Utility.Encrypt(salt + passwordNew);
-            // Update the user's password of SAA Online
-            si.AddParameter("@password", SqlIntegrate.DataType.VarChar, passwordEncrypted);
-            si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
-            si.Execute("UPDATE [User] SET [password] = @password WHERE [UUID] = @UUID");
-            si = new SqlIntegrate(SAAO.Mail.ConnStr);
-            // Update the user's password of SAA Mail (Hmailserver)
-            si.ResetParameter();
-            si.AddParameter("@accountpassword", SqlIntegrate.DataType.VarChar, passwordEncrypted);
-            si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, Username + "@" + SAAO.Mail.MailDomain, 50);
-            si.Execute("UPDATE [hm_accounts] SET accountpassword = @accountpassword WHERE accountaddress = @accountaddress");
-            PasswordRaw = passwordNew;
             return true;
         }
         
