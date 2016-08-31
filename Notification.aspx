@@ -142,7 +142,6 @@
                     <h4 class="modal-title">帮助</h4>
                 </div>
                 <div class="modal-body">
-                    <p>通知系统并不完善，如有问题请联系技术部。</p>
                     <p>若要查看监督报告，请点击监督报告的卡片。</p>
                     <hr>
                     <p>发布通知权限</p>

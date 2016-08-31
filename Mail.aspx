@@ -84,7 +84,7 @@
                     <textarea id="mailcontent"></textarea>
                 </div>
                 <div class="modal-footer" id="maildropzone">
-                    <button id="btnaddfiles" type="button" class="btn btn-primary pull-left" style="margin-right: 10px;">添加附件</button>
+                    <button id="btnaddfiles" type="button" class="btn btn-primary pull-left" style="margin-right: 10px; display: none">添加附件</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
                     <button type="submit" class="btn btn-primary">发送</button>
                 </div>
@@ -99,17 +99,76 @@
                     <h4 class="modal-title">帮助</h4>
                 </div>
                 <div class="modal-body">
-                    <p>此处的邮件系统功能并不完善，如需要完整的邮件系统请在顶栏中跳转。</p>
-                    <p>使用此处系统之前，请先使用手机电子邮件或完整版邮件系统，避免无法正常载入文件夹。</p>
-                    <p>此处邮件系统不能提供发送附件的功能，若需要该功能，请使用完整版。</p>
-                    <hr>
-                    <p>在手机上使用电子邮件的简要说明</p>
                     <ol>
-                        <li>你需要手动设置或选择其他（IMAP/SMTP、SMTP）</li>
-                        <li>收发件服务器地址均为：xuehuo.shenzhong.net</li>
-                        <li>请注意端口号（IMAP 143、POP3 110、SMTP 25）</li>
-                        <li>可选择SSL证书登录（端口号会变化）</li>
+                        <li>此处邮件仅包含收件箱、无附件的邮件撰写；</li>
+                        <li>如需要完整的邮件系统请在顶栏点击完整邮箱；</li>
+                        <li>使用微信登陆会导致无法发件和无法跳转到完整邮箱（技术上难以解决的Bug），如需使用，请注销后使用用户名密码登陆；</li>
+                        <li>在此处转发（回复）带有附件的邮件并不会保留其附件，如需转发附件，请使用完整邮箱。</li>
                     </ol>
+                    <p></p>
+                    <hr>
+
+                    <p>在 Windows 10 使用邮件系统的指引</p>
+                    <ol>
+                        <li>打开邮件应用，点击 <kbd>账户</kbd>，点击 <kbd>添加账户</kbd>，选择 <kbd>高级设置</kbd>，选择 <kbd>Internet 电子邮件</kbd></li>
+                        <li>电子邮件地址填写 <kbd><%=SAAO.User.Current.Username %>@xuehuo.org</kbd></li>
+                        <li>用户名填写 <kbd><%=SAAO.User.Current.Username %></kbd></li>
+                        <li>密码填写SAAO的登陆密码（邮件系统与SAAO密码相同）</li>
+                        <li>账户名可随意填写，如<kbd>学活</kbd></li>
+                        <li>“使用此名称发送你的邮件”填写您希望在发件时显示的名称，如<kbd>学生活动中心 <%=SAAO.User.Current.Realname %></kbd></li>
+                        <li>传入电子邮件服务器填写<kbd>xuehuo.shenzhong.net</kbd></li>
+                        <li>账户类型<kbd>POP3</kbd>和<kbd>IMAP4</kbd>都可，建议选择后者</li>
+                        <li>传出(SMTP)电子邮件服务器填写<kbd>xuehuo.shenzhong.net</kbd></li>
+                        <li>勾选 传出服务器要求身份验证</li>
+                        <li>勾选 发送邮件时使用同一用户名和密码</li>
+                        <li>建议勾选 需要用于传入电子邮件的 SSL</li>
+                        <li>建议勾选 需要用于传出电子邮件的 SSL</li>
+                        <li>点击登录即可完成设置（若在过程中遇到问题，请联系网络组）</li>
+                    </ol>
+                    <p>在 Android 使用邮件系统的指引</p>
+                    <ol>
+                        <li>打开<kbd>电子邮件</kbd>应用，在电子邮件地址输入 <kbd><%=SAAO.User.Current.Username %>@xuehuo.org</kbd></li>
+                        <li><kbd>手动设置</kbd>，<kbd>个人(IMAP)</kbd>，密码填写SAAO的登陆密码（邮件系统与SAAO密码相同），下一步</li>
+                        <li>将“服务器”改为<kbd>xuehuo.shenzhong.net</kbd></li>
+                        <li>安全类型选择<kbd>SSL/TLS</kbd>（若出错，则改为<kbd>SSL/TLS（接受所有证书）</kbd>），端口<kbd>993</kbd>，下一步</li>
+                        <li>SMTP服务器改为<kbd>xuehuo.shenzhong.net</kbd></li>
+                        <li>安全类型选择<kbd>SSL/TLS</kbd>（若出错，则改为<kbd>SSL/TLS（接受所有证书）</kbd>），端口<kbd>465</kbd>，下一步</li>
+                        <li>选择合适的同步频率（建议选择每小时以上避免过高耗电），下一步</li>
+                        <li>“您的姓名”填写您希望在发件时显示的名称，如<kbd>学生活动中心 <%=SAAO.User.Current.Realname %></kbd>，下一步</li>
+                        <li>设置完成（若在过程中遇到问题，请联系网络组）</li>
+                    </ol>
+                    
+                    <table class="table table-condensed">
+                        <caption>邮件服务器</caption>
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>SMTP</th>
+                            <th>IMAP</th>
+                            <th>POP3</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>服务器地址</td>
+                            <td colspan="3">
+                                xuehuo.shenzhong.net
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>端口（无加密）</td>
+                            <td>25</td>
+                            <td>143</td>
+                            <td>110</td>
+                        </tr>
+                        <tr>
+                            <td>端口（SSL）</td>
+                            <td>465、994</td>
+                            <td>993</td>
+                            <td>995</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>

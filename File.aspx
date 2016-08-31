@@ -77,7 +77,7 @@
         <form class="modal-dialog" id="Uploadform">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title">上传文件</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button><h4 class="modal-title">上传文件 <small>可将文件拖拽到框内</small></h4>
                 </div>
                 <div class="modal-body">
                     <div class="form-horizontal">
@@ -104,7 +104,22 @@
                     <h4 class="modal-title">帮助</h4>
                 </div>
                 <div class="modal-body">
-                    <p>多文件功能已取消</p>
+                    <ol>
+                        <li>文件多版本功能将在后续更新中加入；</li>
+                        <li>支持文件拖拽上传（需浏览器支持）和多文件上传；</li>
+                        <li>默认只会显示当前架构（及活动）的文件，后续更新中可能加入选项选择；</li>
+                        <li>文件属性对话框中可修改（未以文本框样式出现）的项包括：
+                            <ul>
+                                <li>文件名</li>
+                                <li>描述</li>
+                                <li>标签（键入标签后，输入 <kbd>空格</kbd> 或 <kbd>Enter</kbd> 完成这个标签，以此类推）</li>
+                                <li>权限（点击选中后变为蓝色）</li>
+                            </ul>
+                        </li>
+                        <li>文件修改完成后请点击保存以保存更改；</li>
+                        <li>请文件上传者尽可能详细填写文件的信息，特别是标签，以便后续的检索；</li>
+                        <li>请谨慎点击删除，删除文件不会有确认提示，文件删除后将从服务器彻底移除，无法恢复。</li>
+                    </ol>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
