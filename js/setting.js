@@ -95,14 +95,3 @@ $("form#info").submit(function(e) {
         }
     });
 });
-
-function settingUnbind() {
-    $.get("user.unbind");
-    $.get("user.reload");
-    window.location.href = "setting";
-}
-
-function settingRefresh() {
-    $.get("user.reload");
-    window.location.href = "setting";
-}

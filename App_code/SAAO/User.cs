@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Data;
-using System.Web.Caching;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -80,10 +78,16 @@ namespace SAAO
         private string _sso;
         public string Sso
         {
-            get { return _sso; }
+            get
+            {
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
+                _sso = si.Query("SELECT [sso] FROM [User] WHERE [UUID] = @UUID").ToString();
+                return _sso;
+            }
             set
             {
-                _phone = value;
+                _sso = value;
                 var si = new SqlIntegrate(Utility.ConnStr);
                 si.AddParameter("@sso", SqlIntegrate.DataType.VarChar, value);
                 si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
@@ -93,10 +97,16 @@ namespace SAAO
         private string _wechat;
         public string Wechat
         {
-            get { return _wechat; }
+            get
+            {
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
+                _wechat = si.Query("SELECT [wechat] FROM [User] WHERE [UUID] = @UUID").ToString();
+                return _wechat;
+            }
             set
             {
-                _phone = value;
+                _wechat = value;
                 var si = new SqlIntegrate(Utility.ConnStr);
                 si.AddParameter("@wechat", SqlIntegrate.DataType.VarChar, value);
                 si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);

@@ -53,9 +53,5 @@ public class UserHandler : AjaxHandler
             if (context.Request.Form["pin"] == null || !int.TryParse(context.Request.Form["pin"], out pin)) return;
             SAAO.User.Current.Pin = context.Request.Form["pin"];
         }
-        else if (context.Request["action"] == "reload")
-        {
-            SAAO.User.Current = new SAAO.User(SAAO.User.Current.Username);
-        }
     }
 }

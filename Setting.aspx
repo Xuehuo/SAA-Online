@@ -16,7 +16,7 @@
                     <li>关注学活订阅号（SMS_SAA）</li>
                     <li>发送<code>sso<%= SAAO.User.Current.Sso.ToLower() %></code>到订阅号</li>
                     <li>订阅号回复绑定成功</li>
-                    <li>点击<a href="#" onclick="settingRefresh()">这里</a>刷新状态</li>
+                    <li>点击<a href="setting">这里</a>刷新状态</li>
                 </ol>
                 <% } else { %>
                 <h4>微信登陆</h4>
@@ -25,7 +25,7 @@
                     <li>订阅号回复一个一次性的登录链接</li>
                     <li>打开链接即可使用</li>
                 </ol>
-                <p>当前已绑定微信号 <button class="btn btn-danger btn-xs" onclick="settingUnbind()">解除绑定</button></p>
+                <p>当前已绑定微信号 <a class="btn btn-danger btn-xs" href="setting">解除绑定</a></p>
                 <% } %>
             </div>
             <div class="col-md-6" style="display: none">
