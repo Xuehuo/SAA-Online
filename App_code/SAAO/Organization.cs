@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+
 namespace SAAO
 {
     /// <summary>
@@ -102,6 +103,10 @@ namespace SAAO
         /// Current event
         /// </summary>
         public Event EventCurrent;
+
+        public DateTime EventStart;
+        public DateTime EventEnd;
+
         /// <summary>
         /// State constructor
         /// </summary>
@@ -116,7 +121,9 @@ namespace SAAO
                 SeniorOne = (dt.Year - 1).ToString();
                 SeniorTwo = (dt.Year - 2).ToString();
                 StructureCurrent = SeniorTwo;
-                EventCurrent = 0;
+                EventCurrent = Event.YouYuanHui;
+                EventStart = summerDivider.AddYears(-1);
+                EventEnd = winterDivider;
             }
             else if (dt > winterDivider && dt < summerDivider)
             {
@@ -124,6 +131,8 @@ namespace SAAO
                 SeniorTwo = (dt.Year - 2).ToString();
                 StructureCurrent = SeniorTwo;
                 EventCurrent = Event.ShiDa;
+                EventStart = summerDivider;
+                EventEnd = winterDivider;
             }
             else// if (dt > summerDivider)
             {
@@ -131,6 +140,8 @@ namespace SAAO
                 SeniorTwo = (dt.Year - 1).ToString();
                 StructureCurrent = SeniorTwo;
                 EventCurrent = Event.YouYuanHui;
+                EventStart = summerDivider;
+                EventEnd = winterDivider.AddYears(1);
             }
         }
     }

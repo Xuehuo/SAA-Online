@@ -164,7 +164,9 @@ namespace SAAO
         public static JArray ListJson()
         {
             var si = new SqlIntegrate(Utility.ConnStr);
-            var dt = si.Adapter("SELECT Notification.reportFile, Notification.ID, Notification.important, Notification.type, Notification.title, Notification.[content], Notification.notifyTime, [User].realname, [User].[group] FROM Notification INNER JOIN [User] ON Notification.UUID = [User].UUID ORDER BY Notification.important DESC, ID DESC");
+            si.AddParameter("@start", SqlIntegrate.DataType.Date, Organization.Current.State.EventStart);
+            si.AddParameter("@end", SqlIntegrate.DataType.Date, Organization.Current.State.EventEnd);
+            var dt = si.Adapter("SELECT [Notification].[reportFile], [Notification].[ID], [Notification].[important], [Notification].[type], [Notification].[title], [Notification].[content], [Notification].[notifyTime], [User].[realname], [User].[group] FROM [Notification] INNER JOIN [User] ON [Notification].[UUID] = [User].[UUID] AND [Notification].[notifyTime] BETWEEN @start AND @end ORDER BY Notification.important DESC, ID DESC");
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {

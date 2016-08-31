@@ -282,7 +282,9 @@ namespace SAAO
         public static JArray ListJson()
         {
             var si = new SqlIntegrate(Utility.ConnStr);
-            var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] ORDER BY [File].[ID] DESC");
+            si.AddParameter("@start", SqlIntegrate.DataType.Date, Organization.Current.State.EventStart);
+            si.AddParameter("@end", SqlIntegrate.DataType.Date, Organization.Current.State.EventEnd);
+            var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] AND [File].[datetime] BETWEEN @start AND @end ORDER BY [File].[ID] DESC");
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {
