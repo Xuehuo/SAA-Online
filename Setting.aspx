@@ -25,7 +25,7 @@
                     <li>订阅号回复一个一次性的登录链接</li>
                     <li>打开链接即可使用</li>
                 </ol>
-                <p>当前已绑定微信号 <a class="btn btn-danger btn-xs" href="setting">解除绑定</a></p>
+                <p>当前已绑定微信号 <button class="btn btn-danger btn-xs" onclick="settingUnbind()">解除绑定</button></p>
                 <% } %>
             </div>
             <div class="col-md-6" style="display: none">

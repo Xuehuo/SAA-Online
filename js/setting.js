@@ -95,3 +95,9 @@ $("form#info").submit(function(e) {
         }
     });
 });
+
+function settingUnbind() {
+    $.get("user.unbind", function() {
+        window.location.href = "setting";
+    });
+}
