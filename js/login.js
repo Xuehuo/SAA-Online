@@ -27,9 +27,7 @@ $("form").submit(function (e) {
                         login: $("#username").val(),
                         password: $("#password").val(),
                         sign_me: "0"
-                    });
-                    window.location.href = "dashboard";
-                    
+                    }, function() { window.location.href = "dashboard"; });
                 }
                 else if (result.flag == 2) {
                     msg("凭证错误", "请更正您的用户名或密码后重试", "error");
