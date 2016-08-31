@@ -42,6 +42,7 @@
         #file #container h2 {
             display: none;
             color: #777;
+            margin-left: 13px;
         }
 
         #file #container > table {
