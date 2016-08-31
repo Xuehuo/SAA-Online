@@ -20,8 +20,16 @@ $("form").submit(function (e) {
             dataType: "json",
             success: function (result) {
                 if (result.flag == 0) {
-                    $.post("../mail/default.aspx?mode=submit", { advanced_login: "0", email: $("#username").val() + "@xuehuo.org", login: $("#username").val(), password: $("#password").val(), sign_me: "0" });
+                    $.post("../mail/default.aspx?mode=submit&auto=1",
+                    {
+                        advanced_login: "0",
+                        email: $("#username").val() + "@xuehuo.org",
+                        login: $("#username").val(),
+                        password: $("#password").val(),
+                        sign_me: "0"
+                    });
                     window.location.href = "dashboard";
+                    
                 }
                 else if (result.flag == 2) {
                     msg("凭证错误", "请更正您的用户名或密码后重试", "error");
