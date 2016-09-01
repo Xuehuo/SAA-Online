@@ -15,10 +15,9 @@ public partial class LoginPage : System.Web.UI.Page
                     ["access_token"].ToString();
             Wechat = SAAO.Utility.HttpRequestJson(
                 $"https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={accessToken}&code={Request["code"]}")["UserId"].ToString();
+            Session.Add("wechat", Wechat);
             if (SAAO.User.WechatLogin(Wechat))
                 Response.Redirect("dashboard");
-            else
-                Session.Add("wechat", Wechat);
         }
         if (SAAO.User.IsLogin)
             Response.Redirect("dashboard");

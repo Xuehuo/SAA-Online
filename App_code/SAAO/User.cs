@@ -1,5 +1,6 @@
 ﻿using System;
-using System.CodeDom;
+using System.Web;
+using System.Web.ModelBinding;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -222,20 +223,18 @@ namespace SAAO
         /// <summary>
         /// Whether the user is executive (only Senior Two)
         /// </summary>
-        public bool IsExecutive => Senior == 2 && Array.IndexOf(Organization.ImptMember, Job) != -1;
+        public bool IsExecutive => Senior == 2 && Organization.Current.Structure.Select("[executive] = 1 AND [job] = " + Job).Length != 0;
          // Executive member and important member are identical
 
         /// <summary>
         /// Whether the user is headman of a group (only Senior One)
         /// </summary>
-        public bool IsGroupHeadman => Senior == 1 && Job == 5;
-        // TODO: Remove this magic number
+        public bool IsGroupHeadman => Senior == 1 && Organization.Current.Structure.Select("[headman] = 1 AND [job] = " + Job).Length != 0;
 
         /// <summary>
         /// Whether the user is in the supervising group (both Senior)
         /// </summary>
-        public bool IsSupervisor => GroupName == "审计组";
-        // TODO: Remove this magic string
+        public bool IsSupervisor => Group == Convert.ToInt32(Organization.Current.Structure.Select("[supervisor] = 1")[0]["Group"]);
 
         /// <summary>
         /// Verify whether a string is the password of the user
@@ -293,6 +292,8 @@ namespace SAAO
         public void Logout()
         {
             Current = null;
+            if (HttpContext.Current.Session["wechat"] != null)
+                HttpContext.Current.Session.Remove("wechat");
         }
         /// <summary>
         /// Change password of the user

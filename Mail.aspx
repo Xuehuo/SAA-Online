@@ -2,8 +2,10 @@
 <%@ MasterType TypeName="MasterPage" %>
 
 <asp:Content ContentPlaceHolderID="PageMenu" runat="server">
+    <%if (Session["wechat"] == null) {%>
     <li><a href="#" onclick="mailCompose()"><span class="glyphicon glyphicon-pencil"></span><span class="hidden-xs">撰写邮件</span></a></li>
     <li><a href="../mail/webmail.aspx" target="_blank"><span class="glyphicon glyphicon-share-alt"></span><span class="hidden-xs">完整邮箱</span></a></li>
+    <%} %>
     <li class="hidden-xs"><a href="#" data-toggle="modal" data-target="#helpmodal"><span class="glyphicon glyphicon-question-sign"></span><span class="hidden-xs">帮助</span></a></li>
 </asp:Content>
 
@@ -102,7 +104,7 @@
                     <ol>
                         <li>此处邮件仅包含收件箱、无附件的邮件撰写；</li>
                         <li>如需要完整的邮件系统请在顶栏点击完整邮箱；</li>
-                        <li>使用微信登陆会导致无法发件和无法跳转到完整邮箱（技术上难以解决的Bug），如需使用，请注销后使用用户名密码登陆；</li>
+                        <li>使用微信登陆会导致无法发件和无法跳转到完整邮箱，如需使用，请注销后使用用户名密码登陆；</li>
                         <li>在此处转发（回复）带有附件的邮件并不会保留其附件，如需转发附件，请使用完整邮箱。</li>
                     </ol>
                     <p></p>

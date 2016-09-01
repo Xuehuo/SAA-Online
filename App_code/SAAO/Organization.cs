@@ -8,12 +8,6 @@ namespace SAAO
     /// </summary>
     public class Organization
     {
-        /// <summary>
-        /// Important members ([job] in database)
-        /// </summary>
-        public static int[] ImptMember = { 0, 1, 2, 3 };
-        // TODO: Rename or write it in database
-
         public State State;
 
         /// <summary>
