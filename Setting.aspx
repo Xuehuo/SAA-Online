@@ -7,42 +7,25 @@
 
 <asp:Content ContentPlaceHolderID="PageContent" runat="server">
     <div class="panel panel-default">
-        <div class="panel-heading">账号登陆</div>
+        <div class="panel-heading">微信绑定</div>
         <div class="panel-body">
             <div class="col-md-6">
                 <% if (SAAO.User.Current.Wechat == "") { %>
                 <h4>微信绑定</h4>
                 <ol>
-                    <li>关注学活订阅号（SMS_SAA）</li>
-                    <li>发送<code>sso<%= SAAO.User.Current.Sso.ToLower() %></code>到订阅号</li>
-                    <li>订阅号回复绑定成功</li>
+                    <li>扫描二维码关注微信企业号（学活工作网络）</li>
+                    <li>进入SAAO应用</li>
+                    <li>输入用户名密码登陆</li>
                     <li>点击<a href="setting">这里</a>刷新状态</li>
                 </ol>
                 <% } else { %>
                 <h4>微信登陆</h4>
-                <ol>
-                    <li>向订阅号发送<code>saao</code>（不区分大小写）</li>
-                    <li>订阅号回复一个一次性的登录链接</li>
-                    <li>打开链接即可使用</li>
-                </ol>
-                <p>当前已绑定微信号 <button class="btn btn-danger btn-xs" onclick="settingUnbind()">解除绑定</button></p>
+                <p>在企业号中即可直接进入SAAO（不需要用户名密码登录）。</p>
+                <p>当前已绑定微信号 <%=SAAO.User.Current.Wechat %> <button class="btn btn-danger btn-xs" onclick="settingUnbind()">解除绑定</button></p>
                 <% } %>
             </div>
-            <div class="col-md-6" style="display: none">
-                <h4>登陆链接</h4>
-                <p>在此处可获得一个永久性的登录链接，您可以将其保存为桌面上的快捷方式或者浏览器书签以便快速登陆。为保安全，在生成该链接前需要您设置一个四位<code>PIN</code>，在使用该链接登录时，只需在密码栏输入4位的<code>PIN</code>即可。需要特别注意的是，这个<code>PIN</code>不会被存储在服务器上，丢失后可重新生成，之前生成的链接不会失效，若不慎泄露链接，请修改密码。
-                </p>
-                <form class="form-inline">
-                    <div class="form-group">
-                        <label for="pin">PIN</label>
-                        <input type="text" class="form-control" id="pin" placeholder="PIN" maxlength="4" style="width: 60px">
-                    </div>
-                    <div class="form-group">
-                        <label for="pwd">密码</label>
-                        <input type="password" class="form-control" id="pwd" placeholder="密码">
-                    </div>
-                    <a href="#" class="btn btn-default" onclick="settingGenerateLink(this);return false;">生成</a>
-                </form>
+            <div class="col-md-6">
+                <img src="image/qy.jpg" class="img-responsive">
             </div>
         </div>
     </div>

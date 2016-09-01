@@ -1,7 +1,12 @@
 ﻿using System;
+using System.IO;
+using System.Net;
 using System.Text;
 using System.Security.Cryptography;
 using System.Web;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 namespace SAAO
 {
     /// <summary>
@@ -90,6 +95,46 @@ namespace SAAO
             HttpContext.Current.Response.TransmitFile(path);
             HttpContext.Current.Response.Flush();
             HttpContext.Current.ApplicationInstance.CompleteRequest();
+        }
+        /// <summary>
+        /// Http Request
+        /// </summary>
+        /// <param name="url">Request URL</param>
+        /// <param name="data">POST data</param>
+        /// <returns>Json object parsed from response string</returns>
+        public static JObject HttpRequestJson(string url, string data = "")
+        {
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            if (data != "")
+            {
+                request.Method = "POST";
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.ContentLength = Encoding.ASCII.GetBytes(data).Length;
+                using (var stream = request.GetRequestStream())
+                {
+                    stream.Write(Encoding.ASCII.GetBytes(data), 0, data.Length);
+                }
+            }
+            else
+            {
+                request.Method = "GET";
+            }
+            try
+            {
+                using (var response = (HttpWebResponse) request.GetResponse())
+                {
+                    return
+                        (JObject)
+                            new JsonSerializer().Deserialize(
+                                new JsonTextReader(
+                                    new StringReader(new StreamReader(response.GetResponseStream()).ReadToEnd())));
+                }    
+            }
+            catch (Exception ex)
+            {
+                Log(ex);
+                return null;
+            }
         }
     }
 }

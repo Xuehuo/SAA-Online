@@ -17,6 +17,8 @@ public class UserHandler : AjaxHandler
                 var user = new SAAO.User(context.Request.Form["username"].ToLower());
                 if (!user.Login(context.Request.Form["password"]))
                     R.Flag = 2;
+                if (user.Wechat == "" && context.Session["wechat"] != null)
+                    user.Wechat = context.Session["wechat"].ToString();
             }
             else
                 R.Flag = 2;
@@ -47,13 +49,6 @@ public class UserHandler : AjaxHandler
         else if (context.Request["action"] == "unbind")
         {
             SAAO.User.Current.Wechat = "";
-            SAAO.User.Current.Sso = Guid.NewGuid().ToString().ToUpper().Substring(0, 8);
-        }
-        else if (context.Request["action"] == "pin")
-        {
-            int pin;
-            if (context.Request.Form["pin"] == null || !int.TryParse(context.Request.Form["pin"], out pin)) return;
-            SAAO.User.Current.Pin = context.Request.Form["pin"];
         }
     }
 }

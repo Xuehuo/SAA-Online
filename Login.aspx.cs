@@ -2,18 +2,25 @@
 
 public partial class LoginPage : System.Web.UI.Page
 {
+    public string Wechat;
     protected void Page_Load(object sender, System.EventArgs e)
     {
         if (Request["code"] != null && Request["state"] != null && Request["state"] == "saalogin")
-            SAAO.Utility.Log(Request["code"]);
-        if (SAAO.User.IsLogin)
         {
-            Response.Redirect("dashboard");
-            return;
+            var corpId = System.Configuration.ConfigurationManager.AppSettings["WechatCorpId"];
+            var corpSecret = System.Configuration.ConfigurationManager.AppSettings["WechatCorpSecret"];
+            var accessToken =
+                SAAO.Utility.HttpRequestJson(
+                    $"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}")
+                    ["access_token"].ToString();
+            Wechat = SAAO.Utility.HttpRequestJson(
+                $"https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={accessToken}&code={Request["code"]}")["UserId"].ToString();
+            if (SAAO.User.WechatLogin(Wechat))
+                Response.Redirect("dashboard");
+            else
+                Session.Add("wechat", Wechat);
         }
-        Guid otl;
-        if (Request["otl"] == null || !Guid.TryParse(Request["otl"], out otl)) return;
-        if (SAAO.User.Login(otl))
+        if (SAAO.User.IsLogin)
             Response.Redirect("dashboard");
     }
 }

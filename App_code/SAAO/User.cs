@@ -97,26 +97,7 @@ namespace SAAO
         /// Initial letter of surname (0 represents 'A')
         /// </summary>
         public readonly int Initial;
-
-        private string _sso;
-        public string Sso
-        {
-            get
-            {
-                var si = new SqlIntegrate(Utility.ConnStr);
-                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
-                _sso = si.Query("SELECT [sso] FROM [User] WHERE [UUID] = @UUID").ToString();
-                return _sso;
-            }
-            set
-            {
-                _sso = value;
-                var si = new SqlIntegrate(Utility.ConnStr);
-                si.AddParameter("@sso", SqlIntegrate.DataType.VarChar, value);
-                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
-                si.Execute("UPDATE [User] SET [sso] = @sso WHERE [UUID] = @UUID");
-            }
-        }
+        
         private string _wechat;
         public string Wechat
         {
@@ -134,20 +115,6 @@ namespace SAAO
                 si.AddParameter("@wechat", SqlIntegrate.DataType.VarChar, value);
                 si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
                 si.Execute("UPDATE [User] SET [wechat] = @wechat WHERE [UUID] = @UUID");
-            }
-        }
-
-        private string _pin;
-        public string Pin
-        {
-            get { return _pin; }
-            set
-            {
-                _phone = value;
-                var si = new SqlIntegrate(Utility.ConnStr);
-                si.AddParameter("@pin", SqlIntegrate.DataType.VarChar, value);
-                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
-                si.Execute("UPDATE [User] SET [pin] = @pin WHERE [UUID] = @UUID");
             }
         }
 
@@ -176,7 +143,6 @@ namespace SAAO
             _class = Convert.ToInt32(dr["class"]);
             _mail = dr["mail"].ToString();
             _phone = dr["phone"].ToString();
-            _sso = dr["sso"].ToString();
             _wechat = dr["wechat"].ToString();
             Initial = dr["username"].ToString()[dr["realname"].ToString().Length - 1] - 'a' + 1;
             Group = Convert.ToInt32(dr["group"].ToString());
@@ -206,7 +172,6 @@ namespace SAAO
             _class = Convert.ToInt32(dr["class"]);
             _mail = dr["mail"].ToString();
             _phone = dr["phone"].ToString();
-            _sso = dr["sso"].ToString();
             _wechat = dr["wechat"].ToString();
             Initial = dr["username"].ToString()[dr["realname"].ToString().Length - 1] - 'a' + 1;
             Group = Convert.ToInt32(dr["group"].ToString());
@@ -243,7 +208,10 @@ namespace SAAO
             }
             set
             {
-                System.Web.HttpContext.Current.Session["User"] = value;
+                if (System.Web.HttpContext.Current.Session["User"] != null)
+                    System.Web.HttpContext.Current.Session["User"] = value;
+                else
+                    System.Web.HttpContext.Current.Session.Add("User", value);
             }
         }
         /// <summary>
@@ -303,19 +271,22 @@ namespace SAAO
             _passwordRaw = password;
             return true;
         }
-
-        public static bool Login(Guid otl)
+        /// <summary>
+        /// Wechat Login
+        /// </summary>
+        /// <param name="wechatId">Wechat ID(username)</param>
+        /// <returns>Whether the wechat ID has been bound</returns>
+        public static bool WechatLogin(string wechatId)
         {
             var si = new SqlIntegrate(Utility.ConnStr);
-            si.AddParameter("@otl", SqlIntegrate.DataType.VarChar, otl.ToString().ToUpper());
+            si.AddParameter("@wechat", SqlIntegrate.DataType.VarChar, wechatId);
             var r = si.Query(
-                "SELECT [username] FROM [User] WHERE [otlExpire] > getdate() AND [otl] = @otl");
+                "SELECT [username] FROM [User] WHERE [wechat] = @wechat");
             if (r == null) return false;
             Current = new User(r.ToString());
             // TODO: no raw password raw storage!
             return true;
         }
-
         /// <summary>
         /// Logout the user of current session
         /// </summary>

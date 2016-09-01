@@ -30,6 +30,12 @@
                 <input type="password" class="form-control" id="password" placeholder="密码" data-toggle="tooltip" data-placement="right" title="初次登录请务必修改密码。若忘记密码，请联系网络组">
             </div>
             <button type="submit" class="btn btn-primary btn-block" data-toggle="tooltip" data-placement="bottom" title="会话将于浏览器关闭后结束">登录</button>
+            <% if (Wechat != null) { %>
+            <br>
+            <div class="alert alert-success" role="alert">
+                在此处登录即可将您的学活工作网络账户与微信账户（<strong><%=Wechat %></strong>）绑定。
+            </div>
+            <% } %>
         </form>
     </div>
     <script src="//cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
