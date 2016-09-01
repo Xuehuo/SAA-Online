@@ -279,11 +279,11 @@ namespace SAAO
         /// List current files in the database in JSON
         /// </summary>
         /// <returns>JSON of current files [{guid,name,extension,uploaderName,datetime,info(bool)},...]</returns>
-        public static JArray ListJson()
+        public static JArray ListJson(DateTime start, DateTime end)
         {
             var si = new SqlIntegrate(Utility.ConnStr);
-            si.AddParameter("@start", SqlIntegrate.DataType.Date, Organization.Current.State.EventStart);
-            si.AddParameter("@end", SqlIntegrate.DataType.Date, Organization.Current.State.EventEnd);
+            si.AddParameter("@start", SqlIntegrate.DataType.Date, start);
+            si.AddParameter("@end", SqlIntegrate.DataType.Date, end);
             var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] AND [File].[uploadTime] BETWEEN @start AND @end ORDER BY [File].[ID] DESC");
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)

@@ -14,7 +14,7 @@ public class FileHandler : AjaxHandler
         }
         else if (context.Request["action"] == "list")
         {
-            R.Data = SAAO.File.ListJson();
+            R.Data = SAAO.File.ListJson(SAAO.Organization.Current.State.EventStart, SAAO.Organization.Current.State.EventEnd);
         }
         else if (context.Request["action"] == "info")
         {
