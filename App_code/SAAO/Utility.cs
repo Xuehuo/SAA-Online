@@ -21,11 +21,12 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
             si.AddParameter("@context", SqlIntegrate.DataType.Text, message);
-            si.AddParameter("@IP", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.UserHostAddress, 50);
+            si.AddParameter("@url", SqlIntegrate.DataType.Text, HttpContext.Current.Request.Url.ToString());
+            si.AddParameter("@IP", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserHostAddress);
             si.AddParameter("@browser", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserAgent);
-            si.AddParameter("@OS", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.Browser.Platform, 50);
-            si.AddParameter("@session", SqlIntegrate.DataType.VarChar, User.IsLogin ? User.Current.Username : "未登录用户", 50);
-            si.Execute("INSERT INTO Log ([context], [IP], [browser], [OS], [session]) VALUES (@context, @IP, @browser, @OS, @session)");
+            si.AddParameter("@OS", SqlIntegrate.DataType.Text, HttpContext.Current.Request.Browser.Platform);
+            si.AddParameter("@session", SqlIntegrate.DataType.Text, User.IsLogin ? User.Current.Username : "未登录用户");
+            si.Execute("INSERT INTO Log ([context], [url], [IP], [browser], [OS], [session]) VALUES (@context, @url, @IP, @browser, @OS, @session)");
         }
         /// <summary>
         /// Write message (error one most possibly) to database
@@ -35,11 +36,12 @@ namespace SAAO
         {
             SqlIntegrate si = new SqlIntegrate(ConnStr);
             si.AddParameter("@context", SqlIntegrate.DataType.Text, message.Message + message.StackTrace);
-            si.AddParameter("@IP", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.UserHostAddress, 50);
+            si.AddParameter("@url", SqlIntegrate.DataType.Text, HttpContext.Current.Request.Url.ToString());
+            si.AddParameter("@IP", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserHostAddress);
             si.AddParameter("@browser", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserAgent);
-            si.AddParameter("@OS", SqlIntegrate.DataType.VarChar, HttpContext.Current.Request.Browser.Platform, 50);
-            si.AddParameter("@session", SqlIntegrate.DataType.VarChar, User.IsLogin ? User.Current.Username : "未登录用户", 50);
-            si.Execute("INSERT INTO Log ([context], [IP], [browser], [OS], [session]) VALUES (@context, @IP, @browser, @OS, @session)");
+            si.AddParameter("@OS", SqlIntegrate.DataType.Text, HttpContext.Current.Request.Browser.Platform);
+            si.AddParameter("@session", SqlIntegrate.DataType.Text, User.IsLogin ? User.Current.Username : "未登录用户");
+            si.Execute("INSERT INTO Log ([context], [url], [IP], [browser], [OS], [session]) VALUES (@context, @url, @IP, @browser, @OS, @session)");
         }
         /// <summary>
         /// Use Base64 to encode a string
