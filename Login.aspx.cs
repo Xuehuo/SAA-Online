@@ -9,10 +9,14 @@ public partial class LoginPage : System.Web.UI.Page
         {
             var corpId = System.Configuration.ConfigurationManager.AppSettings["WechatCorpId"];
             var corpSecret = System.Configuration.ConfigurationManager.AppSettings["WechatCorpSecret"];
-            var accessToken =
-                SAAO.Utility.HttpRequestJson(
-                    $"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}")
-                    ["access_token"].ToString();
+            if (Application["accessTokenExpire"] == null || DateTime.Now > (DateTime) Application["accessTokenExpire"])
+            {
+                var data = SAAO.Utility.HttpRequestJson(
+                    $"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}");
+                Application["accessTokenExpire"] = DateTime.Now.AddSeconds(Convert.ToInt32(data["expires_in"]));
+                Application["accessToken"] = data["access_token"].ToString();
+            }
+            var accessToken = Application["accessToken"].ToString();
             Wechat = SAAO.Utility.HttpRequestJson(
                 $"https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={accessToken}&code={Request["code"]}")["UserId"].ToString();
             Session.Add("wechat", Wechat);
