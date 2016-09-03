@@ -82,7 +82,7 @@ public class FileHandler : AjaxHandler
                     ["agentid"] = 4,
                     ["file"] = new JObject { ["media_id"] = file.MediaId }
                 };
-                var result = SAAO.Utility.HttpRequestJson("https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=file&access_token=" + SAAO.Utility.GetAccessToken(), o.ToString());
+                var result = SAAO.Utility.HttpRequestJson("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), o.ToString());
                 if (result["errcode"].ToString() == "0")
                     context.Response.Write("1");
                 else

@@ -204,6 +204,8 @@ namespace SAAO
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
             si.Execute("DELETE FROM [Filetag] WHERE [FUID] = @FUID");
             System.IO.File.Delete(_savePath);
+            if(_mediaId != "")
+                Utility.HttpRequestJson(string.Format("https://qyapi.weixin.qq.com/cgi-bin/material/del?access_token={0}&media_id={1}", Utility.GetAccessToken(), _mediaId));
         }
         /// <summary>
         /// File visibility-level
@@ -330,10 +332,8 @@ namespace SAAO
             form.Headers.Remove("Content-Type");
             form.Headers.TryAddWithoutValidation("Content-Type", "multipart/form-data; boundary=fbce142e-4e8e-4bf3-826d-cc3cf506cccc");
             media.Headers.Remove("Content-Disposition");
-            media.Headers.Remove("content-type");
-            media.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
-            media.Headers.ContentDisposition.Name = "\"media\"";
-            media.Headers.ContentDisposition.FileName = "\"" + file.FileName + "\"";
+            media.Headers.Remove("Content-Type");
+            media.Headers.TryAddWithoutValidation("Content-Disposition", "form-data; name=\"media\";filename=\"" + System.IO.Path.GetFileName(file.FileName) + "\"");
             media.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
             try
             {
