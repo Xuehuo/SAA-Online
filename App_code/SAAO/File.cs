@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -92,6 +93,8 @@ namespace SAAO
             si.AddParameter("@size", SqlIntegrate.DataType.Int, file.ContentLength);
             si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, User.Current.UUID);
             si.Execute("INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES (@GUID,@name,@extension,@size,@UUID)");
+            if(file.ContentLength < 20000000)
+                UploadWechat(file, guid);
         }
         /// <summary>
         /// Check whether the file has a tag
@@ -305,6 +308,36 @@ namespace SAAO
                 a.Add(o);
             }
             return a;
+        }
+
+        private static void UploadWechat(System.Web.HttpPostedFile file, string guid)
+        {
+            var url = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=file&access_token=" + Utility.GetAccessToken();
+            var client = new HttpClient();
+            var media = new StreamContent(file.InputStream);
+            media.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
+            media.Headers.ContentDisposition.Name = "\"media\"";
+            media.Headers.ContentDisposition.FileName = "\"" + file.FileName + "\"";
+            media.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+            var form = new MultipartFormDataContent { media };
+            try
+            {
+                var response = client.PostAsync(url, form);
+                if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
+                    Utility.Log(response.Result.Content.ToString());
+                else
+                {
+                    string mediaid = new JObject(response.Result.Content.ToString())["media_id"].ToString();
+                    var si = new SqlIntegrate(Utility.ConnStr);
+                    si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, mediaid);
+                    si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, guid);
+                    si.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
+                }
+            }
+            catch(Exception e)
+            {
+                Utility.Log(e);
+            }
         }
     }
 }
