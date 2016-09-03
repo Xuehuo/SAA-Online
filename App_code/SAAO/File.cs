@@ -323,11 +323,12 @@ namespace SAAO
             try
             {
                 var response = client.PostAsync(url, form);
-                if (response.Result.StatusCode != System.Net.HttpStatusCode.OK)
+                JObject jo = JObject.Parse(response.Result.Content.ToString());
+                if (jo["errcode"].ToString() != "0")
                     Utility.Log(response.Result.Content.ToString());
                 else
                 {
-                    string mediaid = new JObject(response.Result.Content.ToString())["media_id"].ToString();
+                    string mediaid = jo["media_id"].ToString();
                     var si = new SqlIntegrate(Utility.ConnStr);
                     si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, mediaid);
                     si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, guid);
