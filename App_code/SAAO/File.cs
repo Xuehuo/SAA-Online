@@ -330,6 +330,7 @@ namespace SAAO
             form.Headers.Remove("Content-Type");
             form.Headers.TryAddWithoutValidation("Content-Type", "multipart/form-data; boundary=fbce142e-4e8e-4bf3-826d-cc3cf506cccc");
             media.Headers.Remove("Content-Disposition");
+            media.Headers.Remove("content-type");
             media.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
             media.Headers.ContentDisposition.Name = "\"media\"";
             media.Headers.ContentDisposition.FileName = "\"" + file.FileName + "\"";
