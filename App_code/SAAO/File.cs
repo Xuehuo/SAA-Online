@@ -34,7 +34,9 @@ namespace SAAO
         private readonly string _savePath;
         public List<string> Tag;
         private PermissionLevel _permission;
+        private string _mediaId;
         public enum PermissionLevel
+
         {
             All = 0,
             /// <summary>
@@ -72,6 +74,7 @@ namespace SAAO
             _uploadTime = Convert.ToDateTime(fileInfo["uploadTime"]);
             _savePath = StoragePath + str.ToUpper();
             _permission = (PermissionLevel)Convert.ToInt32(fileInfo["permission"]);
+            _mediaId = fileInfo["media_id"].ToString();
             Tag = new List<string>();
             si.ResetParameter();
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, str.ToUpper());
@@ -180,6 +183,13 @@ namespace SAAO
             get
             {
                 return _info;
+            }
+        }
+        public string MediaId
+        {
+            get
+            {
+                return _mediaId;
             }
         }
         /// <summary>
@@ -303,7 +313,8 @@ namespace SAAO
                     ["downloadCount"] = int.Parse(dt.Rows[i]["downloadCount"].ToString()),
                     ["uploaderName"] = dt.Rows[i]["realname"].ToString(),
                     ["datetime"] = DateTime.Parse(dt.Rows[i]["uploadTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
-                    ["info"] = dt.Rows[i]["info"].ToString() != ""
+                    ["info"] = dt.Rows[i]["info"].ToString() != "",
+                    ["wechat"] = (dt.Rows[i]["info"] != null)
                 };
                 a.Add(o);
             }
@@ -315,17 +326,20 @@ namespace SAAO
             var url = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=file&access_token=" + Utility.GetAccessToken();
             var client = new HttpClient();
             var media = new StreamContent(file.InputStream);
+            var form = new MultipartFormDataContent("fbce142e-4e8e-4bf3-826d-cc3cf506cccc") { media };
+            form.Headers.Remove("Content-Type");
+            form.Headers.TryAddWithoutValidation("Content-Type", "multipart/form-data; boundary=fbce142e-4e8e-4bf3-826d-cc3cf506cccc");
+            media.Headers.Remove("Content-Disposition");
             media.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
             media.Headers.ContentDisposition.Name = "\"media\"";
             media.Headers.ContentDisposition.FileName = "\"" + file.FileName + "\"";
             media.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-            var form = new MultipartFormDataContent { media };
             try
             {
-                var response = client.PostAsync(url, form);
-                JObject jo = JObject.Parse(response.Result.Content.ToString());
+                var response = client.PostAsync(url, form).Result.Content.ReadAsStringAsync().Result;
+                JObject jo = JObject.Parse(response);
                 if (jo["errcode"].ToString() != "0")
-                    Utility.Log(response.Result.Content.ToString());
+                    Utility.Log(response);
                 else
                 {
                     string mediaid = jo["media_id"].ToString();

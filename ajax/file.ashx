@@ -1,6 +1,7 @@
 ﻿<%@ WebHandler Language="C#" Class="FileHandler" %>
 using System;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 public class FileHandler : AjaxHandler
 {
@@ -65,6 +66,35 @@ public class FileHandler : AjaxHandler
             }
             else
                 R.Flag = 2;
+        }
+        else if (context.Request["action"] == "towechat")
+        {
+            if (context.Request["id"] == null) return;
+            Guid guid;
+            if (!Guid.TryParse(context.Request["id"], out guid)) return;
+            var file = new SAAO.File(guid.ToString().ToUpper());
+            if (SAAO.User.Current.Wechat != "" && file.Visible(SAAO.User.Current))
+            {
+                var o = new JObject
+                {
+                    ["touser"] = SAAO.User.Current.Wechat,
+                    ["msgtype"] = "file",
+                    ["agentid"] = 4,
+                    ["mediaid"] = file.MediaId
+                };
+                var result = SAAO.Utility.HttpRequestJson("https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=file&access_token=" + SAAO.Utility.GetAccessToken(), o.ToString());
+                if (result["errcode"].ToString() == "0")
+                    context.Response.Write("1");
+                else
+                {
+                    context.Response.Write("-10");
+                    SAAO.Utility.Log(result.ToString());
+                }
+            }
+            else
+            {
+                context.Response.Write("-1");
+            }
         }
         else if (context.Request["action"] == "delete")
         {
