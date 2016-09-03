@@ -80,7 +80,7 @@ public class FileHandler : AjaxHandler
                     ["touser"] = SAAO.User.Current.Wechat,
                     ["msgtype"] = "file",
                     ["agentid"] = 4,
-                    ["mediaid"] = file.MediaId
+                    ["file"] = new JObject { ["media_id"] = file.MediaId }
                 };
                 var result = SAAO.Utility.HttpRequestJson("https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=file&access_token=" + SAAO.Utility.GetAccessToken(), o.ToString());
                 if (result["errcode"].ToString() == "0")
