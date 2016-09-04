@@ -136,5 +136,22 @@ namespace SAAO
                 return null;
             }
         }
+        /// <summary>
+        /// Get cached access token or retrieve a new one
+        /// </summary>
+        /// <returns>Access token</returns>
+        public static string GetAccessToken()
+        {
+            var corpId = System.Configuration.ConfigurationManager.AppSettings["WechatCorpId"];
+            var corpSecret = System.Configuration.ConfigurationManager.AppSettings["WechatCorpSecret"];
+            if (HttpContext.Current.Application["accessTokenExpire"] == null || DateTime.Now > (DateTime)HttpContext.Current.Application["accessTokenExpire"])
+            {
+                var data = SAAO.Utility.HttpRequestJson(
+                    $"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}");
+                HttpContext.Current.Application["accessTokenExpire"] = DateTime.Now.AddSeconds(Convert.ToInt32(data["expires_in"]));
+                HttpContext.Current.Application["accessToken"] = data["access_token"].ToString();
+            }
+            return HttpContext.Current.Application["accessToken"].ToString();
+        }
     }
 }
