@@ -136,7 +136,10 @@ namespace SAAO
                 return null;
             }
         }
-
+        /// <summary>
+        /// Get cached access token or retrieve a new one
+        /// </summary>
+        /// <returns>Access token</returns>
         public static string GetAccessToken()
         {
             var corpId = System.Configuration.ConfigurationManager.AppSettings["WechatCorpId"];

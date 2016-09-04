@@ -211,11 +211,11 @@ function fileList() {
 
 function fileToWechat() {
     $.get("file.towechat&id=" + fileCurrent, function (result) {
-        if (result == "1") {
+        if (result.flag === 1) {
             msg("成功", "文件已通过SAAO助手发送", "success");
             $("#file #filemodal").modal("hide");
         }
-        else if (result == "-1") {
+        else if (result.flag === -1) {
             msg("错误", "请先在微信端关注学活工作网络并绑定SAAO", "error");
             $("#file #filemodal").modal("hide");
         }

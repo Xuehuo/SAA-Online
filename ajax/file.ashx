@@ -84,10 +84,10 @@ public class FileHandler : AjaxHandler
                 };
                 var result = SAAO.Utility.HttpRequestJson("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), o.ToString());
                 if (result["errcode"].ToString() == "0")
-                    context.Response.Write("1");
+                    R.Flag = 1;
                 else
                 {
-                    context.Response.Write("-10");
+                    R.Flag = -1;
                     SAAO.Utility.Log(result.ToString());
                 }
             }
