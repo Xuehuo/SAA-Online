@@ -333,7 +333,7 @@ namespace SAAO
             form.Headers.TryAddWithoutValidation("Content-Type", "multipart/form-data; boundary=fbce142e-4e8e-4bf3-826d-cc3cf506cccc");
             media.Headers.Remove("Content-Disposition");
             media.Headers.Remove("Content-Type");
-            media.Headers.TryAddWithoutValidation("Content-Disposition", "form-data; name=\"media\";filename=\"" + System.IO.Path.GetFileName(file.FileName) + "\"");
+            media.Headers.TryAddWithoutValidation("Content-Disposition", "form-data; name=\"media\"; filename=\"" + file.FileName + "\"");
             media.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
             try
             {

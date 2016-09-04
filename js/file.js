@@ -3,7 +3,7 @@
 function fileInfo(obj) {
     var fileid = $(obj).data("id");
     fileCurrent = fileid;
-    if ($(obj).data("wechat") == "false")
+    if ($(obj).data("wechat") == false)
         $("#towechat").attr("disabled", "disabled");
     else
         $("#towechat").removeAttr("disabled");
