@@ -210,7 +210,7 @@ function fileList() {
 function fileToWechat() {
     $.get("file.towechat.id=" + fileCurrent,
         function(result) {
-            if (result.flag === 1) {
+            if (result.flag === 0) {
                 msg("成功", "文件已通过SAAO助手发送", "success");
                 $("#file #filemodal").modal("hide");
             } else {
