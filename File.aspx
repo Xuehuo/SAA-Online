@@ -67,7 +67,9 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger pull-left" onclick="fileDelete()">删除</button>
+                    <%if (SAAO.User.Current.Wechat != "") { %>
                     <button type="button" class="btn btn-default" id="towechat" onclick="fileToWechat()">发送至微信</button>
+                    <% } %>
                     <button type="button" class="btn btn-success" onclick="fileDownload()">下载</button>
                     <button type="button" class="btn btn-primary" onclick="fileSave()">保存</button>
                 </div>

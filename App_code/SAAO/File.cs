@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.IO;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -34,7 +35,7 @@ namespace SAAO
         private readonly string _savePath;
         public List<string> Tag;
         private PermissionLevel _permission;
-        private string _mediaId;
+
         public enum PermissionLevel
 
         {
@@ -90,14 +91,12 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, guid);
             si.AddParameter("@name", SqlIntegrate.DataType.VarChar,
-                System.IO.Path.GetFileNameWithoutExtension(file.FileName), 50);
+                Path.GetFileNameWithoutExtension(file.FileName), 50);
             si.AddParameter("@extension", SqlIntegrate.DataType.VarChar,
-                System.IO.Path.GetExtension(file.FileName).TrimStart('.').ToLower(), 10);
+                Path.GetExtension(file.FileName).TrimStart('.').ToLower(), 10);
             si.AddParameter("@size", SqlIntegrate.DataType.Int, file.ContentLength);
             si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, User.Current.UUID);
             si.Execute("INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES (@GUID,@name,@extension,@size,@UUID)");
-            if(file.ContentLength < 20000000)
-                UploadWechat(file, guid);
         }
         /// <summary>
         /// Check whether the file has a tag
@@ -185,13 +184,32 @@ namespace SAAO
                 return _info;
             }
         }
+
+        private string _mediaId;
         public string MediaId
         {
             get
             {
+                if (_size > 1 << 21) // 2 * 1024 * 1024 Byte
+                    return null;
+                if (_mediaId != "") return _mediaId;
+                var jo = (JObject) new JsonSerializer()
+                    .Deserialize(new JsonTextReader(new StringReader(Utility.HttpRequest(
+                        url:
+                            $"https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={Utility.GetAccessToken()}&type=file",
+                        data: null,
+                        filePath: _savePath,
+                        fileName: _name,
+                        fileFieldName: "media"))));
+                _mediaId = jo["media_id"].ToString();
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, _mediaId);
+                si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+                si.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
                 return _mediaId;
             }
         }
+
         /// <summary>
         /// Delete the file
         /// </summary>
@@ -204,8 +222,6 @@ namespace SAAO
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
             si.Execute("DELETE FROM [Filetag] WHERE [FUID] = @FUID");
             System.IO.File.Delete(_savePath);
-            if(_mediaId != "")
-                Utility.HttpRequestJson(string.Format("https://qyapi.weixin.qq.com/cgi-bin/material/del?access_token={0}&media_id={1}", Utility.GetAccessToken(), _mediaId));
         }
         /// <summary>
         /// File visibility-level
@@ -315,45 +331,11 @@ namespace SAAO
                     ["downloadCount"] = int.Parse(dt.Rows[i]["downloadCount"].ToString()),
                     ["uploaderName"] = dt.Rows[i]["realname"].ToString(),
                     ["datetime"] = DateTime.Parse(dt.Rows[i]["uploadTime"].ToString()).ToString("yyyy-MM-dd HH:mm"),
-                    ["info"] = dt.Rows[i]["info"].ToString() != "",
-                    ["wechat"] = (dt.Rows[i]["info"] != null)
+                    ["info"] = dt.Rows[i]["info"].ToString() != ""
                 };
                 a.Add(o);
             }
             return a;
-        }
-
-        private static void UploadWechat(System.Web.HttpPostedFile file, string guid)
-        {
-            var url = "https://qyapi.weixin.qq.com/cgi-bin/material/add_material?type=file&access_token=" + Utility.GetAccessToken();
-            var client = new HttpClient();
-            var media = new StreamContent(file.InputStream);
-            var form = new MultipartFormDataContent("fbce142e-4e8e-4bf3-826d-cc3cf506cccc") { media };
-            form.Headers.Remove("Content-Type");
-            form.Headers.TryAddWithoutValidation("Content-Type", "multipart/form-data; boundary=fbce142e-4e8e-4bf3-826d-cc3cf506cccc");
-            media.Headers.Remove("Content-Disposition");
-            media.Headers.Remove("Content-Type");
-            media.Headers.TryAddWithoutValidation("Content-Disposition", "form-data; name=\"media\"; filename=\"" + file.FileName + "\"");
-            media.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-            try
-            {
-                var response = client.PostAsync(url, form).Result.Content.ReadAsStringAsync().Result;
-                JObject jo = JObject.Parse(response);
-                if (jo["errcode"].ToString() != "0")
-                    Utility.Log(response);
-                else
-                {
-                    string mediaid = jo["media_id"].ToString();
-                    var si = new SqlIntegrate(Utility.ConnStr);
-                    si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, mediaid);
-                    si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, guid);
-                    si.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
-                }
-            }
-            catch(Exception e)
-            {
-                Utility.Log(e);
-            }
         }
     }
 }

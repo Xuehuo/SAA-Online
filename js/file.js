@@ -3,10 +3,6 @@
 function fileInfo(obj) {
     var fileid = $(obj).data("id");
     fileCurrent = fileid;
-    if ($(obj).data("wechat") == false)
-        $("#towechat").attr("disabled", "disabled");
-    else
-        $("#towechat").removeAttr("disabled");
     $.ajax({
         url: "file.info.id=" + fileid,
         type: "get",
@@ -19,6 +15,8 @@ function fileInfo(obj) {
                 $("#filemodal dl").children("dd").eq(1).html(result.data.extension);
                 $("#filemodal dl").children("dd").eq(2).html(result.data.uploadTime);
                 $("#filemodal dl").children("dd").eq(3).html(fileGetAutoSize(result.data.size, 2));
+                if (result.data.size > 1 << 21)
+                    $("button#towechat").remove();
                 $("#filemodal dl").children("dd").eq(4).html(result.data.uploader);
                 $("#filemodal dl").children("dd").eq(5).html(result.data.group);
                 $("#filemodal dl").children("dd").eq(6).html(result.data.downloadCount);
@@ -210,16 +208,16 @@ function fileList() {
 }
 
 function fileToWechat() {
-    $.get("file.towechat&id=" + fileCurrent, function (result) {
-        if (result.flag === 1) {
-            msg("成功", "文件已通过SAAO助手发送", "success");
-            $("#file #filemodal").modal("hide");
-        }
-        else if (result.flag === -1) {
-            msg("错误", "请先在微信端关注学活工作网络并绑定SAAO", "error");
-            $("#file #filemodal").modal("hide");
-        }
-    })
+    $.get("file.towechat.id=" + fileCurrent,
+        function(result) {
+            if (result.flag === 1) {
+                msg("成功", "文件已通过SAAO助手发送", "success");
+                $("#file #filemodal").modal("hide");
+            } else {
+                msg("错误", "请稍后重试", "error");
+                $("#file #filemodal").modal("hide");
+            }
+        });
 }
 
 fileList();

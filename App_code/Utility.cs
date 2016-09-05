@@ -105,19 +105,27 @@ namespace SAAO
         /// <param name="fileName">File name</param>
         /// <param name="fileFieldName">File field name</param>
         /// <returns>Response string</returns>
-        public static string HttpRequest(string url, Dictionary<string, string> data = null, string filePath = "", string fileName = "", string fileFieldName = "")
+        public static string HttpRequest(string url, object data = null, string filePath = "", string fileName = "", string fileFieldName = "")
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
             if (data != null && filePath == "") // Common Form POST
             {
                 request.Method = "POST";
                 var postData = "";
-                request.ContentType = "application/x-www-form-urlencoded";
-                foreach (var p in data)
+                if (data is Dictionary<string, string>)
                 {
-                    if (postData != "")
-                        postData += "&";
-                    postData += $"{p.Key}={p.Value}";
+                    request.ContentType = "application/x-www-form-urlencoded";
+                    foreach (var p in (Dictionary<string, string>) data)
+                    {
+                        if (postData != "")
+                            postData += "&";
+                        postData += $"{p.Key}={p.Value}";
+                    }
+                }
+                else if (data is JObject)
+                {
+                    request.ContentType = "application/json";
+                    postData = ((JObject) data).ToString();
                 }
                 request.ContentLength = Encoding.ASCII.GetBytes(postData).Length;
                 using (var stream = request.GetRequestStream())
@@ -131,8 +139,9 @@ namespace SAAO
                 using (var stream = request.GetRequestStream())
                 {
                     string field;
-                    if (data != null)
-                        foreach (var p in data)
+                    if ((Dictionary<string, string>)data != null)
+                        // TODO: No implementation when data is JObject
+                        foreach (var p in (Dictionary<string, string>)data)
                         {
                             stream.Write(boundaryBytes, 0, boundaryBytes.Length);
                             field = $"Content-Disposition: form-data; name=\"{p.Key}\"\r\n\r\n{p.Value}";
