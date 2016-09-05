@@ -183,9 +183,9 @@ namespace SAAO
                 return HttpContext.Current.Application["accessToken"].ToString();
             var data = (JObject)new JsonSerializer()
                 .Deserialize(new JsonTextReader(new StringReader(HttpRequest($"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}")))); 
-            HttpContext.Current.Application["accessTokenExpire"] = DateTime.Now.AddSeconds(Convert.ToInt32(data["expires_in"]));
-            HttpContext.Current.Application["accessToken"] = data["access_token"].ToString();
-            return HttpContext.Current.Application["accessToken"].ToString();
+            HttpContext.Current.Application.Add("accessTokenExpire", DateTime.Now.AddSeconds(Convert.ToInt32(data["expires_in"]);
+            HttpContext.Current.Application.Add("accessToken", data["access_token"].ToString());
+            return data["access_token"].ToString();
         }
     }
 }
