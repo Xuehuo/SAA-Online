@@ -136,7 +136,7 @@ function fileSave() {
         msg("文件描述为空或过长", "请正确填写描述", "error");
         return;
     }
-    if (!parseInt($("#filemodal .btn-group").children(".btn-primary").data("per"))) {
+    if ($("#filemodal .btn-group").children(".btn-primary").length != 1) {
         msg("文件的权限级别为空", "请选择文件的权限级别", "error");
         return;
     }
