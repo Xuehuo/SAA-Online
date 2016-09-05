@@ -31,12 +31,14 @@ $("form").submit(function (e) {
                 }
                 else if (result.flag == 2) {
                     msg("凭证错误", "请更正您的用户名或密码后重试", "error");
+                    $("form").fadeIn("fast");
                     $("form")[0].reset();
                 }
                 else if (result.flag == 3) {
                     msg("系统错误", "请刷新重试或联系技术部网络组", "error");
+                    $("form").fadeIn("fast");
                 }
-                $("form").fadeIn("fast");
+                
             },
             error: function () {
                 msg("系统错误", "网络中断或服务器错误", "error");
