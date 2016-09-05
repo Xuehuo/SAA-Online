@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Security.Cryptography;
@@ -25,7 +26,7 @@ namespace SAAO
         /// <param name="message">Message (string)</param>
         public static void Log(string message)
         {
-            SqlIntegrate si = new SqlIntegrate(ConnStr);
+            var si = new SqlIntegrate(ConnStr);
             si.AddParameter("@context", SqlIntegrate.DataType.Text, message);
             si.AddParameter("@url", SqlIntegrate.DataType.Text, HttpContext.Current.Request.Url.ToString());
             si.AddParameter("@IP", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserHostAddress);
@@ -40,7 +41,7 @@ namespace SAAO
         /// <param name="message">Exception</param>
         public static void Log(Exception message)
         {
-            SqlIntegrate si = new SqlIntegrate(ConnStr);
+            var si = new SqlIntegrate(ConnStr);
             si.AddParameter("@context", SqlIntegrate.DataType.Text, message.Message + message.StackTrace);
             si.AddParameter("@url", SqlIntegrate.DataType.Text, HttpContext.Current.Request.Url.ToString());
             si.AddParameter("@IP", SqlIntegrate.DataType.Text, HttpContext.Current.Request.UserHostAddress);
@@ -74,12 +75,9 @@ namespace SAAO
         /// <returns>Password encrypted by SHA256</returns>
         public static string Encrypt(string password)
         {
-            SHA256Managed crypt = new SHA256Managed();
-            string hash = string.Empty;
-            byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(password), 0, Encoding.UTF8.GetByteCount(password));
-            foreach (byte bit in crypto)
-                hash += bit.ToString("x2");
-            return hash;
+            return new SHA256Managed()
+                .ComputeHash(Encoding.UTF8.GetBytes(password), 0, Encoding.UTF8.GetByteCount(password))
+                .Aggregate(string.Empty, (current, bit) => current + bit.ToString("x2"));
         }
         /// <summary>
         /// Download a file (via current response)
@@ -106,8 +104,8 @@ namespace SAAO
         /// <param name="filePath">File path</param>
         /// <param name="fileName">File name</param>
         /// <param name="fileFieldName">File field name</param>
-        /// <returns>Json object parsed from response string</returns>
-        public static JObject HttpRequestJson(string url, Dictionary<string, string> data = null, string filePath = "", string fileName = "", string fileFieldName = "")
+        /// <returns>Response string</returns>
+        public static string HttpRequest(string url, Dictionary<string, string> data = null, string filePath = "", string fileName = "", string fileFieldName = "")
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
             if (data != null && filePath == "") // Common Form POST
@@ -157,23 +155,10 @@ namespace SAAO
                 }
             }
             else // GET
-                request.Method = "GET";
-            try
-            {
-                using (var response = (HttpWebResponse) request.GetResponse())
-                {
-                    return
-                        (JObject)
-                            new JsonSerializer().Deserialize(
-                                new JsonTextReader(
-                                    new StringReader(new StreamReader(response.GetResponseStream()).ReadToEnd())));
-                }    
-            }
-            catch (Exception ex)
-            {
-                Log(ex);
-                return null;
-            }
+            request.Method = "GET";
+            using (var response = (HttpWebResponse) request.GetResponse())
+                using (var responseStream = response.GetResponseStream())
+                    return responseStream != null ? new StreamReader(responseStream).ReadToEnd() : null;
         }
         /// <summary>
         /// Get cached access token or retrieve a new one
@@ -183,13 +168,13 @@ namespace SAAO
         {
             var corpId = System.Configuration.ConfigurationManager.AppSettings["WechatCorpId"];
             var corpSecret = System.Configuration.ConfigurationManager.AppSettings["WechatCorpSecret"];
-            if (HttpContext.Current.Application["accessTokenExpire"] == null || DateTime.Now > (DateTime)HttpContext.Current.Application["accessTokenExpire"])
-            {
-                var data = SAAO.Utility.HttpRequestJson(
-                    $"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}");
-                HttpContext.Current.Application["accessTokenExpire"] = DateTime.Now.AddSeconds(Convert.ToInt32(data["expires_in"]));
-                HttpContext.Current.Application["accessToken"] = data["access_token"].ToString();
-            }
+            if (HttpContext.Current.Application["accessTokenExpire"] != null &&
+                DateTime.Now <= (DateTime) HttpContext.Current.Application["accessTokenExpire"])
+                return HttpContext.Current.Application["accessToken"].ToString();
+            var data = (JObject)new JsonSerializer()
+                .Deserialize(new JsonTextReader(new StringReader(HttpRequest($"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}")))); 
+            HttpContext.Current.Application["accessTokenExpire"] = DateTime.Now.AddSeconds(Convert.ToInt32(data["expires_in"]));
+            HttpContext.Current.Application["accessToken"] = data["access_token"].ToString();
             return HttpContext.Current.Application["accessToken"].ToString();
         }
     }
