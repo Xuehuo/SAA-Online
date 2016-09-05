@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -96,29 +97,67 @@ namespace SAAO
             HttpContext.Current.Response.Flush();
             HttpContext.Current.ApplicationInstance.CompleteRequest();
         }
+
         /// <summary>
         /// Http Request
         /// </summary>
         /// <param name="url">Request URL</param>
         /// <param name="data">POST data</param>
+        /// <param name="filePath">File path</param>
+        /// <param name="fileName">File name</param>
+        /// <param name="fileFieldName">File field name</param>
         /// <returns>Json object parsed from response string</returns>
-        public static JObject HttpRequestJson(string url, string data = "")
+        public static JObject HttpRequestJson(string url, Dictionary<string, string> data = null, string filePath = "", string fileName = "", string fileFieldName = "")
         {
             var request = (HttpWebRequest)WebRequest.Create(url);
-            if (data != "")
+            if (data != null && filePath == "") // Common Form POST
             {
                 request.Method = "POST";
+                var postData = "";
                 request.ContentType = "application/x-www-form-urlencoded";
-                request.ContentLength = Encoding.ASCII.GetBytes(data).Length;
+                foreach (var p in data)
+                {
+                    if (postData != "")
+                        postData += "&";
+                    postData += $"{p.Key}={p.Value}";
+                }
+                request.ContentLength = Encoding.ASCII.GetBytes(postData).Length;
+                using (var stream = request.GetRequestStream())
+                    stream.Write(Encoding.ASCII.GetBytes(postData), 0, Encoding.ASCII.GetByteCount(postData));
+            }
+            else if (filePath != "" && fileName != "" && fileFieldName != "") // Multipart Form POST
+            {
+                var boundary = $"---------------------------{Guid.NewGuid():N}";
+                var boundaryBytes = Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
+                request.ContentType = "multipart/form-data; boundary=" + boundary;
                 using (var stream = request.GetRequestStream())
                 {
-                    stream.Write(Encoding.ASCII.GetBytes(data), 0, data.Length);
+                    string field;
+                    if (data != null)
+                        foreach (var p in data)
+                        {
+                            stream.Write(boundaryBytes, 0, boundaryBytes.Length);
+                            field = $"Content-Disposition: form-data; name=\"{p.Key}\"\r\n\r\n{p.Value}";
+                            stream.Write(Encoding.UTF8.GetBytes(field), 0, Encoding.UTF8.GetByteCount(field));
+                        }
+                    stream.Write(boundaryBytes, 0, boundaryBytes.Length);
+                    field =
+                        $"Content-Disposition: form-data; name=\"{fileFieldName}\"; filename=\"{fileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n";
+                    stream.Write(Encoding.UTF8.GetBytes(field), 0, Encoding.UTF8.GetByteCount(field));
+                    using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    {
+                        var fileData = new byte[fs.Length];
+                        fs.Read(fileData, 0, fileData.Length);
+                        fs.Close();
+                        stream.Write(fileData, 0, fileData.Length);
+                    }
+                    var trailer = Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n");
+                    stream.Write(trailer, 0, trailer.Length);
+                    stream.Close();
                 }
             }
-            else
-            {
+            else // GET
                 request.Method = "GET";
-            }
             try
             {
                 using (var response = (HttpWebResponse) request.GetResponse())
