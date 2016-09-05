@@ -199,7 +199,7 @@ namespace SAAO
                             $"https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={Utility.GetAccessToken()}&type=file",
                         data: null,
                         filePath: _savePath,
-                        fileName: _name,
+                        fileName: _name + "." + _extension,
                         fileFieldName: "media"))));
                 _mediaId = jo["media_id"].ToString();
                 var si = new SqlIntegrate(Utility.ConnStr);

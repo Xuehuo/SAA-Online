@@ -150,7 +150,7 @@ namespace SAAO
                         }
                     stream.Write(boundaryBytes, 0, boundaryBytes.Length);
                     field =
-                        $"Content-Disposition: form-data; name=\"{fileFieldName}\"; filename=\"{fileName}\";\r\nContent-Type: application/octet-stream\r\n\r\n";
+                        $"Content-Disposition: form-data; name=\"{fileFieldName}\"; filename=\"{fileName}\";\r\nContent-Type: {MimeMapping.GetMimeMapping(fileName)}\r\n\r\n";
                     stream.Write(Encoding.UTF8.GetBytes(field), 0, Encoding.UTF8.GetByteCount(field));
                     using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                     {
