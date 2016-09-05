@@ -133,6 +133,7 @@ namespace SAAO
             }
             else if (filePath != "" && fileName != "" && fileFieldName != "") // Multipart Form POST
             {
+                request.Method = "POST";
                 var boundary = $"---------------------------{Guid.NewGuid():N}";
                 var boundaryBytes = Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
                 request.ContentType = "multipart/form-data; boundary=" + boundary;
