@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data;
+using System.IO;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -13,8 +15,6 @@ namespace SAAO
         /// File storage path of supervising notification
         /// </summary>
         public static readonly string StoragePath = System.Configuration.ConfigurationManager.AppSettings["fileStoragePath"] + @"report\";
-        private static readonly string NotifyMail = System.Configuration.ConfigurationManager.AppSettings["notifyMailAddress"];
-        private static readonly string NotifyMailCredential = System.Configuration.ConfigurationManager.AppSettings["notifyMailCredential"];
 
         public int Id;
         public PermissionType Type;
@@ -82,14 +82,37 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             DataTable dt;
             if (_group == -1)
-                dt = si.Adapter("SELECT mail FROM [User] WHERE activated = 1");
+                dt = si.Adapter("SELECT [wechat] FROM [User] WHERE activated = 1 AND [wechat] != ''");
             else
             {
                 si.AddParameter("@group", SqlIntegrate.DataType.Int, _group);
-                dt = si.Adapter("SELECT mail FROM [User] WHERE activated = 1 AND [group] = @group");
+                dt = si.Adapter("SELECT [wechat] FROM [User] WHERE activated = 1 AND [group] = @group AND [wechat] != ''");
             }
+            var toSend = "";
             for (var i = 0; i < dt.Rows.Count; i++)
-                SendMail(dt.Rows[i]["mail"].ToString());
+            {
+                toSend += dt.Rows[i]["wechat"].ToString();
+                if (toSend != "")
+                    toSend += "|";
+            }
+            var o = new JObject
+            {
+                ["touser"] = toSend,
+                ["msgtype"] = "news",
+                ["agentid"] = 1,
+                ["news"] = new JObject
+                {
+                    ["articles"] = new JArray
+                    {
+                        new JObject
+                        {
+                            ["title"] = Title,
+                            ["description"] = Content
+                        }
+                    }
+                }
+            };
+            Utility.HttpRequest($"https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={Utility.GetAccessToken()}", o);
         }
 
         /// <summary>
@@ -112,22 +135,6 @@ namespace SAAO
             si.AddParameter("@reportFile", SqlIntegrate.DataType.VarChar, guid);
             si.AddParameter("@ID", SqlIntegrate.DataType.Int, Id);
             si.Execute("UPDATE Notification SET reportFile = @reportFile WHERE ID = @ID");
-        }
-
-        /// <summary>
-        /// Send a notification email
-        /// </summary>
-        /// <param name="to">Receiver email</param>
-        private void SendMail(string to)
-        {
-            Mail.Send(
-                @from: NotifyMail, 
-                receiver: to, 
-                subject: Title, 
-                isBodyHtml: false, 
-                body: Content, 
-                credential: new System.Net.NetworkCredential(NotifyMail, NotifyMailCredential)
-            );
         }
 
         /// <summary>
