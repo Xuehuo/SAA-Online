@@ -302,7 +302,8 @@ namespace SAAO
                 ["group"] = _uploader.GroupName,
                 ["downloadCount"] = _downloadCount,
                 ["tag"] = string.Join(",", Tag),
-                ["info"] = _info ?? ""
+                ["info"] = _info ?? "",
+                ["wechat"] = _size <= 1 << 21 && DateTime.Now < _uploadTime.AddDays(3) && User.Current.Wechat != ""
             };
             return o;
         }

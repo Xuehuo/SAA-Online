@@ -15,8 +15,10 @@ function fileInfo(obj) {
                 $("#filemodal dl").children("dd").eq(1).html(result.data.extension);
                 $("#filemodal dl").children("dd").eq(2).html(result.data.uploadTime);
                 $("#filemodal dl").children("dd").eq(3).html(fileGetAutoSize(result.data.size, 2));
-                if (result.data.size > 1 << 21)
-                    $("button#towechat").remove();
+                if (result.data.wechat)
+                    $("button#towechat").css("display", "block");
+                else
+                    $("button#towechat").css("display", "none");
                 $("#filemodal dl").children("dd").eq(4).html(result.data.uploader);
                 $("#filemodal dl").children("dd").eq(5).html(result.data.group);
                 $("#filemodal dl").children("dd").eq(6).html(result.data.downloadCount);
