@@ -4,7 +4,6 @@
     void Application_Start(object sender, EventArgs e)
     {
         // Store current organization structure when application starts
-        SAAO.Organization SAA = new SAAO.Organization(DateTime.Now);
-        Application["org"] = SAA;
+        Application.Add("org", new SAAO.Organization(DateTime.Now));
     }
 </script>

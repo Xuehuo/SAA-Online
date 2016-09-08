@@ -127,9 +127,9 @@ namespace SAAO
                     request.ContentType = "application/json";
                     postData = ((JObject) data).ToString();
                 }
-                request.ContentLength = Encoding.ASCII.GetBytes(postData).Length;
+                request.ContentLength = Encoding.UTF8.GetBytes(postData).Length;
                 using (var stream = request.GetRequestStream())
-                    stream.Write(Encoding.ASCII.GetBytes(postData), 0, Encoding.ASCII.GetByteCount(postData));
+                    stream.Write(Encoding.UTF8.GetBytes(postData), 0, Encoding.UTF8.GetByteCount(postData));
             }
             else if (filePath != "" && fileName != "" && fileFieldName != "") // Multipart Form POST
             {

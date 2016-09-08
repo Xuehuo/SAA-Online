@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.IO;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace SAAO
@@ -91,15 +89,15 @@ namespace SAAO
             var toSend = "";
             for (var i = 0; i < dt.Rows.Count; i++)
             {
-                toSend += dt.Rows[i]["wechat"].ToString();
                 if (toSend != "")
                     toSend += "|";
+                toSend += dt.Rows[i]["wechat"].ToString();
             }
             var o = new JObject
             {
                 ["touser"] = toSend,
                 ["msgtype"] = "news",
-                ["agentid"] = 1,
+                ["agentid"] = 4,
                 ["news"] = new JObject
                 {
                     ["articles"] = new JArray

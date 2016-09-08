@@ -95,7 +95,7 @@ $("#notificationmodal>form").submit(function (e) {
             success: function (result) {
                 if (result.flag == 0) {
                     $("#notificationmodal").modal("hide");
-                    msg("发布成功", "相应邮件将很快投递", "success");
+                    msg("发布成功", "通知发布成功", "success");
                 }
                 else
                     msg("发布失败", "服务器错误", "error");

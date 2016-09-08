@@ -90,7 +90,7 @@
                                         <% if (SAAO.User.Current.IsExecutive)
                                            { %>
                                             <span class="input-group-addon">
-                                            <span class="glyphicon glyphicon-flag"></span>设为重要
+                                            <span class="glyphicon glyphicon-flag"></span><abbr title="通知将会置顶，同时会在微信广播">设为重要</abbr>
                                             <input type="checkbox">
                                         </span>
                                         <% } %>
