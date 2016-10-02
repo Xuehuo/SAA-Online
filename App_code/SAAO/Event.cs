@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Data;
 
 namespace SAAO
 {
@@ -9,7 +10,10 @@ namespace SAAO
     public class Event
     {
         private static readonly string AllGroupColor = "#555555";
+        private static readonly string FeijiColor = "#e74c3c";
+        private static readonly string JishuColor = "#4c6592";
         private static readonly string UnknownGroupColor = "#BBBBBB";
+        private static readonly int[] Dept = {-3,-3,-3,-3,-4,-4,-4};
 
         /// <summary>
         /// Event constructor
@@ -48,6 +52,14 @@ namespace SAAO
             if (group_tag == "全体")
             {
                 group_index = -2; group_color = AllGroupColor;
+            }
+            else if(group_tag == "非技")
+            {
+                group_index = -3; group_color = FeijiColor;
+            }
+            else if(group_tag == "技术")
+            {
+                group_index = -4; group_color = JishuColor;
             }
             else
             {
@@ -99,9 +111,9 @@ namespace SAAO
             var o = new JObject
             {
                 ["group"] = User.Current.GroupName,
-                ["begin"] = null,
-                ["doing"] = null,
-                ["todo"] = null
+                ["begin"] = ListMissionNames("begin"),
+                ["doing"] = ListMissionNames("ongoing"),
+                ["todo"] = ListMissionNames("end")
             };
             return o;
         }
@@ -116,6 +128,32 @@ namespace SAAO
             var ci = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
             var origin_date_obj = DateTime.ParseExact(origin_date.Substring(0, 21), "ddd MMM dd yyyy HH:mm", ci);
             return origin_date_obj.ToString("MM.dd.yyyy HH:mm").Replace('.', '/');
+        }
+
+        ///<summary>
+        ///List beginning/ongoing/ending missions in JArray
+        ///</summary>
+        ///<return>list of mission names corresponding to the type</return>
+        private static JArray ListMissionNames(string type)
+        {
+            SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@group", SqlIntegrate.DataType.Int, User.Current.Group);
+            si.AddParameter("@dept", SqlIntegrate.DataType.Int, Dept[User.Current.Group]);
+            si.AddParameter("@sd", SqlIntegrate.DataType.Date, DateTime.Today);
+            si.AddParameter("@ed", SqlIntegrate.DataType.Date, DateTime.Today.AddDays(1));
+            DataTable dt;
+            if (type == "begin")
+                dt = si.Adapter("SELECT [text] FROM [Calendar] WHERE ([group]=@group OR [group]='-2' OR [group]=@dept) AND [start_date]>=@sd AND [start_date]<@ed");
+            else if (type == "end")
+                dt = si.Adapter("SELECT [text] FROM [Calendar] WHERE ([group]=@group OR [group]='-2' OR [group]=@dept) AND [end_date]>@sd AND [end_date]<=@ed");
+            else
+                dt = si.Adapter("SELECT [text] FROM [Calendar] WHERE ([group]=@group OR [group]='-2' OR [group]=@dept) AND [start_date]<@sd AND [end_date]>@ed");
+            var array = new JArray();
+            foreach (DataRow r in dt.Rows)
+            {
+                array.Add(r[0].ToString());
+            }
+            return array;
         }
     }
 }

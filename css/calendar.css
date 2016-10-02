@@ -230,15 +230,35 @@
             }
 /*======Calendar style end======*/
 
-/*@media(max-width:479px) {
-    年月字体大小 #calendar #container .fc-left h2 {
+@media(max-width:479px) {
+    /*年月字体大小*/
+    #calendar #container .fc-left h2 {
         font-size: 18px;
         line-height: 30px;
+    }
+    .dhx_cal_date {
+        margin-top:-16px;
+        text-align:left !important;
+    }
+    .dhx_cal_prev_button{
+        margin-top:-16px;
+    }
+    .dhx_cal_next_button{
+        margin-top:-16px;
+    }
+    .dhx_cal_tab {
+        margin-top:14px;
+        margin-left:-15px;
+    }
+    .dhx_cal_today_button {
+        margin-top:16px;
+        right:20px !important;
     }
 }
 
 @media(max-width:767px) {
-    事件字体大小 #calendar .fc-day-grid-event > .fc-content {
+    /*事件字体大小*/
+    #calendar .fc-day-grid-event > .fc-content {
         font-size: 11px;
     }
-}*/
+}

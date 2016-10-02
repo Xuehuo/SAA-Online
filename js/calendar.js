@@ -1,11 +1,9 @@
-﻿$(function () {
-    $("div#content").css("height", $(window).height() - 50);
+﻿$(window).resize(function () {
+    $("div#content, div.dhx_cal_container").css("height", $(window).height() - 50);
 });
-$(window).resize(function () {
-    $("div#content").css("height", $(window).height() - 50);
-});
+$(window).resize()
 
-scheduler.init("container", new Date(), "week");
+scheduler.init("container", new Date(), "month");
 
 $.ajax({
     url: "calendar.list",
