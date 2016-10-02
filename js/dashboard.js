@@ -6,13 +6,13 @@
         if (result.flag == 0) {
             $("#grouphead").text(result.data.group + " 任务");
             for (var i = 0; i < result.data.begin.length; i++)
-                $("#taskbegin").append("<li>" + result.data.begin[i].title + "</li>");
+                $("#taskbegin").append("<li>" + result.data.begin[i] + "</li>");
 
             for (var i = 0; i < result.data.doing.length; i++)
-                $("#taskdoing").append("<li>" + result.data.doing[i].title + "</li>");
+                $("#taskdoing").append("<li>" + result.data.doing[i] + "</li>");
 
             for (var i = 0; i < result.data.todo.length; i++)
-                $("#tasktodo").append("<li>" + result.data.todo[i].title + "</li>");
+                $("#tasktodo").append("<li>" + result.data.todo[i] + "</li>");
             if (result.data.begin.length == 0)
                 $("#taskbegin").parent().html("无");
             if (result.data.doing.length == 0)
