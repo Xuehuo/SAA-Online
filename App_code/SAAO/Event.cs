@@ -139,8 +139,8 @@ namespace SAAO
             SqlIntegrate si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@group", SqlIntegrate.DataType.Int, User.Current.Group);
             si.AddParameter("@dept", SqlIntegrate.DataType.Int, Dept[User.Current.Group]);
-            si.AddParameter("@sd", SqlIntegrate.DataType.Date, DateTime.Today);
-            si.AddParameter("@ed", SqlIntegrate.DataType.Date, DateTime.Today.AddDays(1));
+            si.AddParameter("@sd", SqlIntegrate.DataType.DateTime, DateTime.Today);
+            si.AddParameter("@ed", SqlIntegrate.DataType.DateTime, DateTime.Today.AddDays(1));
             DataTable dt;
             if (type == "begin")
                 dt = si.Adapter("SELECT [text] FROM [Calendar] WHERE ([group]=@group OR [group]='-2' OR [group]=@dept) AND [start_date]>=@sd AND [start_date]<@ed");

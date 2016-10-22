@@ -20,6 +20,7 @@ namespace SAAO
         public enum DataType
         {
             Date = SqlDbType.Date,
+            DateTime = SqlDbType.DateTime,
             VarChar = SqlDbType.VarChar,
             NVarChar = SqlDbType.NVarChar,
             Text = SqlDbType.Text,
