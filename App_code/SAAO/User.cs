@@ -295,19 +295,7 @@ namespace SAAO
             Current = null;
             if (HttpContext.Current.Session["wechat"] != null)
                 HttpContext.Current.Session.Remove("wechat");
-        }
-        /// <summary>
-        /// Change password of the user
-        /// </summary>
-        /// <param name="password">Orginal password</param>
-        /// <param name="passwordNew">New password</param>
-        /// <returns>Whether the original password is correct</returns>
-        public bool SetPassword(string password, string passwordNew)
-        {
-            if (!Verify(password)) return false;
-            return true;
-        }
-        
+        }        
         /// <summary>
         /// List activated users in the database in JSON
         /// </summary>
