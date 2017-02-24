@@ -169,7 +169,7 @@ namespace SAAO
             _password = dr["password"].ToString();
             Realname = dr["realname"].ToString();
             _sn = dr["SN"].ToString();
-            _class = Convert.ToInt32(dr["class"]);
+            _class = Convert.IsDBNull(dr["class"]) ? 0 : Convert.ToInt32(dr["class"]);
             _mail = dr["mail"].ToString();
             _phone = dr["phone"].ToString();
             _wechat = dr["wechat"].ToString();
@@ -182,6 +182,8 @@ namespace SAAO
                 Senior = 1;
             else if (_sn.Substring(0, 4) == Organization.Current.State.SeniorTwo)
                 Senior = 2;
+            else // for retired member
+                Senior = 1;
         }
         /// <summary>
         /// Check whether the user of a username exists and is activated
@@ -192,7 +194,7 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
-            var count = Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE [username] = @username AND [activated] = 1"));
+            var count = Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE [username] = @username"));
             return count == 1;
         }
         /// <summary>
@@ -233,7 +235,7 @@ namespace SAAO
         /// <summary>
         /// Whether the user is in the supervising group (both Senior)
         /// </summary>
-        public bool IsSupervisor => Group == Convert.ToInt32(Organization.Current.Structure.Select("[supervisor] = 1")[0]["Group"]);
+        public bool IsSupervisor => Organization.Current.Structure.Select("[supervisor] = 1 AND [group] = " + Group).Length != 0;
 
         /// <summary>
         /// Verify whether a string is the password of the user
