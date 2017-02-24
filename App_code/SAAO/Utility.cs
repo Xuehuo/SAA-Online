@@ -36,6 +36,21 @@ namespace SAAO
             si.Execute("INSERT INTO Log ([context], [url], [IP], [browser], [OS], [session]) VALUES (@context, @url, @IP, @browser, @OS, @session)");
         }
         /// <summary>
+        /// Write message (error one most possibly) to database with no Http context
+        /// </summary>
+        /// <param name="message">Message (string)</param>
+        public static void LogFailover(string message)
+        {
+            var si = new SqlIntegrate(ConnStr);
+            si.AddParameter("@context", SqlIntegrate.DataType.Text, message);
+            si.AddParameter("@url", SqlIntegrate.DataType.Text, "N/A");
+            si.AddParameter("@IP", SqlIntegrate.DataType.Text, "N/A");
+            si.AddParameter("@browser", SqlIntegrate.DataType.Text, "N/A");
+            si.AddParameter("@OS", SqlIntegrate.DataType.Text, "N/A");
+            si.AddParameter("@session", SqlIntegrate.DataType.Text, "N/A");
+            si.Execute("INSERT INTO Log ([context], [url], [IP], [browser], [OS], [session]) VALUES (@context, @url, @IP, @browser, @OS, @session)");
+        }
+        /// <summary>
         /// Write message (error one most possibly) to database
         /// </summary>
         /// <param name="message">Exception</param>
