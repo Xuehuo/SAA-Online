@@ -132,8 +132,8 @@ namespace SAAO
                 SeniorTwo = (dt.Year - 2).ToString();
                 StructureCurrent = SeniorTwo;
                 EventCurrent = Event.ShiDa;
-                EventStart = summerDivider;
-                EventEnd = winterDivider;
+                EventStart = summerDivider.AddYears(-1);
+                EventEnd = summerDivider;
             }
             else// if (dt > summerDivider)
             {

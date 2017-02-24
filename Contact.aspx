@@ -32,9 +32,9 @@
                             <label>组别</label>
                             <div class="btn-group" role="group">
                                 <% for (int i = 0; i < SAAO.Organization.Current.Structure.Select("[group] IS NOT NULL").Length; i++)
-                                   { %>
+                                   { if (i != 1) { %>
                                     <button type="button" class="btn btn-default" data-filter="g<%= i %>" onclick="contactFilter(1, this)"><%= SAAO.Organization.Current.GetGroupName(i) %></button>
-                                <% } %>
+                                <% } else continue;} %>
                             </div>
                         </div>
                     </div>
