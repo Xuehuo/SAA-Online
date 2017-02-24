@@ -41,7 +41,8 @@ namespace SAAO
         /// <returns>Group color</returns>
         public string GetGroupColor(int i)
         {
-            return Structure.Select("[group]=" + i)[0]["color"].ToString();
+            var rows = Structure.Select("[group]=" + i);
+            return rows.Length == 0 ? "#aaaaaa" : rows[0]["color"].ToString();
         }
         /// <summary>
         /// Get group name
@@ -50,7 +51,8 @@ namespace SAAO
         /// <returns>Group name</returns>
         public string GetGroupName(int i)
         {
-            return Structure.Select("[group]=" + i)[0]["name"].ToString();
+            var rows = Structure.Select("[group]=" + i);
+            return rows.Length == 0 ? "Undefined" : rows[0]["name"].ToString();
         }
         /// <summary>
         /// Get group index
@@ -69,7 +71,8 @@ namespace SAAO
         /// <returns>Job name</returns>
         public string GetJobName(int i)
         {
-            return Structure.Select("[job]=" + i)[0]["name"].ToString();
+            var rows = Structure.Select("[job]=" + i);
+            return rows.Length == 0 ? "Undefined" : rows[0]["name"].ToString();
         }
     }
     public struct State
