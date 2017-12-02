@@ -194,7 +194,7 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
-            var count = Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE [username] = @username"));
+            var count = Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE [username] = @username AND [activated] = 1"));
             return count == 1;
         }
         /// <summary>
