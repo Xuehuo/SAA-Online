@@ -4,7 +4,6 @@
 <asp:Content ContentPlaceHolderID="PageMenu" runat="server">
     <%if (Session["wechat"] == null) {%>
     <li><a href="#" onclick="mailCompose()"><span class="glyphicon glyphicon-pencil"></span><span class="hidden-xs">撰写邮件</span></a></li>
-    <li><a href="../mail/webmail.aspx" target="_blank"><span class="glyphicon glyphicon-share-alt"></span><span class="hidden-xs">完整邮箱</span></a></li>
     <%} %>
     <li class="hidden-xs"><a href="#" data-toggle="modal" data-target="#helpmodal"><span class="glyphicon glyphicon-question-sign"></span><span class="hidden-xs">帮助</span></a></li>
 </asp:Content>
@@ -101,6 +100,7 @@
                     <h4 class="modal-title">帮助</h4>
                 </div>
                 <div class="modal-body">
+                    <strong>邮件系统维护中，暂时无法使用。</strong>
                     <ol>
                         <li>此处邮件仅包含收件箱、无附件的邮件撰写；</li>
                         <li>如需要完整的邮件系统请在顶栏点击完整邮箱；</li>
