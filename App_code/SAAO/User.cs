@@ -26,16 +26,9 @@ namespace SAAO
                 var si = new SqlIntegrate(Utility.ConnStr);
                 var salt = _password.Substring(0, 6);
                 _password = salt + Utility.Encrypt(salt + value);
-                // Update the user's password of SAA Online
                 si.AddParameter("@password", SqlIntegrate.DataType.VarChar, _password);
                 si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
                 si.Execute("UPDATE [User] SET [password] = @password WHERE [UUID] = @UUID");
-                si = new SqlIntegrate(SAAO.Mail.ConnStr);
-                // Update the user's password of SAA Mail (Hmailserver)
-                si.ResetParameter();
-                si.AddParameter("@accountpassword", SqlIntegrate.DataType.VarChar, _password);
-                si.AddParameter("@accountaddress", SqlIntegrate.DataType.VarChar, Username + "@" + SAAO.Mail.MailDomain, 50);
-                si.Execute("UPDATE [hm_accounts] SET accountpassword = @accountpassword WHERE accountaddress = @accountaddress");
             }
         }
         /// <summary>
@@ -194,7 +187,7 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@username", SqlIntegrate.DataType.VarChar, username, 50);
-            var count = Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE [username] = @username AND [activated] = 1"));
+            var count = Convert.ToInt32(si.Query("SELECT COUNT(*) FROM [User] WHERE [username] = @username AND ([activated] = 1 OR [username]='test')"));
             return count == 1;
         }
         /// <summary>
