@@ -14,7 +14,7 @@
                         "<tr data-id=\"" + result.data[i].GUID + "\" onclick=\"mailDisplay(this)\">" +
                             "<td> " + mailLabel + "</td>" +
                             "<td>" + result.data[i].sender + "</td>" +
-                            "<td>" + result.data[i].subject + "</td>" +
+                            "<td>" + result.data[i].subject.split(",")[0] + "</td>" +
                             "<td>" + result.data[i].datetime + "</td>" +
                         "</tr>");
                 }
