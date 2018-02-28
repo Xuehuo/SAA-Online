@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Data;
+
 
 namespace SAAO
 {
@@ -36,6 +38,9 @@ namespace SAAO
         public List<string> Tag;
         private PermissionLevel _permission;
 
+        public User Uploader { get { return _uploader; } }
+        public DateTime UploadTime { get { return _uploadTime; } }
+        public string Extension { get { return _extension; } }
         public enum PermissionLevel
 
         {
@@ -84,7 +89,7 @@ namespace SAAO
                 Tag.Add(tagList.Rows[i]["name"].ToString());
         }
 
-        public static void Upload(System.Web.HttpPostedFile file)
+        public static string Upload(System.Web.HttpPostedFile file)
         {
             var guid = Guid.NewGuid().ToString().ToUpper();
             file.SaveAs(StoragePath + guid);
@@ -97,6 +102,7 @@ namespace SAAO
             si.AddParameter("@size", SqlIntegrate.DataType.Int, file.ContentLength);
             si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, User.Current.UUID);
             si.Execute("INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES (@GUID,@name,@extension,@size,@UUID)");
+            return guid;
         }
         /// <summary>
         /// Check whether the file has a tag
@@ -337,6 +343,24 @@ namespace SAAO
                 a.Add(o);
             }
             return a;
+        }
+
+
+        /// <summary>
+        /// Get All Users who will receive File Upload Event Push
+        /// </summary>
+        /// <returns>List of WechatID For sending message by WechatAPI</returns>
+        public List<string> GetVisibleUserWechat()
+        {
+            List<string> wechats = new List<string>();
+            var si = new SqlIntegrate(Utility.ConnStr);
+            DataTable dt= si.Adapter("SELECT [UUID],[wechat] FROM [User] WHERE [activated]=1 AND FilePush=1 AND [wechat]<>''"); //Get All Used Wechat File Upload Event Push Service
+            foreach (DataRow dr in dt.Rows)
+            {
+                if(Visible(new User(Guid.Parse(dr[0].ToString()))))
+                    wechats.Add(dr[1].ToString());
+            }
+            return wechats;
         }
     }
 }

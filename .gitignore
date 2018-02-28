@@ -1,0 +1,14 @@
+# Web Config File
+Web.config
+
+# Visual Studio Files
+/.vs/*
+
+# Web Files
+/[lL]ogs/*
+/[uU]ploads/*
+/[uU]pload/*
+
+# Wechat Tokens Files
+/[tT]oken/*
+/[tT]okens/*

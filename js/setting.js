@@ -101,3 +101,40 @@ function settingUnbind() {
         window.location.href = "setting";
     });
 }
+
+$('#FilePush').on('click', function (e) {
+    var state = 0;
+    var _this = this;
+    if ($(this).is(':checked'))
+        state = 1;
+    else
+        state = 0;
+
+    $.ajax({
+        url: "user.filepush.enable=" + state,
+        type: "get",
+        dataType: "json",
+        success: function (result) {
+            if (result.flag === 0) {
+                if (state===1)
+                    msg("修改成功", "新文件推送服务已启用", "success");
+                else
+                    msg("修改成功", "新文件推送服务已停用", "success");
+            }
+            else {
+                msg("修改失败", "请刷新重试或联系网络组", "error");
+                if (state==1)
+                    $(_this).prop("checked", false);
+                else
+                    $(_this).prop("checked", true);
+            }
+        },
+        error: function () {
+            msg("修改失败", "网络中断或服务器错误", "error");
+            if ($(_this).attr("checked"))
+                $(_this).prop("checked", false);
+            else
+                $(_this).prop("checked", true);
+        }
+    });
+});
