@@ -47,6 +47,20 @@ public class UserHandler : SAAO.AjaxHandler
         else if (context.Request["action"] == "unbind")
         {
             SAAO.User.Current.Wechat = "";
+            SAAO.User.Current.FilePush = 0;
+        }
+        else if (context.Request["action"] == "filepush")
+        {
+            if (context.Request["enable"] == null) return;
+            if (context.Request["enable"].ToString().Equals("0")) //Turn off this service
+            {
+                SAAO.User.Current.FilePush = 0; return;
+            }
+            if(SAAO.User.Current.Wechat=="") //haven't bind wechat
+            {
+                R.Flag = 1;return;
+            }
+            SAAO.User.Current.FilePush = 1;
         }
     }
 }

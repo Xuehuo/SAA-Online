@@ -22,6 +22,12 @@
                 <h4>微信登陆</h4>
                 <p>在企业号中即可直接进入SAAO（不需要用户名密码登录）。</p>
                 <p>当前已绑定微信号 <%=SAAO.User.Current.Wechat %> <button class="btn btn-danger btn-xs" onclick="settingUnbind()">解除绑定</button></p>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" id="FilePush" <% if(SAAO.User.Current.FilePush==1){%>checked="checked"<%} %> />
+                        新文件推送
+                    </label>
+                </div>
                 <% } %>
             </div>
             <div class="col-md-6">

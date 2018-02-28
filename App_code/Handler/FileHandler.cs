@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -10,7 +11,9 @@ public class FileHandler : SAAO.AjaxHandler
         if (context.Request["action"] == "upload")
         {
             if (context.Request.Files.Count == 0) return;
-            SAAO.File.Upload(context.Request.Files[0]);
+            var upfile = SAAO.File.Upload(context.Request.Files[0]);
+
+
         }
         else if (context.Request["action"] == "list")
         {
@@ -48,6 +51,39 @@ public class FileHandler : SAAO.AjaxHandler
                     file.AddTag(tag);
                 foreach (var tag in tagsOriginal.Except(tags))
                     file.RemoveTag(tag);
+
+                if(file.Uploader.UUID==SAAO.User.Current.UUID)  // Owner Check
+                {
+                    if((DateTime.Now- file.UploadTime).Minutes<=5)  //上传5分钟内修改 推动上传通知
+                    {                       
+                        //Wechat File Upload Event Push Service
+                        List<string> lst = file.GetVisibleUserWechat();
+                        string rec = string.Join("|", lst.ToArray());
+                        var oText = new JObject
+                        {
+                            ["touser"] = rec,
+                            ["msgtype"] = "text",
+                            ["agentid"] = 4,
+                            ["text"] = new JObject {
+                                ["content"] = "新文件提醒：\n" +
+                                              "文件名：" + file.Name + "\n" +
+                                              "上传者：" + file.Uploader.Realname + "\n" +
+                                              "上传时间：" + string.Format("{0:f}", file.UploadTime) +"\n" +
+                                              "备注："+file.Info
+                            }
+                        };
+
+                        var oFile = new JObject
+                        {
+                            ["touser"] = rec,
+                            ["msgtype"] = "file",
+                            ["agentid"] = 4,
+                            ["file"] = new JObject { ["media_id"] = file.MediaId }
+                        };
+                        SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
+                        SAAO.Utility.SendMessgaeBySAAOHelper(oText);
+                    }
+                }
             }
             else
                 R.Flag = 2;
@@ -81,15 +117,7 @@ public class FileHandler : SAAO.AjaxHandler
                 ["agentid"] = 4,
                 ["file"] = new JObject { ["media_id"] = file.MediaId }
             };
-#if DEBUG
-            SAAO.Utility.Log(
-#endif
-            SAAO.Utility.HttpRequest(
-                "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), o)
-#if DEBUG
-            )
-#endif
-            ;
+            SAAO.Utility.SendMessgaeBySAAOHelper(o);
         }
         else if (context.Request["action"] == "delete")
         {
