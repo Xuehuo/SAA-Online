@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -48,6 +49,31 @@ public class FileHandler : SAAO.AjaxHandler
                     file.AddTag(tag);
                 foreach (var tag in tagsOriginal.Except(tags))
                     file.RemoveTag(tag);
+
+                if (file.Uploader.UUID == SAAO.User.Current.UUID && (DateTime.Now - file.UploadTime).Minutes <= 5)  // Owner Check  上传5分钟内修改 推动上传通知
+                {
+                    //Wechat File Upload Event Push Service
+                    string Rec = string.Join("|", file.GetVisibleUserWechat().ToArray());
+                    var oText = new JObject
+                    {
+                        ["touser"] = Rec,
+                        ["msgtype"] = "text",
+                        ["agentid"] = 4,
+                        ["text"] = new JObject
+                        {
+                            ["content"] = string.Format("新文件提醒：\n文件名：{0}\n上传者：{1}\n上传时间：{2}\n备注：{3}",file.Name,file.Uploader.Realname, string.Format("{0:f}", file.UploadTime),file.Info)
+                        }
+                    };
+                    var oFile = new JObject
+                    {
+                        ["touser"] = Rec,
+                        ["msgtype"] = "file",
+                        ["agentid"] = 4,
+                        ["file"] = new JObject { ["media_id"] = file.MediaId }
+                    };
+                    SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
+                    SAAO.Utility.SendMessgaeBySAAOHelper(oText);
+                }
             }
             else
                 R.Flag = 2;
@@ -81,15 +107,7 @@ public class FileHandler : SAAO.AjaxHandler
                 ["agentid"] = 4,
                 ["file"] = new JObject { ["media_id"] = file.MediaId }
             };
-#if DEBUG
-            SAAO.Utility.Log(
-#endif
-            SAAO.Utility.HttpRequest(
-                "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), o)
-#if DEBUG
-            )
-#endif
-            ;
+            SAAO.Utility.SendMessgaeBySAAOHelper(o);
         }
         else if (context.Request["action"] == "delete")
         {

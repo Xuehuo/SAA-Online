@@ -1,0 +1,20 @@
+# Config File
+*.config
+
+# Visual Studio Files
+/.vs/*
+
+# Web Files
+/[lL]ogs/*
+/[uU]ploads/*
+/[uU]pload/*
+
+# Wechat Tokens Files
+/[tT]oken/*
+/[tT]okens/*
+
+# C# compiler
+/Bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+/Bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll.refresh
+/Bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+/Bin/roslyn/*

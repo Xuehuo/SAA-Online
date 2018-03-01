@@ -17,6 +17,7 @@ namespace SAAO
         public string Username;
         private string _password;
         private string _passwordRaw;
+
         public string PasswordRaw
         {
             get { return _passwordRaw; }
@@ -111,6 +112,23 @@ namespace SAAO
             }
         }
 
+        private int _filepush;
+        /// <summary>
+        /// File Upload Event Service (1=Enable)
+        /// </summary>
+        public int FilePush
+        {
+            get { return _filepush; }
+            set
+            {
+                _filepush = value;
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@filepush", SqlIntegrate.DataType.Int, _filepush);
+                si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, UUID);
+                si.Execute("UPDATE [User] SET [FilePush] = @filepush WHERE [UUID] = @UUID");
+            }
+        }
+
         public int Group;
         public string GroupName;
         public int Job;
@@ -137,6 +155,7 @@ namespace SAAO
             _mail = dr["mail"].ToString();
             _phone = dr["phone"].ToString();
             _wechat = dr["wechat"].ToString();
+            _filepush = Convert.ToInt32(dr["FilePush"]);
             Initial = dr["username"].ToString()[dr["realname"].ToString().Length - 1] - 'a' + 1;
             Group = Convert.ToInt32(dr["group"].ToString());
             Job = Convert.ToInt32(dr["job"].ToString());
@@ -166,6 +185,7 @@ namespace SAAO
             _mail = dr["mail"].ToString();
             _phone = dr["phone"].ToString();
             _wechat = dr["wechat"].ToString();
+            _filepush = (int)dr["FilePush"];
             Initial = dr["username"].ToString()[dr["realname"].ToString().Length - 1] - 'a' + 1;
             Group = Convert.ToInt32(dr["group"].ToString());
             Job = Convert.ToInt32(dr["job"].ToString());

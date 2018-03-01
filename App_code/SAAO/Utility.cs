@@ -202,5 +202,18 @@ namespace SAAO
             HttpContext.Current.Application.Add("accessToken", data["access_token"].ToString());
             return data["access_token"].ToString();
         }
+
+        /// <summary>
+        /// Send Wechat Messgae by SAAO Helper
+        /// ToUser: (up to 1000 message receiver, multiple receivers' | 'Division)
+        /// </summary>
+        /// <param name="data">structure on Wechat QyApi</param>
+        public static void SendMessgaeBySAAOHelper(JObject data)
+        {
+            string ret=HttpRequest("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), data);
+#if DEBUG
+            Log(ret);            
+#endif
+        }
     }
 }
