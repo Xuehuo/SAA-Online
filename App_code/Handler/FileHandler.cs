@@ -11,9 +11,7 @@ public class FileHandler : SAAO.AjaxHandler
         if (context.Request["action"] == "upload")
         {
             if (context.Request.Files.Count == 0) return;
-            var upfile = SAAO.File.Upload(context.Request.Files[0]);
-
-
+            SAAO.File.Upload(context.Request.Files[0]);
         }
         else if (context.Request["action"] == "list")
         {
@@ -52,37 +50,29 @@ public class FileHandler : SAAO.AjaxHandler
                 foreach (var tag in tagsOriginal.Except(tags))
                     file.RemoveTag(tag);
 
-                if(file.Uploader.UUID==SAAO.User.Current.UUID)  // Owner Check
+                if (file.Uploader.UUID == SAAO.User.Current.UUID && (DateTime.Now - file.UploadTime).Minutes <= 5)  // Owner Check  上传5分钟内修改 推动上传通知
                 {
-                    if((DateTime.Now- file.UploadTime).Minutes<=5)  //上传5分钟内修改 推动上传通知
-                    {                       
-                        //Wechat File Upload Event Push Service
-                        List<string> lst = file.GetVisibleUserWechat();
-                        string rec = string.Join("|", lst.ToArray());
-                        var oText = new JObject
+                    //Wechat File Upload Event Push Service
+                    string Rec = string.Join("|", file.GetVisibleUserWechat().ToArray());
+                    var oText = new JObject
+                    {
+                        ["touser"] = Rec,
+                        ["msgtype"] = "text",
+                        ["agentid"] = 4,
+                        ["text"] = new JObject
                         {
-                            ["touser"] = rec,
-                            ["msgtype"] = "text",
-                            ["agentid"] = 4,
-                            ["text"] = new JObject {
-                                ["content"] = "新文件提醒：\n" +
-                                              "文件名：" + file.Name + "\n" +
-                                              "上传者：" + file.Uploader.Realname + "\n" +
-                                              "上传时间：" + string.Format("{0:f}", file.UploadTime) +"\n" +
-                                              "备注："+file.Info
-                            }
-                        };
-
-                        var oFile = new JObject
-                        {
-                            ["touser"] = rec,
-                            ["msgtype"] = "file",
-                            ["agentid"] = 4,
-                            ["file"] = new JObject { ["media_id"] = file.MediaId }
-                        };
-                        SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
-                        SAAO.Utility.SendMessgaeBySAAOHelper(oText);
-                    }
+                            ["content"] = string.Format("新文件提醒：\n文件名：{0}\n上传者：{1}\n上传时间：{2}\n备注：{3}",file.Name,file.Uploader.Realname, string.Format("{0:f}", file.UploadTime),file.Info)
+                        }
+                    };
+                    var oFile = new JObject
+                    {
+                        ["touser"] = Rec,
+                        ["msgtype"] = "file",
+                        ["agentid"] = 4,
+                        ["file"] = new JObject { ["media_id"] = file.MediaId }
+                    };
+                    SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
+                    SAAO.Utility.SendMessgaeBySAAOHelper(oText);
                 }
             }
             else

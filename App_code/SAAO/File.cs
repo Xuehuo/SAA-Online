@@ -41,8 +41,8 @@ namespace SAAO
         public User Uploader { get { return _uploader; } }
         public DateTime UploadTime { get { return _uploadTime; } }
         public string Extension { get { return _extension; } }
+        
         public enum PermissionLevel
-
         {
             All = 0,
             /// <summary>
@@ -323,7 +323,7 @@ namespace SAAO
             si.AddParameter("@start", SqlIntegrate.DataType.Date, start);
             si.AddParameter("@end", SqlIntegrate.DataType.Date, end);
             var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] AND [File].[uploadTime] BETWEEN @start AND @end ORDER BY [File].[ID] DESC");
-            var a = new JArray();
+             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {
                 if (

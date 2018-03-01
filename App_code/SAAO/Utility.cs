@@ -207,19 +207,13 @@ namespace SAAO
         /// Send Wechat Messgae by SAAO Helper
         /// ToUser: (up to 1000 message receiver, multiple receivers' | 'Division)
         /// </summary>
-        /// <param name="msgType">Wechat Message Type</param>
         /// <param name="data">structure on Wechat QyApi</param>
         public static void SendMessgaeBySAAOHelper(JObject data)
         {
+            string ret=HttpRequest("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), data);
 #if DEBUG
-            SAAO.Utility.Log(
+            Log(ret);            
 #endif
-            SAAO.Utility.HttpRequest(
-                "https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), data)
-#if DEBUG
-            )
-#endif
-            ;
         }
     }
 }
