@@ -316,7 +316,7 @@ namespace SAAO
         public static JArray ListJson()
         {
             var si = new SqlIntegrate(Utility.ConnStr);
-            var dt = si.Adapter("SELECT * FROM [User] WHERE [activated] = 1");
+            var dt = si.Adapter("SELECT * FROM [User] WHERE [activated] = 1 ORDER BY [job] DESC");
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {
