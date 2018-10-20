@@ -163,7 +163,7 @@ namespace SAAO
             JobName = Organization.Current.GetJobName(Job);
             if (_sn.Substring(0, 4) == Organization.Current.State.SeniorOne)
                 Senior = 1;
-            else if (_sn.Substring(0, 4) == Organization.Current.State.SeniorTwo)
+            else if (Convert.ToInt32(_sn.Substring(0, 4)) <= Convert.ToInt32(Organization.Current.State.SeniorTwo))
                 Senior = 2;
         }
         /// <summary>
@@ -193,7 +193,7 @@ namespace SAAO
             JobName = Organization.Current.GetJobName(Job);
             if (_sn.Substring(0, 4) == Organization.Current.State.SeniorOne)
                 Senior = 1;
-            else if (_sn.Substring(0, 4) == Organization.Current.State.SeniorTwo)
+            else if (Convert.ToInt32(_sn.Substring(0, 4)) <= Convert.ToInt32(Organization.Current.State.SeniorTwo))
                 Senior = 2;
             else // for retired member
                 Senior = 1;
@@ -324,7 +324,7 @@ namespace SAAO
                 {
                     ["realname"] = dt.Rows[i]["realname"].ToString(),
                     ["senior"] =
-                        (dt.Rows[i]["SN"].ToString().Substring(0, 4) == Organization.Current.State.StructureCurrent)
+                        (Convert.ToInt32(dt.Rows[i]["SN"].ToString().Substring(0, 4)) <= Convert.ToInt32(Organization.Current.State.StructureCurrent))
                             ? 2
                             : 1,
                     ["group"] = dt.Rows[i]["group"].ToString(),
