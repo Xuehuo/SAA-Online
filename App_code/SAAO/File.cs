@@ -41,7 +41,7 @@ namespace SAAO
         public User Uploader { get { return _uploader; } }
         public DateTime UploadTime { get { return _uploadTime; } }
         public string Extension { get { return _extension; } }
-        
+
         public enum PermissionLevel
         {
             All = 0,
@@ -196,26 +196,36 @@ namespace SAAO
         {
             get
             {
-                if (_size > 1 << 21) // 2 * 1024 * 1024 Byte
-                    return null;
-                if (_mediaId != "") return _mediaId;
-                var jo = (JObject) new JsonSerializer()
-                    .Deserialize(new JsonTextReader(new StringReader(Utility.HttpRequest(
-                        url:
-                            $"https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={Utility.GetAccessToken()}&type=file",
-                        data: null,
-                        filePath: _savePath,
-                        fileName: _name + "." + _extension,
-                        fileFieldName: "media"))));
-                _mediaId = jo["media_id"].ToString();
-                var si = new SqlIntegrate(Utility.ConnStr);
-                si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, _mediaId);
-                si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
-                si.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
-                return _mediaId;
+                return getMediaId(SAAO.Utility.GetAccessToken());
             }
         }
 
+        /// <summary>
+        /// get file mediaid by given access_token
+        /// to fix visiting HttpContext.Current in multithreading environment
+        /// </summary>
+        /// <param name="access_token"></param>
+        /// <returns></returns>
+        public string getMediaId(string access_token)
+        {
+            if (_size > 1 << 21) // 2 * 1024 * 1024 Byte
+                return null;
+            if (_mediaId != "") return _mediaId;
+            var jo = (JObject)new JsonSerializer()
+                .Deserialize(new JsonTextReader(new StringReader(Utility.HttpRequest(
+                    url:
+                        $"https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={access_token}&type=file",
+                    data: null,
+                    filePath: _savePath,
+                    fileName: _name + "." + _extension,
+                    fileFieldName: "media"))));
+            _mediaId = jo["media_id"].ToString();
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, _mediaId);
+            si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+            si.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
+            return _mediaId;
+        }
         /// <summary>
         /// Delete the file
         /// </summary>
@@ -242,7 +252,7 @@ namespace SAAO
             {
                 _permission = value;
                 var si = new SqlIntegrate(Utility.ConnStr);
-                si.AddParameter("@permission", SqlIntegrate.DataType.Int, (int) value);
+                si.AddParameter("@permission", SqlIntegrate.DataType.Int, (int)value);
                 si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
                 si.Execute("UPDATE [File] SET [permission] = @permission WHERE [GUID] = @GUID");
             }
@@ -265,24 +275,41 @@ namespace SAAO
         /// <param name="group">Group (of uploader)</param>
         /// <param name="user">User (current one most possibly)</param>
         /// <returns>whether a user has the permission to a file</returns>
+        /// 
         public static bool Visible(PermissionLevel permission, string uuid, int group, User user)
         {
-            if (uuid == user.UUID)
+            return Visible(permission, uuid, group, user.UUID, user.Group, user.Senior, user.IsExecutive);
+        }
+
+        /// <summary>
+        /// Check whether a user has the permission to a file (static function)
+        /// </summary>
+        /// <param name="permission">Permission setting</param>
+        /// <param name="uuid">UUID (of uploader)</param>
+        /// <param name="group">Group (of uploader)</param>
+        /// <param name="user_uuid">User's UUID</param>
+        /// <param name="user_group">User's Group</param>
+        /// <param name="user_senior">User's Senior</param>
+        /// <param name="user_isExecutive">User's isExecutive</param>
+        /// <returns></returns>
+        public static bool Visible(PermissionLevel permission, string uuid, int group, string user_uuid, int user_group, int user_senior, bool user_isExecutive)
+        {
+            if (uuid == user_uuid)
                 return true;
             switch (permission)
             {
                 case PermissionLevel.All:
                     return true;
                 case PermissionLevel.SelfGroupOnly:
-                    if (group == user.Group)
+                    if (group == user_group)
                         return true;
                     break;
                 case PermissionLevel.SeniorTwoOnly:
-                    if (user.Senior == 2)
+                    if (user_senior == 2)
                         return true;
                     break;
                 case PermissionLevel.ImptMembOnly:
-                    if (user.IsExecutive)
+                    if (user_isExecutive)
                         return true;
                     break;
                 default:
@@ -299,7 +326,7 @@ namespace SAAO
             var o = new JObject
             {
                 ["guid"] = _guid,
-                ["permission"] = (int) _permission,
+                ["permission"] = (int)_permission,
                 ["name"] = _name,
                 ["extension"] = _extension,
                 ["uploadTime"] = _uploadTime.ToString("yyyy-MM-dd HH:mm"),
@@ -323,11 +350,11 @@ namespace SAAO
             si.AddParameter("@start", SqlIntegrate.DataType.Date, start);
             si.AddParameter("@end", SqlIntegrate.DataType.Date, end);
             var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] AND [File].[uploadTime] BETWEEN @start AND @end ORDER BY [File].[ID] DESC");
-             var a = new JArray();
+            var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {
                 if (
-                    !Visible((PermissionLevel) Convert.ToInt32(dt.Rows[i]["permission"].ToString()),
+                    !Visible((PermissionLevel)Convert.ToInt32(dt.Rows[i]["permission"].ToString()),
                         dt.Rows[i]["uploader"].ToString(), Convert.ToInt32(dt.Rows[i]["group"]),
                         User.Current)) continue;
                 var o = new JObject
@@ -354,10 +381,20 @@ namespace SAAO
         {
             List<string> wechats = new List<string>();
             var si = new SqlIntegrate(Utility.ConnStr);
-            DataTable dt= si.Adapter("SELECT [UUID],[wechat] FROM [User] WHERE [activated]=1 AND FilePush=1 AND [wechat]<>''"); //Get All Used Wechat File Upload Event Push Service
+            DataTable dt = si.Adapter("SELECT [UUID],[wechat],[group],[sn],[job] FROM [User] WHERE [activated]=1 AND FilePush=1 AND [wechat]<>''"); //Get All Used Wechat File Upload Event Push Service
             foreach (DataRow dr in dt.Rows)
             {
-                if(Visible(new User(Guid.Parse(dr[0].ToString()))))
+                string _sn = dr["sn"].ToString();
+                int job = Convert.ToInt32(dr["job"].ToString());
+                int senior = 1;
+                if (_sn.Substring(0, 4) == Organization.Current.State.SeniorOne)
+                    senior = 1;
+                else if (Convert.ToInt32(_sn.Substring(0, 4)) <= Convert.ToInt32(Organization.Current.State.SeniorTwo))
+                    senior = 2;
+                bool isexecutive = senior == 2 && Organization.Current.Structure.Select("[executive] = 1 AND [job] = " + job).Length != 0;
+                string user_uuid = dr["UUID"].ToString();
+                int user_group = Convert.ToInt32(dr["group"]);
+                if (Visible(Permission, Uploader.UUID, Uploader.Group, user_uuid, user_group, senior, isexecutive))
                     wechats.Add(dr[1].ToString());
             }
             return wechats;

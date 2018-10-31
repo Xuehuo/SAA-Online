@@ -208,11 +208,16 @@ namespace SAAO
         /// ToUser: (up to 1000 message receiver, multiple receivers' | 'Division)
         /// </summary>
         /// <param name="data">structure on Wechat QyApi</param>
-        public static void SendMessgaeBySAAOHelper(JObject data)
+        /// <param name="access_token">access_token for multithreading</param>
+        public static void SendMessgaeBySAAOHelper(JObject data,string access_token="")
         {
-            string ret=HttpRequest("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), data);
+            bool multithreading = access_token != ""; //if access_token is given it's multithreading.
+            if (access_token == "")
+                access_token = GetAccessToken();
+            string ret=HttpRequest("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + access_token, data);
 #if DEBUG
-            Log(ret);            
+            if(!multithreading)
+                Log(ret);            
 #endif
         }
     }

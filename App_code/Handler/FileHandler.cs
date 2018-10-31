@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using Newtonsoft.Json.Linq;
 
 public class FileHandler : SAAO.AjaxHandler
@@ -54,25 +56,29 @@ public class FileHandler : SAAO.AjaxHandler
                 {
                     //Wechat File Upload Event Push Service
                     string Rec = string.Join("|", file.GetVisibleUserWechat().ToArray());
-                    var oText = new JObject
+                    string access_token = SAAO.Utility.GetAccessToken();//visiting httpcontext.current will boom Null...
+                    new Thread(() =>
                     {
-                        ["touser"] = Rec,
-                        ["msgtype"] = "text",
-                        ["agentid"] = 4,
-                        ["text"] = new JObject
+                        var oText = new JObject
                         {
-                            ["content"] = string.Format("新文件提醒：\n文件名：{0}\n上传者：{1}\n上传时间：{2}\n备注：{3}",file.Name,file.Uploader.Realname, string.Format("{0:f}", file.UploadTime),file.Info)
-                        }
-                    };
-                    var oFile = new JObject
-                    {
-                        ["touser"] = Rec,
-                        ["msgtype"] = "file",
-                        ["agentid"] = 4,
-                        ["file"] = new JObject { ["media_id"] = file.MediaId }
-                    };
-                    SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
-                    SAAO.Utility.SendMessgaeBySAAOHelper(oText);
+                            ["touser"] = Rec,
+                            ["msgtype"] = "text",
+                            ["agentid"] = 4,
+                            ["text"] = new JObject
+                            {
+                                ["content"] = $"新文件提醒：\n文件名：{file.Name}\n上传者：{file.Uploader.Realname}\n上传时间：{string.Format("{0:f}", file.UploadTime)}\n备注：{file.Info}"
+                            }
+                        };
+                        var oFile = new JObject
+                        {
+                            ["touser"] = Rec,
+                            ["msgtype"] = "file",
+                            ["agentid"] = 4,
+                            ["file"] = new JObject { ["media_id"] = file.getMediaId(access_token) }
+                        };
+                        SAAO.Utility.SendMessgaeBySAAOHelper(oFile, access_token);
+                        SAAO.Utility.SendMessgaeBySAAOHelper(oText, access_token);
+                    }).Start();
                 }
             }
             else
