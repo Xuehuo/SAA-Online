@@ -163,7 +163,7 @@ namespace SAAO
             JobName = Organization.Current.GetJobName(Job);
             if (_sn.Substring(0, 4) == Organization.Current.State.SeniorOne)
                 Senior = 1;
-            else if (Convert.ToInt32(_sn.Substring(0, 4))<= Convert.ToInt32(Organization.Current.State.SeniorTwo))
+            else if (Convert.ToInt32(_sn.Substring(0, 4)) <= Convert.ToInt32(Organization.Current.State.SeniorTwo))
                 Senior = 2;
         }
         /// <summary>
@@ -193,7 +193,7 @@ namespace SAAO
             JobName = Organization.Current.GetJobName(Job);
             if (_sn.Substring(0, 4) == Organization.Current.State.SeniorOne)
                 Senior = 1;
-            else if (Convert.ToInt32(_sn.Substring(0, 4))<= Convert.ToInt32(Organization.Current.State.SeniorTwo))
+            else if (Convert.ToInt32(_sn.Substring(0, 4)) <= Convert.ToInt32(Organization.Current.State.SeniorTwo))
                 Senior = 2;
             else // for retired member
                 Senior = 1;
@@ -316,7 +316,7 @@ namespace SAAO
         public static JArray ListJson()
         {
             var si = new SqlIntegrate(Utility.ConnStr);
-            var dt = si.Adapter("SELECT * FROM [User] WHERE [activated] = 1");
+            var dt = si.Adapter("SELECT * FROM [User] WHERE [activated] = 1 ORDER BY [job],[group]");
             var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {
