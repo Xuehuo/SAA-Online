@@ -110,7 +110,7 @@ namespace SAAO
                     }
                 }
             };
-            Utility.HttpRequest($"https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={Utility.GetAccessToken()}", o);
+            Utility.SendMessgaeBySAAOHelper(SAAO.Utility.GetAccessToken(), o);
         }
 
         /// <summary>

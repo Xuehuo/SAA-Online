@@ -4,7 +4,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data;
-
+using System.Threading.Tasks;
 
 namespace SAAO
 {
@@ -89,7 +89,7 @@ namespace SAAO
                 Tag.Add(tagList.Rows[i]["name"].ToString());
         }
 
-        public static string Upload(System.Web.HttpPostedFile file)
+        public static string Upload(System.Web.HttpPostedFile file, bool getmediaid = false)
         {
             var guid = Guid.NewGuid().ToString().ToUpper();
             file.SaveAs(StoragePath + guid);
@@ -102,6 +102,25 @@ namespace SAAO
             si.AddParameter("@size", SqlIntegrate.DataType.Int, file.ContentLength);
             si.AddParameter("@UUID", SqlIntegrate.DataType.VarChar, User.Current.UUID);
             si.Execute("INSERT INTO [File] ([GUID],[name],[extension],[size],[uploader]) VALUES (@GUID,@name,@extension,@size,@UUID)");
+            if (getmediaid)
+            {
+                var access_token = SAAO.Utility.GetAccessToken();
+                new Task(() =>
+                {
+                    var jo = (JObject)new JsonSerializer()
+                        .Deserialize(new JsonTextReader(new StringReader(Utility.HttpRequest(
+                            url:$"https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={access_token}&type=file",
+                            data: null,
+                            filePath: StoragePath + guid,
+                            fileName: file.FileName,
+                            fileFieldName: "media"))));
+                    var _mediaId = jo["media_id"].ToString();
+                    var si2 = new SqlIntegrate(Utility.ConnStr);
+                    si2.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, _mediaId);
+                    si2.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, guid);
+                    si2.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
+                }).Start();
+            }
             return guid;
         }
         /// <summary>
@@ -196,35 +215,26 @@ namespace SAAO
         {
             get
             {
-                return getMediaId(SAAO.Utility.GetAccessToken());
+                if (_size > 1 << 21) // 2 * 1024 * 1024 Byte
+                    return null;
+                if (_mediaId != "") return _mediaId;
+                //SyncGet will lose lots of time
+                //MediaId shoule be requested when it's uploaded
+                var jo = (JObject)new JsonSerializer()
+                    .Deserialize(new JsonTextReader(new StringReader(Utility.HttpRequest(
+                        url:
+                            $"https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={SAAO.Utility.GetAccessToken()}&type=file",
+                        data: null,
+                        filePath: _savePath,
+                        fileName: _name + "." + _extension,
+                        fileFieldName: "media"))));
+                _mediaId = jo["media_id"].ToString();
+                var si = new SqlIntegrate(Utility.ConnStr);
+                si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, _mediaId);
+                si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+                si.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
+                return _mediaId;
             }
-        }
-
-        /// <summary>
-        /// get file mediaid by given access_token
-        /// to fix visiting HttpContext.Current in multithreading environment
-        /// </summary>
-        /// <param name="access_token"></param>
-        /// <returns></returns>
-        public string getMediaId(string access_token)
-        {
-            if (_size > 1 << 21) // 2 * 1024 * 1024 Byte
-                return null;
-            if (_mediaId != "") return _mediaId;
-            var jo = (JObject)new JsonSerializer()
-                .Deserialize(new JsonTextReader(new StringReader(Utility.HttpRequest(
-                    url:
-                        $"https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={access_token}&type=file",
-                    data: null,
-                    filePath: _savePath,
-                    fileName: _name + "." + _extension,
-                    fileFieldName: "media"))));
-            _mediaId = jo["media_id"].ToString();
-            var si = new SqlIntegrate(Utility.ConnStr);
-            si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, _mediaId);
-            si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
-            si.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
-            return _mediaId;
         }
         /// <summary>
         /// Delete the file
@@ -266,7 +276,6 @@ namespace SAAO
         {
             return Visible(_permission, _uploader.UUID, _uploader.Group, user);
         }
-
         /// <summary>
         /// Check whether a user has the permission to a file (static function)
         /// </summary>
@@ -280,9 +289,8 @@ namespace SAAO
         {
             return Visible(permission, uuid, group, user.UUID, user.Group, user.Senior, user.IsExecutive);
         }
-
         /// <summary>
-        /// Check whether a user has the permission to a file (static function)
+        /// Check whether a user has the permission to a file (bases function)
         /// </summary>
         /// <param name="permission">Permission setting</param>
         /// <param name="uuid">UUID (of uploader)</param>
@@ -291,7 +299,7 @@ namespace SAAO
         /// <param name="user_group">User's Group</param>
         /// <param name="user_senior">User's Senior</param>
         /// <param name="user_isExecutive">User's isExecutive</param>
-        /// <returns></returns>
+        /// <returns>whether a user has the permission to a file</returns>
         public static bool Visible(PermissionLevel permission, string uuid, int group, string user_uuid, int user_group, int user_senior, bool user_isExecutive)
         {
             if (uuid == user_uuid)
@@ -371,8 +379,6 @@ namespace SAAO
             }
             return a;
         }
-
-
         /// <summary>
         /// Get All Users who will receive File Upload Event Push
         /// </summary>

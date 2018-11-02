@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 public class FileHandler : SAAO.AjaxHandler
@@ -13,7 +14,7 @@ public class FileHandler : SAAO.AjaxHandler
         if (context.Request["action"] == "upload")
         {
             if (context.Request.Files.Count == 0) return;
-            SAAO.File.Upload(context.Request.Files[0]);
+            SAAO.File.Upload(context.Request.Files[0], true);
         }
         else if (context.Request["action"] == "list")
         {
@@ -51,13 +52,11 @@ public class FileHandler : SAAO.AjaxHandler
                     file.AddTag(tag);
                 foreach (var tag in tagsOriginal.Except(tags))
                     file.RemoveTag(tag);
-
                 if (file.Uploader.UUID == SAAO.User.Current.UUID && (DateTime.Now - file.UploadTime).Minutes <= 5)  // Owner Check  上传5分钟内修改 推动上传通知
                 {
-                    //Wechat File Upload Event Push Service
                     string Rec = string.Join("|", file.GetVisibleUserWechat().ToArray());
-                    string access_token = SAAO.Utility.GetAccessToken();//visiting httpcontext.current will boom Null...
-                    new Thread(() =>
+                    string access_token = SAAO.Utility.GetAccessToken();
+                    new Task(() =>
                     {
                         var oText = new JObject
                         {
@@ -74,10 +73,10 @@ public class FileHandler : SAAO.AjaxHandler
                             ["touser"] = Rec,
                             ["msgtype"] = "file",
                             ["agentid"] = 4,
-                            ["file"] = new JObject { ["media_id"] = file.getMediaId(access_token) }
+                            ["file"] = new JObject { ["media_id"] = file.MediaId } //Media id should be ready or NullReferenceException will be thronw when requesting access_token
                         };
-                        SAAO.Utility.SendMessgaeBySAAOHelper(oFile, access_token);
-                        SAAO.Utility.SendMessgaeBySAAOHelper(oText, access_token);
+                        SAAO.Utility.SendMessgaeBySAAOHelper(access_token, oText);
+                        SAAO.Utility.SendMessgaeBySAAOHelper(access_token, oFile);
                     }).Start();
                 }
             }
@@ -113,7 +112,7 @@ public class FileHandler : SAAO.AjaxHandler
                 ["agentid"] = 4,
                 ["file"] = new JObject { ["media_id"] = file.MediaId }
             };
-            SAAO.Utility.SendMessgaeBySAAOHelper(o);
+            SAAO.Utility.SendMessgaeBySAAOHelper(SAAO.Utility.GetAccessToken(), o);
         }
         else if (context.Request["action"] == "delete")
         {

@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace SAAO
 {
@@ -16,6 +17,16 @@ namespace SAAO
     /// </summary>
     public class Utility
     {
+        /// <summary>
+        /// Debug Flag
+        /// </summary>
+        private const bool isDebug =
+#if DEBUG
+            true;
+#else
+            true;
+#endif
+
         /// <summary>
         /// Major database connection string
         /// </summary>
@@ -130,7 +141,7 @@ namespace SAAO
                 if (data is Dictionary<string, string>)
                 {
                     request.ContentType = "application/x-www-form-urlencoded";
-                    foreach (var p in (Dictionary<string, string>) data)
+                    foreach (var p in (Dictionary<string, string>)data)
                     {
                         if (postData != "")
                             postData += "&";
@@ -140,7 +151,7 @@ namespace SAAO
                 else if (data is JObject)
                 {
                     request.ContentType = "application/json";
-                    postData = ((JObject) data).ToString();
+                    postData = ((JObject)data).ToString();
                 }
                 request.ContentLength = Encoding.UTF8.GetBytes(postData).Length;
                 using (var stream = request.GetRequestStream())
@@ -180,11 +191,151 @@ namespace SAAO
                 }
             }
             else // GET
-            request.Method = "GET";
-            using (var response = (HttpWebResponse) request.GetResponse())
-                using (var responseStream = response.GetResponseStream())
-                    return responseStream != null ? new StreamReader(responseStream).ReadToEnd() : null;
+                request.Method = "GET";
+            using (var response = (HttpWebResponse)request.GetResponse())
+            using (var responseStream = response.GetResponseStream())
+                return responseStream != null ? new StreamReader(responseStream).ReadToEnd() : null;
         }
+
+        /// <summary>
+        /// Http Get Request(Sync)
+        /// </summary>
+        /// <param name="url">Request Url</param>
+        /// <returns>Response String</returns>
+        public static string HttpRequestGet(string url)
+        {
+            var request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "GET";
+            using (var response = (HttpWebResponse)request.GetResponse())
+            using (var responseStream = response.GetResponseStream())
+            {
+                string back = responseStream != null ? new StreamReader(responseStream).ReadToEnd() : null;
+                if (isDebug) LogFailover($"Response:{back ?? "null"} Request:{url}");
+                return back;
+            }
+        }
+
+        /// <summary>
+        /// Http Get Request(Async)
+        /// </summary>
+        /// <param name="url">Request Url</param>
+        /// <returns>Async Task Object. use .Result to wait response</returns>
+        public static Task<string> HttpRequestGetAsync(string url)
+        {
+            var task = new Task<string>(() =>
+             {
+                 var request = (HttpWebRequest)WebRequest.Create(url);
+                 using (var response = (HttpWebResponse)request.GetResponse())
+                 using (var responseStream = response.GetResponseStream())
+                 {
+                     string back = responseStream != null ? new StreamReader(responseStream).ReadToEnd() : null;
+                     if (isDebug) LogFailover($"Response:{back ?? "null"} Request:{url}");
+                     return back;
+                 }
+             });
+            task.Start();
+            return task;
+        }
+
+        /// <summary>
+        /// Http Post Request(Async)
+        /// </summary>
+        /// <param name="url">Request Url</param>
+        /// <param name="data">Post Data</param>
+        /// <returns>Async Task Object. use .Result to wait response</returns>
+        public static Task<string> HttpRequestPostAsync(string url, object data)
+        {
+            var task = new Task<string>(() =>
+            {
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "POST";
+                var postData = "";
+                if (data is Dictionary<string, string>)
+                {
+                    request.ContentType = "application/x-www-form-urlencoded";
+                    foreach (var p in (Dictionary<string, string>)data)
+                    {
+                        if (postData != "")
+                            postData += "&";
+                        postData += $"{p.Key}={p.Value}";
+                    }
+                }
+                else if (data is JObject)
+                {
+                    request.ContentType = "application/json";
+                    postData = ((JObject)data).ToString();
+                }
+                request.ContentLength = Encoding.UTF8.GetBytes(postData).Length;
+                using (var stream = request.GetRequestStream())
+                    stream.Write(Encoding.UTF8.GetBytes(postData), 0, Encoding.UTF8.GetByteCount(postData));
+                using (var response = (HttpWebResponse)request.GetResponse())
+                using (var responseStream = response.GetResponseStream())
+                {
+                    string back = responseStream != null ? new StreamReader(responseStream).ReadToEnd() : null;
+                    if (isDebug) LogFailover($"Response:{back ?? "null"} Request:{url}");
+                    return back;
+                }
+            });
+            task.Start();
+            return task;
+        }
+
+        /// <summary>
+        /// Http Post File Request(Async)
+        /// </summary>
+        /// <param name="url">Request Url</param>
+        /// <param name="data">Post data</param>
+        /// <param name="filePath">Post File Path</param>
+        /// <param name="fileName">Post File Name</param>
+        /// <param name="fileFieldName">Post File Field Name</param>
+        /// <returns>Async Task Object. use .Result to wait response</returns>
+        public static Task<string> HttpRequestPostFileAsync(string url, object data = null, string filePath = "", string fileName = "", string fileFieldName = "")
+        {
+            var task = new Task<string>(() =>
+             {
+                 var request = (HttpWebRequest)WebRequest.Create(url);
+                 request.Method = "POST";
+                 var boundary = $"---------------------------{Guid.NewGuid():N}";
+                 var boundaryBytes = Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\n");
+                 request.ContentType = "multipart/form-data; boundary=" + boundary;
+                 using (var stream = request.GetRequestStream())
+                 {
+                     string field;
+                     if ((Dictionary<string, string>)data != null)
+                         // TODO: No implementation when data is JObject
+                         foreach (var p in (Dictionary<string, string>)data)
+                         {
+                             stream.Write(boundaryBytes, 0, boundaryBytes.Length);
+                             field = $"Content-Disposition: form-data; name=\"{p.Key}\"\r\n\r\n{p.Value}";
+                             stream.Write(Encoding.UTF8.GetBytes(field), 0, Encoding.UTF8.GetByteCount(field));
+                         }
+                     stream.Write(boundaryBytes, 0, boundaryBytes.Length);
+                     field =
+                         $"Content-Disposition: form-data; name=\"{fileFieldName}\"; filename=\"{fileName}\";\r\nContent-Type: {MimeMapping.GetMimeMapping(fileName)}\r\n\r\n";
+                     stream.Write(Encoding.UTF8.GetBytes(field), 0, Encoding.UTF8.GetByteCount(field));
+                     using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                     {
+                         var fileData = new byte[fs.Length];
+                         fs.Read(fileData, 0, fileData.Length);
+                         fs.Close();
+                         stream.Write(fileData, 0, fileData.Length);
+                     }
+                     var trailer = Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n");
+                     stream.Write(trailer, 0, trailer.Length);
+                     stream.Close();
+                 }
+                 using (var response = (HttpWebResponse)request.GetResponse())
+                 using (var responseStream = response.GetResponseStream())
+                 {
+                     string back = responseStream != null ? new StreamReader(responseStream).ReadToEnd() : null;
+                     if (isDebug) LogFailover($"Response:{back ?? "null"} Request:{url}");
+                     return back;
+                 }
+             });
+            task.Start();
+            return task;
+        }
+
         /// <summary>
         /// Get cached access token or retrieve a new one
         /// </summary>
@@ -194,10 +345,10 @@ namespace SAAO
             var corpId = System.Configuration.ConfigurationManager.AppSettings["WechatCorpId"];
             var corpSecret = System.Configuration.ConfigurationManager.AppSettings["WechatCorpSecret"];
             if (HttpContext.Current.Application["accessTokenExpire"] != null &&
-                DateTime.Now <= (DateTime) HttpContext.Current.Application["accessTokenExpire"])
+                DateTime.Now <= (DateTime)HttpContext.Current.Application["accessTokenExpire"])
                 return HttpContext.Current.Application["accessToken"].ToString();
             var data = (JObject)new JsonSerializer()
-                .Deserialize(new JsonTextReader(new StringReader(HttpRequest($"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}")))); 
+                .Deserialize(new JsonTextReader(new StringReader(HttpRequest($"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpId}&corpsecret={corpSecret}"))));
             HttpContext.Current.Application.Add("accessTokenExpire", DateTime.Now.AddSeconds(Convert.ToInt32(data["expires_in"])));
             HttpContext.Current.Application.Add("accessToken", data["access_token"].ToString());
             return data["access_token"].ToString();
@@ -207,18 +358,11 @@ namespace SAAO
         /// Send Wechat Messgae by SAAO Helper
         /// ToUser: (up to 1000 message receiver, multiple receivers' | 'Division)
         /// </summary>
+        /// <param name="access_token">access_token for Task(multithreading)</param>
         /// <param name="data">structure on Wechat QyApi</param>
-        /// <param name="access_token">access_token for multithreading</param>
-        public static void SendMessgaeBySAAOHelper(JObject data,string access_token="")
+        public static void SendMessgaeBySAAOHelper(string access_token, JObject data)
         {
-            bool multithreading = access_token != ""; //if access_token is given it's multithreading.
-            if (access_token == "")
-                access_token = GetAccessToken();
-            string ret=HttpRequest("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + access_token, data);
-#if DEBUG
-            if(!multithreading)
-                Log(ret);            
-#endif
+            HttpRequestPostAsync("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + access_token, data);
         }
     }
 }
