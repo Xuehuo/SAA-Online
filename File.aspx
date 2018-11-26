@@ -1,15 +1,26 @@
 ﻿<%@ Page Language="C#" MasterPageFile="MasterPage.master" AutoEventWireup="true" CodeFile="File.aspx.cs" Inherits="FilePage" %>
+
 <%@ MasterType TypeName="MasterPage" %>
 
 <asp:Content ContentPlaceHolderID="PageMenu" runat="server">
     <li><a href="#" onclick="fileList()"><span class="glyphicon glyphicon-repeat"></span><span class="hidden-xs">刷新</span></a></li>
     <li><a href="#" data-toggle="modal" data-target="#uploadmodal"><span class="glyphicon glyphicon-cloud-upload"></span><span class="hidden-xs">上传</span></a></li>
     <li><a href="#" data-toggle="modal" data-target="#helpmodal"><span class="glyphicon glyphicon-question-sign"></span><span class="hidden-xs">帮助</span></a></li>
+    <li><a href="#" id="change_showMode"><span class="glyphicon glyphicon glyphicon-th-list"></span><span class="hidden-xs">切换</span></a></li>
 </asp:Content>
 
 <asp:Content ContentPlaceHolderID="PageContent" runat="server">
     <div id="container">
         <h2>现在没有文件</h2>
+        <table class="table table-hover" id="tb_files">
+            <tr>
+                <th class="ft_filename">文件名</th>
+                <th class="ft_filetype">文件类型</th>
+                <th class="ft_uploader">上传者</th>
+                <th class="ft_time">时间</th>
+                <th class="ft_downloadcount">下载次数</th>
+            </tr>
+        </table>
     </div>
 </asp:Content>
 
@@ -67,7 +78,8 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger pull-left" onclick="fileDelete()">删除</button>
-                    <%if (SAAO.User.Current.Wechat != "") { %>
+                    <%if (SAAO.User.Current.Wechat != "")
+                        { %>
                     <button type="button" class="btn btn-default" id="towechat" onclick="fileToWechat()">发送至微信</button>
                     <% } %>
                     <button type="button" class="btn btn-success" onclick="fileDownload()">下载</button>

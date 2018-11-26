@@ -41,7 +41,7 @@ namespace SAAO
         public User Uploader { get { return _uploader; } }
         public DateTime UploadTime { get { return _uploadTime; } }
         public string Extension { get { return _extension; } }
-        
+
         public enum PermissionLevel
         {
             All = 0,
@@ -199,7 +199,7 @@ namespace SAAO
                 if (_size > 1 << 21) // 2 * 1024 * 1024 Byte
                     return null;
                 if (_mediaId != "") return _mediaId;
-                var jo = (JObject) new JsonSerializer()
+                var jo = (JObject)new JsonSerializer()
                     .Deserialize(new JsonTextReader(new StringReader(Utility.HttpRequest(
                         url:
                             $"https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token={Utility.GetAccessToken()}&type=file",
@@ -242,7 +242,7 @@ namespace SAAO
             {
                 _permission = value;
                 var si = new SqlIntegrate(Utility.ConnStr);
-                si.AddParameter("@permission", SqlIntegrate.DataType.Int, (int) value);
+                si.AddParameter("@permission", SqlIntegrate.DataType.Int, (int)value);
                 si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
                 si.Execute("UPDATE [File] SET [permission] = @permission WHERE [GUID] = @GUID");
             }
@@ -299,7 +299,7 @@ namespace SAAO
             var o = new JObject
             {
                 ["guid"] = _guid,
-                ["permission"] = (int) _permission,
+                ["permission"] = (int)_permission,
                 ["name"] = _name,
                 ["extension"] = _extension,
                 ["uploadTime"] = _uploadTime.ToString("yyyy-MM-dd HH:mm"),
@@ -323,11 +323,11 @@ namespace SAAO
             si.AddParameter("@start", SqlIntegrate.DataType.Date, start);
             si.AddParameter("@end", SqlIntegrate.DataType.Date, end);
             var dt = si.Adapter("SELECT [File].*, [User].[realname], [User].[group] FROM [File] INNER JOIN [User] ON [File].[uploader] = [User].[UUID] AND [File].[uploadTime] BETWEEN @start AND @end ORDER BY [File].[ID] DESC");
-             var a = new JArray();
+            var a = new JArray();
             for (var i = 0; i < dt.Rows.Count; i++)
             {
                 if (
-                    !Visible((PermissionLevel) Convert.ToInt32(dt.Rows[i]["permission"].ToString()),
+                    !Visible((PermissionLevel)Convert.ToInt32(dt.Rows[i]["permission"].ToString()),
                         dt.Rows[i]["uploader"].ToString(), Convert.ToInt32(dt.Rows[i]["group"]),
                         User.Current)) continue;
                 var o = new JObject
@@ -345,7 +345,6 @@ namespace SAAO
             return a;
         }
 
-
         /// <summary>
         /// Get All Users who will receive File Upload Event Push
         /// </summary>
@@ -354,13 +353,32 @@ namespace SAAO
         {
             List<string> wechats = new List<string>();
             var si = new SqlIntegrate(Utility.ConnStr);
-            DataTable dt= si.Adapter("SELECT [UUID],[wechat] FROM [User] WHERE [activated]=1 AND FilePush=1 AND [wechat]<>''"); //Get All Used Wechat File Upload Event Push Service
+            DataTable dt = si.Adapter("SELECT [UUID],[wechat] FROM [User] WHERE [activated]=1 AND FilePush=1 AND [wechat]<>''"); //Get All Used Wechat File Upload Event Push Service
             foreach (DataRow dr in dt.Rows)
             {
-                if(Visible(new User(Guid.Parse(dr[0].ToString()))))
+                if (Visible(new User(Guid.Parse(dr[0].ToString()))))
                     wechats.Add(dr[1].ToString());
             }
             return wechats;
         }
+        
+        public struct DownloadToken
+        {
+            public string File_GUID;
+            public long TimeStamp;
+        }
+        /// <summary>
+        /// TempDownloadToken. To Download File In Wechat.
+        /// </summary>
+        public static Dictionary<string, DownloadToken> TempDownloadToken
+        {
+            get
+            {
+                if (System.Web.HttpContext.Current.Application["TempDownloadToken"] == null)
+                    System.Web.HttpContext.Current.Application["TempDownloadToken"] = new Dictionary<string, DownloadToken>();
+                return (Dictionary<string, DownloadToken>)System.Web.HttpContext.Current.Application["TempDownloadToken"];
+            }
+        }
+
     }
 }

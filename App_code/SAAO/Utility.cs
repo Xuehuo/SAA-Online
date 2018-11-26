@@ -215,5 +215,16 @@ namespace SAAO
             Log(ret);            
 #endif
         }
+
+        /// <summary>
+        /// Get Unix Timestamp
+        /// </summary>
+        /// <param name="time">DateTime</param>
+        /// <returns>timestamp</returns>
+        public static int GetUnixTimeStamp(System.DateTime time)
+        {
+            System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1));
+            return (int)(time - startTime).TotalSeconds;
+        }
     }
 }

@@ -45,7 +45,7 @@
             margin-left: 13px;
         }
 
-        #file #container > table {
+        #file #container > table:not(#tb_files) {
             display: inline-table;
             height: 158px;
             width: 255px;
@@ -167,7 +167,7 @@
                     background-size: 0%;
                     width: 100%;
                 }
-                
+
                 #file #uploadqueue .file-row > div:nth-child(3) {
                     background-color: #00BFFF;
                     cursor: pointer;
@@ -258,4 +258,50 @@
         #file #uploadqueue .file-row > div > p, #file #uploadqueue .file-row > div > span {
             text-align: center;
         }
+}
+
+#file #container #tb_files {
+    table-layout: fixed;
+    word-break: break-all;
+    word-wrap: break-word;
+}
+
+    #file #container #tb_files * {
+        text-align: center
+    }
+
+    #file #container #tb_files .ft_filename {
+        width: 50%;
+    }
+
+    #file #container #tb_files .ft_filetype {
+        width: 10%;
+    }
+
+    #file #container #tb_files .ft_uploader {
+        width: 15%;
+    }
+
+    #file #container #tb_files .ft_datetime {
+        width: 15%;
+    }
+
+    #file #container #tb_files .ft_downloadcount {
+        width: 10%;
+    }
+
+    #file #container #tb_files .fb_td_filename {
+        padding-left: 15px;
+        text-align: left;
+    }
+
+@media (max-width: 768px) {
+    #horizontal-table-container {
+        display: -webkit-box;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    #tb_files{
+        min-width:800px;
+    }
 }
