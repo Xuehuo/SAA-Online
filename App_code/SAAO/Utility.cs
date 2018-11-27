@@ -364,5 +364,16 @@ namespace SAAO
         {
             HttpRequestPostAsync("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + access_token, data);
         }
+
+        /// <summary>
+        /// Get Unix Timestamp
+        /// </summary>
+        /// <param name="time">DateTime</param>
+        /// <returns>timestamp</returns>
+        public static int GetUnixTimeStamp(System.DateTime time)
+        {
+            System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1));
+            return (int)(time - startTime).TotalSeconds;
+        }
     }
 }

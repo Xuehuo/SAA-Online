@@ -405,5 +405,24 @@ namespace SAAO
             }
             return wechats;
         }
+        
+        public struct DownloadToken
+        {
+            public string File_GUID;
+            public long TimeStamp;
+        }
+        /// <summary>
+        /// TempDownloadToken. To Download File In Wechat.
+        /// </summary>
+        public static Dictionary<string, DownloadToken> TempDownloadToken
+        {
+            get
+            {
+                if (System.Web.HttpContext.Current.Application["TempDownloadToken"] == null)
+                    System.Web.HttpContext.Current.Application["TempDownloadToken"] = new Dictionary<string, DownloadToken>();
+                return (Dictionary<string, DownloadToken>)System.Web.HttpContext.Current.Application["TempDownloadToken"];
+            }
+        }
+
     }
 }

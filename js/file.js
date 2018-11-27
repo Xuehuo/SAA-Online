@@ -1,4 +1,5 @@
 ﻿var fileCurrent;
+var fileShowMode = "normal";
 
 function fileInfo(obj) {
     var fileid = $(obj).data("id");
@@ -7,7 +8,7 @@ function fileInfo(obj) {
         url: "file.info.id=" + fileid,
         type: "get",
         cache: false,
-        success: function(result) {
+        success: function (result) {
             if (result.flag !== 0) {
                 msg("错误", "加载文件属性失败，请刷新重试", "error");
             } else {
@@ -30,12 +31,12 @@ function fileInfo(obj) {
                         "case-sensitive": false,
                         "edit-on-delete": false,
                         "forbidden-chars-text": "以下字符是非法的：",
-                        "forbidden-chars-callback": function(text) {
+                        "forbidden-chars-callback": function (text) {
                             msg("错误的标签", text, "error");
                         },
                         "no-backspace": true,
                         "no-duplicate-text": "重复的标签：",
-                        "no-duplicate-callback": function(text) {
+                        "no-duplicate-callback": function (text) {
                             msg("错误的标签", text, "error");
                         }
                     });
@@ -54,7 +55,7 @@ function fileInfo(obj) {
                 $("#file #filemodal").modal("show");
             }
         },
-        error: function() {
+        error: function () {
             msg("获取文件信息失败", "网络中断或服务器错误", "error");
         }
     });
@@ -116,10 +117,34 @@ function fileDelete() {
 }
 
 function fileDownload() {
-    window.open("file.download.id=" + fileCurrent);
+    if (isWeiXin()) {
+        var token = $.ajax(
+            {
+                url: "file.gettoken.id=" + fileCurrent,
+                type: "get",
+                cache: false,
+                success: function (result) {
+                    if (result.flag === 0) {
+                        window.open("file.download.id=" + fileCurrent + "&token=" + result.data);
+                        //window.showModalDialog("file.download.id=" + fileCurrent + "&token=" + result.data);
+                        //var a = $("<a href='file.download.id=" + fileCurrent + "&token=" + result.data + "' target='_blank'>Apple</a>").get(0);
+                        //var e = document.createEvent('MouseEvents');
+                        //e.initEvent('click', true, true);
+                        //a.dispatchEvent(e);
+                        //window.location.href = "file.download.id=" + fileCurrent + "&token=" + result.data;
+                        //$("#filemodal .modal-footer").remove("a");
+                        //$("#filemodal .modal-footer").append("<a href='" + "file.download.id=" + fileCurrent + "&token=" + result.data + "'> 下载 </a>");
+                    }
+                    else
+                        msg("下载失败", "获取Token失败", "error");
+                }
+            })
+    }
+    else
+        window.open("file.download.id=" + fileCurrent);
     var obj = $("#filemodal dl").children("dd").eq(6);
     obj.html(parseInt(obj.html()) + 1);
-    $("#container > table[data-id='" + fileCurrent + "'] .downloadcount").html(parseInt(obj.html()));
+    $("#container > table[data-id='" + fileCurrent + "'] .downloadcount").html(parseInt(obj.html()) + "次下载");
 }
 
 function filePermission(obj) {
@@ -128,7 +153,7 @@ function filePermission(obj) {
 }
 
 function fileSave() {
-    if ($("#filename").val().replace(/(^\s*)|(\s*$)/g, "")=== "") {
+    if ($("#filename").val().replace(/(^\s*)|(\s*$)/g, "") === "") {
         msg("文件名为空", "请填写文件名", "error");
         return;
     }
@@ -162,16 +187,16 @@ function fileSave() {
             permission: parseInt($("#filemodal .btn-group").children(".btn-primary").data("per")),
             tag: tagstring
         },
-        success: function(result) {
+        success: function (result) {
             if (result.flag === 0) {
                 msg("成功", "更新文件信息成功", "success");
                 $("#container > table[data-id='" + fileCurrent + "'] .filetitle > td").html($("#filename").val().trim());
                 $("#container > table[data-id='" + fileCurrent + "'] .downloadcount > strong").remove();
                 $("#filemodal").modal("hide");
-            } else 
+            } else
                 msg("错误", "更新文件信息失败，请重试", "error");
         },
-        error: function() {
+        error: function () {
             msg("更新文件信息失败", "网络中断或服务器错误", "error");
         }
     });
@@ -187,8 +212,16 @@ function fileList() {
             success: function (result) {
                 if (result.flag === 0) {
                     if (result.data.length > 0) {
-                        for (var i = 0; i < result.data.length; i++) {
-                            $("#container").append("<table onclick=\"fileInfo(this)\" data-id=\"" + result.data[i].guid + "\" data-wechat=\"" + result.data[i].wechat + "\"><tr class=\"filetitle\"><td>" + result.data[i].name + "</td></tr><tr class=\"filevertype\"><td><table><tr><td class=\"downloadcount\">" + result.data[i].downloadCount + "次下载" + (!result.data[i].info ? "  <strong>[需要描述]</strong>" : "") + "</td><td class=\"filetype " + fileGetTypeClass(result.data[i].extension) + "\">" + result.data[i].extension + "</td></tr></table></td></tr><tr class=\"fileowntime\"><td>" + result.data[i].uploaderName + " 于 " + result.data[i].datetime + "</td></tr></table>");
+                        if (fileShowMode == "horizontal") {
+                            var tb = $("#container").append('<div id="horizontal-table-container"><table class="table table-hover" id="tb_files"><tr><th class="ft_filename">文件名</th><th class="ft_filetype">文件类型</th><th class="ft_uploader">上传者</th><th class="ft_time">时间</th><th class="ft_downloadcount">下载次数</th></tr></table></div>').find("#tb_files");
+                            for (var i = 0; i < result.data.length; i++) {
+                                tb.append('<tr onclick="fileInfo(this)" data-id="' + result.data[i].guid + '" data-wechat="' + result.data[i].wechat + '"><td class="fb_td_filename">' + result.data[i].name + (!result.data[i].info ? "  <strong>[需要描述]</strong>" : "") + '</td><td>' + result.data[i].extension + '</td><td>' + result.data[i].uploaderName + '</td><td>' + result.data[i].datetime + '</td><td>' + result.data[i].downloadCount + '</td></tr>');
+                            }
+                        }
+                        else {
+                            for (var i = 0; i < result.data.length; i++) {
+                                $("#container").append("<table onclick=\"fileInfo(this)\" data-id=\"" + result.data[i].guid + "\" data-wechat=\"" + result.data[i].wechat + "\"><tr class=\"filetitle\"><td>" + result.data[i].name + "</td></tr><tr class=\"filevertype\"><td><table><tr><td class=\"downloadcount\">" + result.data[i].downloadCount + "次下载" + (!result.data[i].info ? "  <strong>[需要描述]</strong>" : "") + "</td><td class=\"filetype " + fileGetTypeClass(result.data[i].extension) + "\">" + result.data[i].extension + "</td></tr></table></td></tr><tr class=\"fileowntime\"><td>" + result.data[i].uploaderName + " 于 " + result.data[i].datetime + "</td></tr></table>");
+                            }
                         }
                         $("#container").fadeIn("fast");
                     }
@@ -211,7 +244,7 @@ function fileList() {
 
 function fileToWechat() {
     $.get("file.towechat.id=" + fileCurrent,
-        function(result) {
+        function (result) {
             if (result.flag === 0) {
                 msg("成功", "文件已通过SAAO助手发送", "success");
                 $("#file #filemodal").modal("hide");
@@ -231,6 +264,16 @@ $("#uploadmodal").on("hidden.bs.modal", function () {
     fileList();
 });
 
+$("#change_showMode").click(function () {
+    if (fileShowMode == "normal") {
+        fileShowMode = "horizontal";
+        $("#change_showMode").children(".glyphicon").removeClass("glyphicon-th-list").addClass("glyphicon-th");
+    } else {
+        fileShowMode = "normal";
+        $("#change_showMode").children(".glyphicon").removeClass("glyphicon-th").addClass("glyphicon-th-list");
+    }
+    fileList();
+});
 
 var fileDropZone = new Dropzone("#uploadmodal", {
     url: "file.upload",
@@ -244,51 +287,51 @@ var fileDropZone = new Dropzone("#uploadmodal", {
             $("#btnstartupload").fadeIn();
             $("#btnclearqueue").fadeIn();
         }),
-        this.on("uploadprogress", function (file, progress) {
-            $(file.previewTemplate).children(".upfilename").css("background-size", progress + "%");
-        }),
-        this.on("sending", function (file) {
-            $("#file #btnstartupload").fadeOut();
-            this.options.autoProcessQueue = true;
-            $(file.previewTemplate).children('.upfiledivtwo').animate({ backgroundColor: "rgb(0, 190, 254)" }, 120);
-            $(file.previewTemplate).find("[data-dz-size]").css("display", "none");
-            $(file.previewTemplate).find(".uploadstatep").fadeOut("fast");
-            $(file.previewTemplate).find(".uploadstatep").text("上传中");
-            $(file.previewTemplate).find(".uploadstatep").fadeIn("fast");
-        }),
-        this.on("queuecomplete", function () {
-            this.options.autoProcessQueue = false;
-            msg("文件上传", "上传队列已经处理完毕，请及时为新上传的文件添加标签及说明", "info");
-        }),
-        this.on("error", function (file, errorMessage) {
-            $(file.previewTemplate).children(".upfiledivtwo").animate({ backgroundColor: "rgb(239, 127, 127)" }, 120);
-            $(file.previewTemplate).children(".upfileaction").animate({ backgroundColor: "rgb(239, 127, 127)" }, 120);
-            $(file.previewTemplate).find(".uploadstatep").fadeOut("fast");
-            $(file.previewTemplate).find(".uploadstatep").text("出错");
-            $(file.previewTemplate).find(".uploadstatep").fadeIn("fast");
-            if (file.size > 2048 * 1024 * 1024) {
-                msg("上传失败", "文件大于2G。请分段压缩上传或联系网络组" + errorMessage, "error");
-            }
-        }),
-        this.on("success", function (file) {
-            $(file.previewTemplate).children(".upfiledivtwo").animate({ backgroundColor: "rgb(60,178,112)" }, 120);
-            $(file.previewTemplate).children(".upfileaction").animate({ backgroundColor: "rgb(60,178,112)" }, 120);
-            $(file.previewTemplate).find(".uploadstatep").fadeOut("fast");
-            $(file.previewTemplate).find(".uploadstatep").text("成功");
-            $(file.previewTemplate).find(".uploadstatep").fadeIn("fast");
-            $(file.previewTemplate).find(".glyphicon-remove").fadeOut("fast", function () {
-                $(file.previewTemplate).find(".glyphicon-ok").fadeIn("fast", function () {
-                    $(file.previewTemplate).find(".glyphicon-ok").css("display", "inline-block");
+            this.on("uploadprogress", function (file, progress) {
+                $(file.previewTemplate).children(".upfilename").css("background-size", progress + "%");
+            }),
+            this.on("sending", function (file) {
+                $("#file #btnstartupload").fadeOut();
+                this.options.autoProcessQueue = true;
+                $(file.previewTemplate).children('.upfiledivtwo').animate({ backgroundColor: "rgb(0, 190, 254)" }, 120);
+                $(file.previewTemplate).find("[data-dz-size]").css("display", "none");
+                $(file.previewTemplate).find(".uploadstatep").fadeOut("fast");
+                $(file.previewTemplate).find(".uploadstatep").text("上传中");
+                $(file.previewTemplate).find(".uploadstatep").fadeIn("fast");
+            }),
+            this.on("queuecomplete", function () {
+                this.options.autoProcessQueue = false;
+                msg("文件上传", "上传队列已经处理完毕，请及时为新上传的文件添加标签及说明", "info");
+            }),
+            this.on("error", function (file, errorMessage) {
+                $(file.previewTemplate).children(".upfiledivtwo").animate({ backgroundColor: "rgb(239, 127, 127)" }, 120);
+                $(file.previewTemplate).children(".upfileaction").animate({ backgroundColor: "rgb(239, 127, 127)" }, 120);
+                $(file.previewTemplate).find(".uploadstatep").fadeOut("fast");
+                $(file.previewTemplate).find(".uploadstatep").text("出错");
+                $(file.previewTemplate).find(".uploadstatep").fadeIn("fast");
+                if (file.size > 2048 * 1024 * 1024) {
+                    msg("上传失败", "文件大于2G。请分段压缩上传或联系网络组" + errorMessage, "error");
+                }
+            }),
+            this.on("success", function (file) {
+                $(file.previewTemplate).children(".upfiledivtwo").animate({ backgroundColor: "rgb(60,178,112)" }, 120);
+                $(file.previewTemplate).children(".upfileaction").animate({ backgroundColor: "rgb(60,178,112)" }, 120);
+                $(file.previewTemplate).find(".uploadstatep").fadeOut("fast");
+                $(file.previewTemplate).find(".uploadstatep").text("成功");
+                $(file.previewTemplate).find(".uploadstatep").fadeIn("fast");
+                $(file.previewTemplate).find(".glyphicon-remove").fadeOut("fast", function () {
+                    $(file.previewTemplate).find(".glyphicon-ok").fadeIn("fast", function () {
+                        $(file.previewTemplate).find(".glyphicon-ok").css("display", "inline-block");
+                    });
                 });
+            }),
+            this.on("reset", function () {
+                this.options.autoProcessQueue = false;
+                setTimeout(function () {
+                    $("#btnstartupload").fadeOut();
+                    $("#btnclearqueue").fadeOut();
+                }, 150);
             });
-        }),
-        this.on("reset", function () {
-            this.options.autoProcessQueue = false;
-            setTimeout(function () {
-                $("#btnstartupload").fadeOut();
-                $("#btnclearqueue").fadeOut();
-            }, 150);
-        });
     },
     autoProcessQueue: false,
     previewsContainer: "#uploadqueue",
@@ -300,3 +343,11 @@ var fileDropZone = new Dropzone("#uploadmodal", {
     dictCancelUploadConfirmation: "确定要取消上传吗？",
     dictRemoveFile: "移除",
 });
+
+function isWeiXin() {
+    var ua = window.navigator.userAgent.toLowerCase();
+    if (ua.match(/MicroMessenger/i) == 'micromessenger')
+        return true;
+    else
+        return false;
+}
