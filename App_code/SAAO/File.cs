@@ -314,7 +314,7 @@ namespace SAAO
                 ["downloadCount"] = _downloadCount,
                 ["tag"] = string.Join(",", Tag),
                 ["info"] = _info ?? "",
-                ["wechat"] = _size <= 1 << 21 && DateTime.Now < _uploadTime.AddDays(3) && User.Current.Wechat != ""
+                ["wechat"] = _size <= (1 << 21) * 10 &&  User.Current.Wechat != ""
             };
             return o;
         }

@@ -145,7 +145,7 @@ public class FileHandler : SAAO.AjaxHandler
             if (!Guid.TryParse(context.Request["id"], out guid)) return;
             var file = new SAAO.File(guid.ToString().ToUpper());
             if (SAAO.User.Current.Wechat == "" || !file.Visible(SAAO.User.Current)) return;
-            if (file.MediaId == "") return;
+            if (string.IsNullOrEmpty(file.MediaId)) return;
             var o = new JObject
             {
                 ["touser"] = SAAO.User.Current.Wechat,
