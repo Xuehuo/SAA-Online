@@ -84,7 +84,7 @@ public class FileHandler : SAAO.AjaxHandler
                         {
                             ["touser"] = Rec,
                             ["msgtype"] = "text",
-                            ["agentid"] = 1000004,
+                            ["agentid"] = 4,
                             ["text"] = new JObject
                             {
                                 ["content"] = string.Format("新文件提醒：\n文件名：{0}\n上传者：{1}\n上传时间：{2}\n备注：{3}", file.Name, file.Uploader.Realname, string.Format("{0:f}", file.UploadTime), file.Info)
@@ -98,7 +98,7 @@ public class FileHandler : SAAO.AjaxHandler
                             {
                                 ["touser"] = Rec,
                                 ["msgtype"] = "file",
-                                ["agentid"] = 1000004,
+                                ["agentid"] = 4,
                                 ["file"] = new JObject { ["media_id"] = file.MediaId }
                             };
                             SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
