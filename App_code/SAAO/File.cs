@@ -81,6 +81,7 @@ namespace SAAO
             _savePath = StoragePath + str.ToUpper();
             _permission = (PermissionLevel)Convert.ToInt32(fileInfo["permission"]);
             _mediaId = fileInfo["media_id"].ToString();
+            _mediaId_expire = Convert.ToInt32(fileInfo["media_id_expire"]);
             Tag = new List<string>();
             si.ResetParameter();
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, str.ToUpper());
@@ -192,13 +193,15 @@ namespace SAAO
         }
 
         private string _mediaId;
+        private int _mediaId_expire;
         public string MediaId
         {
             get
             {
-                if (_size > 1 << 21) // 2 * 1024 * 1024 Byte
+                if (_size > (1 << 21) * 10) // 20 * 1024 * 1024 Byte (Maximum size for file)
                     return null;
-                if (_mediaId != "") return _mediaId;
+                if (_mediaId != "" && _mediaId_expire > SAAO.Utility.GetUnixTimeStamp(DateTime.Now))
+                    return _mediaId;
                 var jo = (JObject)new JsonSerializer()
                     .Deserialize(new JsonTextReader(new StringReader(Utility.HttpRequest(
                         url:
@@ -208,10 +211,12 @@ namespace SAAO
                         fileName: _name + "." + _extension,
                         fileFieldName: "media"))));
                 _mediaId = jo["media_id"].ToString();
+                _mediaId_expire = Convert.ToInt32(jo["created_at"].ToString()) + 3 * 24 * 3600; // file is available in 3d
                 var si = new SqlIntegrate(Utility.ConnStr);
                 si.AddParameter("@media_id", SqlIntegrate.DataType.VarChar, _mediaId);
+                si.AddParameter("@media_id_expire", SqlIntegrate.DataType.Int, _mediaId_expire);
                 si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
-                si.Execute("UPDATE [File] SET [media_id] = @media_id WHERE [GUID] = @GUID");
+                si.Execute("UPDATE [File] SET [media_id] = @media_id,[media_id_expire] = @media_id_expire WHERE [GUID] = @GUID");
                 return _mediaId;
             }
         }
