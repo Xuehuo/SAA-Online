@@ -210,7 +210,7 @@ namespace SAAO
         /// <param name="data">structure on Wechat QyApi</param>
         public static void SendMessgaeBySAAOHelper(JObject data)
         {
-            string ret=HttpRequest("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), data);
+            string ret = HttpRequest("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), data);
 #if DEBUG
             Log(ret);            
 #endif
