@@ -212,7 +212,7 @@ namespace SAAO
         {
             string ret = HttpRequest("https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=" + SAAO.Utility.GetAccessToken(), data);
 #if DEBUG
-            Log(ret);            
+            LogFailover(ret);            
 #endif
         }
 

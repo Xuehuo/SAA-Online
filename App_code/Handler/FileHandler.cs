@@ -91,18 +91,14 @@ public class FileHandler : SAAO.AjaxHandler
                             }
                         };
                         SAAO.Utility.SendMessgaeBySAAOHelper(oText);
-                        var media_id = file.MediaId;
-                        if(media_id != null)
+                        var oFile = new JObject
                         {
-                            var oFile = new JObject
-                            {
-                                ["touser"] = Rec,
-                                ["msgtype"] = "file",
-                                ["agentid"] = 4,
-                                ["file"] = new JObject { ["media_id"] = file.MediaId }
-                            };
-                            SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
-                        }
+                            ["touser"] = Rec,
+                            ["msgtype"] = "file",
+                            ["agentid"] = 4,
+                            ["file"] = new JObject { ["media_id"] = file.MediaId }
+                        };
+                        SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
                     }).Start();
                 }
             }
