@@ -76,6 +76,7 @@ public class FileHandler : SAAO.AjaxHandler
                 {
                     //Wechat File Upload Event Push Service
                     var current = System.Web.HttpContext.Current;
+                    //Warning: Unclear Optimization. Maybe It Has Bugs.
                     new Task(() =>
                     {
                         System.Web.HttpContext.Current = current;
