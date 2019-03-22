@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 public class FileHandler : SAAO.AjaxHandler
@@ -12,7 +13,7 @@ public class FileHandler : SAAO.AjaxHandler
             if (SAAO.File.TempDownloadToken.Keys.Contains(context.Request["token"].ToString()))
             {
                 if (SAAO.File.TempDownloadToken[context.Request["token"].ToString()].TimeStamp - SAAO.Utility.GetUnixTimeStamp(DateTime.Now) < 60 &&
-                    SAAO.File.TempDownloadToken[context.Request["token"].ToString()].File_GUID==context.Request["id"])
+                    SAAO.File.TempDownloadToken[context.Request["token"].ToString()].File_GUID == context.Request["id"])
                 {
                     if (context.Request.UserAgent.ToLower().IndexOf("micromessenger") < 0)  //Wechat Client Will Request First
                         SAAO.File.TempDownloadToken.Remove(context.Request["token"].ToString());
@@ -74,26 +75,32 @@ public class FileHandler : SAAO.AjaxHandler
                 if (file.Uploader.UUID == SAAO.User.Current.UUID && (DateTime.Now - file.UploadTime).Minutes <= 5)  // Owner Check  上传5分钟内修改 推动上传通知
                 {
                     //Wechat File Upload Event Push Service
-                    string Rec = string.Join("|", file.GetVisibleUserWechat().ToArray());
-                    var oText = new JObject
+                    var current = System.Web.HttpContext.Current;
+                    //Warning: Unclear Optimization. Maybe It Has Bugs.
+                    new Task(() =>
                     {
-                        ["touser"] = Rec,
-                        ["msgtype"] = "text",
-                        ["agentid"] = 4,
-                        ["text"] = new JObject
+                        System.Web.HttpContext.Current = current;
+                        string Rec = string.Join("|", file.GetVisibleUserWechat().ToArray());
+                        var oText = new JObject
                         {
-                            ["content"] = string.Format("新文件提醒：\n文件名：{0}\n上传者：{1}\n上传时间：{2}\n备注：{3}", file.Name, file.Uploader.Realname, string.Format("{0:f}", file.UploadTime), file.Info)
-                        }
-                    };
-                    var oFile = new JObject
-                    {
-                        ["touser"] = Rec,
-                        ["msgtype"] = "file",
-                        ["agentid"] = 4,
-                        ["file"] = new JObject { ["media_id"] = file.MediaId }
-                    };
-                    SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
-                    SAAO.Utility.SendMessgaeBySAAOHelper(oText);
+                            ["touser"] = Rec,
+                            ["msgtype"] = "text",
+                            ["agentid"] = 4,
+                            ["text"] = new JObject
+                            {
+                                ["content"] = string.Format("新文件提醒：\n文件名：{0}\n上传者：{1}\n上传时间：{2}\n备注：{3}", file.Name, file.Uploader.Realname, string.Format("{0:f}", file.UploadTime), file.Info)
+                            }
+                        };
+                        SAAO.Utility.SendMessgaeBySAAOHelper(oText);
+                        var oFile = new JObject
+                        {
+                            ["touser"] = Rec,
+                            ["msgtype"] = "file",
+                            ["agentid"] = 4,
+                            ["file"] = new JObject { ["media_id"] = file.MediaId }
+                        };
+                        SAAO.Utility.SendMessgaeBySAAOHelper(oFile);
+                    }).Start();
                 }
             }
             else
@@ -123,8 +130,8 @@ public class FileHandler : SAAO.AjaxHandler
                 R.Flag = 2;
             else
             {
-                string token = SAAO.Utility.Encrypt(context.Request["id"].ToString() + file.Uploader + SAAO.Utility.GetUnixTimeStamp(DateTime.Now)+Guid.NewGuid().ToString());
-                SAAO.File.TempDownloadToken.Add(token,new SAAO.File.DownloadToken { TimeStamp = SAAO.Utility.GetUnixTimeStamp(DateTime.Now), File_GUID = guid.ToString().ToUpper() });
+                string token = SAAO.Utility.Encrypt(context.Request["id"].ToString() + file.Uploader + SAAO.Utility.GetUnixTimeStamp(DateTime.Now) + Guid.NewGuid().ToString());
+                SAAO.File.TempDownloadToken.Add(token, new SAAO.File.DownloadToken { TimeStamp = SAAO.Utility.GetUnixTimeStamp(DateTime.Now), File_GUID = guid.ToString().ToUpper() });
                 R.Data = token;
             }
         }
@@ -135,7 +142,7 @@ public class FileHandler : SAAO.AjaxHandler
             if (!Guid.TryParse(context.Request["id"], out guid)) return;
             var file = new SAAO.File(guid.ToString().ToUpper());
             if (SAAO.User.Current.Wechat == "" || !file.Visible(SAAO.User.Current)) return;
-            if (file.MediaId == "") return;
+            if (string.IsNullOrEmpty(file.MediaId)) return;
             var o = new JObject
             {
                 ["touser"] = SAAO.User.Current.Wechat,
