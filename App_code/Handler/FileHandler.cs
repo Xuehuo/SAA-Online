@@ -8,27 +8,6 @@ public class FileHandler : SAAO.AjaxHandler
 {
     public override void Process(System.Web.HttpContext context)
     {
-        if (context.Request["action"] == "download" && context.Request["token"] != null && context.Request["id"] != null)
-        {
-            if (SAAO.File.TempDownloadToken.Keys.Contains(context.Request["token"].ToString()))
-            {
-                if (SAAO.File.TempDownloadToken[context.Request["token"].ToString()].TimeStamp - SAAO.Utility.GetUnixTimeStamp(DateTime.Now) < 60 &&
-                    SAAO.File.TempDownloadToken[context.Request["token"].ToString()].File_GUID == context.Request["id"])
-                {
-                    if (context.Request.UserAgent.ToLower().IndexOf("micromessenger") < 0)  //Wechat Client Will Request First
-                        SAAO.File.TempDownloadToken.Remove(context.Request["token"].ToString());
-                    Guid guid;
-                    if (!Guid.TryParse(context.Request["id"], out guid)) return;
-                    var file = new SAAO.File(guid.ToString().ToUpper());
-                    file.Download();
-                    R.Flag = -1;
-                }
-                else
-                    R.Flag = 2;
-            }
-            else
-                R.Flag = 2;
-        }
         if (context.Request["action"] == null || !SAAO.User.IsLogin) return;
         if (context.Request["action"] == "upload")
         {
@@ -119,21 +98,6 @@ public class FileHandler : SAAO.AjaxHandler
             }
             else
                 R.Flag = 2;
-        }
-        else if (context.Request["action"] == "gettoken")
-        {
-            if (context.Request["id"] == null) return;
-            Guid guid;
-            if (!Guid.TryParse(context.Request["id"], out guid)) return;
-            var file = new SAAO.File(guid.ToString().ToUpper());
-            if (!file.Visible(SAAO.User.Current))
-                R.Flag = 2;
-            else
-            {
-                string token = SAAO.Utility.Encrypt(context.Request["id"].ToString() + file.Uploader + SAAO.Utility.GetUnixTimeStamp(DateTime.Now) + Guid.NewGuid().ToString());
-                SAAO.File.TempDownloadToken.Add(token, new SAAO.File.DownloadToken { TimeStamp = SAAO.Utility.GetUnixTimeStamp(DateTime.Now), File_GUID = guid.ToString().ToUpper() });
-                R.Data = token;
-            }
         }
         else if (context.Request["action"] == "towechat")
         {

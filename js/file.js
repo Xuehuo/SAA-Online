@@ -117,31 +117,7 @@ function fileDelete() {
 }
 
 function fileDownload() {
-    if (isWeiXin()) {
-        var token = $.ajax(
-            {
-                url: "file.gettoken.id=" + fileCurrent,
-                type: "get",
-                cache: false,
-                success: function (result) {
-                    if (result.flag === 0) {
-                        window.open("file.download.id=" + fileCurrent + "&token=" + result.data);
-                        //window.showModalDialog("file.download.id=" + fileCurrent + "&token=" + result.data);
-                        //var a = $("<a href='file.download.id=" + fileCurrent + "&token=" + result.data + "' target='_blank'>Apple</a>").get(0);
-                        //var e = document.createEvent('MouseEvents');
-                        //e.initEvent('click', true, true);
-                        //a.dispatchEvent(e);
-                        //window.location.href = "file.download.id=" + fileCurrent + "&token=" + result.data;
-                        //$("#filemodal .modal-footer").remove("a");
-                        //$("#filemodal .modal-footer").append("<a href='" + "file.download.id=" + fileCurrent + "&token=" + result.data + "'> 下载 </a>");
-                    }
-                    else
-                        msg("下载失败", "获取Token失败", "error");
-                }
-            })
-    }
-    else
-        window.open("file.download.id=" + fileCurrent);
+    window.open("file.download.id=" + fileCurrent);
     var obj = $("#filemodal dl").children("dd").eq(6);
     obj.html(parseInt(obj.html()) + 1);
     $("#container > table[data-id='" + fileCurrent + "'] .downloadcount").html(parseInt(obj.html()) + "次下载");
@@ -343,11 +319,3 @@ var fileDropZone = new Dropzone("#uploadmodal", {
     dictCancelUploadConfirmation: "确定要取消上传吗？",
     dictRemoveFile: "移除",
 });
-
-function isWeiXin() {
-    var ua = window.navigator.userAgent.toLowerCase();
-    if (ua.match(/MicroMessenger/i) == 'micromessenger')
-        return true;
-    else
-        return false;
-}
