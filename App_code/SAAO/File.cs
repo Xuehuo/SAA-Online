@@ -144,15 +144,22 @@ namespace SAAO
             si.AddParameter("@FUID", SqlIntegrate.DataType.VarChar, _guid);
             si.Execute("INSERT INTO Filetag ([name], [FUID]) VALUES (@name, @FUID)");
         }
+		/// <summary>
+        /// Add Download Count
+        /// </summary>
+		public void AddDownloadCount()
+		{
+			_downloadCount++;
+            var si = new SqlIntegrate(Utility.ConnStr);
+            si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
+            si.Execute("UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = @GUID");
+		}
         /// <summary>
         /// Download the file (Write stream to current http response)
         /// </summary>
         public void Download()
         {
-            _downloadCount++;
-            var si = new SqlIntegrate(Utility.ConnStr);
-            si.AddParameter("@GUID", SqlIntegrate.DataType.VarChar, _guid);
-            si.Execute("UPDATE [File] SET [downloadCount] = [downloadCount] + 1 WHERE [GUID] = @GUID");
+			AddDownloadCount();
             Utility.Download(_savePath, _name + "." + _extension);
         }
         /// <summary>

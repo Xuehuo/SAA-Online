@@ -115,6 +115,7 @@ public class FileHandler : SAAO.AjaxHandler
                 ["file"] = new JObject { ["media_id"] = file.MediaId }
             };
             SAAO.Utility.SendMessgaeBySAAOHelper(o);
+			file.AddDownloadCount();
         }
         else if (context.Request["action"] == "delete")
         {
