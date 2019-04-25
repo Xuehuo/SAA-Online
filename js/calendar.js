@@ -3,6 +3,9 @@
 });
 $(window).resize()
 
+scheduler.attachEvent("onTemplatesReady", function(){ scheduler.templates.event_bar_date = function(start,end,ev){ return ""; }; });
+// Hide Start-Time in Month-View : https://forum.dhtmlx.com/t/hide-start-time-in-month-view/33635
+
 scheduler.init("container", new Date(), "month");
 
 $.ajax({
@@ -32,6 +35,7 @@ scheduler.attachEvent("onEventAdded", function (id, ev) {
 scheduler.attachEvent("onEventChanged", function (id, ev) {
     update_event(ev);
 });
+
 
 function update_event(event_obj) {
     $.ajax({

@@ -192,6 +192,10 @@
     #calendar #container .dhx_cal_data .dhx_cal_event .dhx_body {
         background-color: #BBBBBB;
     }
+	
+	#calendar #container .dhx_cal_event_clear {
+		padding-left: 10px;
+	}
 
     /*坑死人的绝对定位*/
     #calendar #container .dhx_cal_data .dhx_cal_event.dhx_cal_editor {
