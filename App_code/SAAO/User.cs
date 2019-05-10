@@ -294,7 +294,7 @@ namespace SAAO
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@wechat", SqlIntegrate.DataType.VarChar, wechatId);
             var r = si.Query(
-                "SELECT [username] FROM [User] WHERE [wechat] = @wechat");
+                "SELECT [username] FROM [User] WHERE [wechat] = @wechat AND [activated] = 1");
             if (r == null) return false;
             Current = new User(r.ToString());
             // TODO: no raw password raw storage!
