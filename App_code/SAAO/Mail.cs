@@ -34,7 +34,16 @@ namespace SAAO
         {
             var si = new SqlIntegrate(Utility.ConnStr);
             si.AddParameter("@mail", SqlIntegrate.DataType.VarChar, "%" + User.Current.Username + "%");
-            return si.AdapterJson("SELECT [GUID], [sender], [subject], [datetime], [attachment-count] AS [attachcount] FROM [Mail] WHERE [recipient] LIKE @mail ORDER BY [ID] DESC");
+            var ret = si.AdapterJson("SELECT [GUID], [sender], [subject], [datetime], [attachment-count] AS [attachcount] FROM [Mail] WHERE [recipient] LIKE @mail ORDER BY [ID] DESC");
+			if(SAAO.User.Current.Group == 6 && SAAO.User.Current.Job == 3)
+            {
+                si.ResetParameter();
+                si.AddParameter("@mail", SqlIntegrate.DataType.VarChar, "%postmaster%");
+                var ret2 = si.AdapterJson("SELECT [GUID], [sender], [subject], [datetime], [attachment-count] AS [attachcount] FROM [Mail] WHERE [recipient] LIKE @mail ORDER BY [ID] DESC");
+                foreach (var r in ret2)
+                    ret.Add(r);
+            }
+            return ret;		
         }
 
         public static void DownloadAttachment(Guid id, string displayName)
